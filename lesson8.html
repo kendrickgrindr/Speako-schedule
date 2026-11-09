@@ -1,0 +1,2367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Speako — Lesson 8: Review and Role Play</title>
+  <!-- Google Fonts: Montserrat (headings), Inter (body), Noto Sans Thai (Thai script) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --navy: #0B2A5B;
+      --teal: #14A3A0;
+      --teal-light: #E6F6F5;
+      --off-white: #F7F5F2;
+      --card-bg: #FFFFFF;
+      --dark-gray: #2B2F36;
+      --muted-gray: #5E6470;
+      --coral: #F47C6B;
+      --coral-light: #FFF0ED;
+      --gradient-brand: linear-gradient(135deg, #14A3A0 0%, #F47C6B 100%);
+      --gradient-soft: linear-gradient(135deg, rgba(20, 163, 160, 0.12) 0%, rgba(244, 124, 107, 0.12) 100%);
+      --shadow-card: 0 10px 28px rgba(11, 42, 91, 0.07), 0 2px 6px rgba(11, 42, 91, 0.04);
+      --shadow-hover: 0 14px 34px rgba(11, 42, 91, 0.12), 0 4px 10px rgba(11, 42, 91, 0.06);
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+      --stage-scale: 1;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #1A2230;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--dark-gray);
+      -webkit-font-smoothing: antialiased;
+      user-select: none;
+    }
+
+    /* Outer viewport wrapper that centers and scales the 16:9 slide deck */
+    .viewport {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Fixed 16:9 virtual stage (1600 x 900) scaled dynamically to fit window */
+    .deck-stage {
+      width: 1600px;
+      height: 900px;
+      background-color: var(--off-white);
+      position: relative;
+      overflow: hidden;
+      border-radius: 12px;
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.45);
+      transform: scale(var(--stage-scale));
+      transform-origin: center center;
+      display: flex;
+      flex-direction: column;
+    }
+
+    :fullscreen .deck-stage,
+    :-webkit-full-screen .deck-stage {
+      border-radius: 0;
+    }
+
+    /* Subtle decorative background blobs */
+    .bg-decor {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(70px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.45;
+    }
+    .bg-decor-1 {
+      width: 420px;
+      height: 420px;
+      background: rgba(20, 163, 160, 0.16);
+      top: -140px;
+      right: -100px;
+    }
+    .bg-decor-2 {
+      width: 380px;
+      height: 380px;
+      background: rgba(244, 124, 107, 0.15);
+      bottom: -140px;
+      left: -100px;
+    }
+
+    /* Top Progress Bar */
+    .progress-track {
+      width: 100%;
+      height: 8px;
+      background: rgba(11, 42, 91, 0.08);
+      position: relative;
+      z-index: 20;
+      flex-shrink: 0;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--gradient-brand);
+      transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+      border-radius: 0 4px 4px 0;
+    }
+
+    /* Top Header Bar (Speako wordmark + Slide badge + Status pills) */
+    .slide-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 22px 52px 10px;
+      position: relative;
+      z-index: 15;
+      flex-shrink: 0;
+    }
+
+    .brand-wordmark {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 1.55rem;
+      letter-spacing: -0.03em;
+      color: var(--navy);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-wordmark .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--coral);
+      display: inline-block;
+    }
+    .brand-wordmark .lesson-tag {
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--teal);
+      background: var(--teal-light);
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-left: 8px;
+      letter-spacing: 0;
+    }
+
+    .topbar-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pill-toggle {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 7px 14px;
+      border-radius: 999px;
+      border: 1.5px solid rgba(11, 42, 91, 0.14);
+      background: rgba(255, 255, 255, 0.85);
+      color: var(--navy);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .pill-toggle:hover {
+      border-color: var(--teal);
+      background: #FFFFFF;
+    }
+    .pill-toggle.active {
+      background: var(--navy);
+      color: #FFFFFF;
+      border-color: var(--navy);
+    }
+    .pill-toggle kbd {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.76rem;
+      padding: 1px 6px;
+      border-radius: 5px;
+      background: rgba(11, 42, 91, 0.09);
+      color: inherit;
+    }
+    .pill-toggle.active kbd {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Main Slide Content Area with Smooth Fade Transition */
+    .slide-viewport {
+      flex: 1;
+      position: relative;
+      z-index: 10;
+      padding: 10px 56px 16px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.28s ease, transform 0.28s ease;
+    }
+    .slide-viewport.fading {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+
+    /* Slide Header */
+    .slide-header {
+      margin-bottom: 18px;
+      flex-shrink: 0;
+    }
+    .slide-eyebrow {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--teal);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .slide-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 2.35rem;
+      font-weight: 800;
+      color: var(--navy);
+      line-height: 1.18;
+      letter-spacing: -0.02em;
+    }
+    .slide-subtitle {
+      font-size: 1.18rem;
+      color: var(--muted-gray);
+      margin-top: 5px;
+      font-weight: 500;
+    }
+
+    /* Thai Typography & Romanization Toggle */
+    .thai {
+      font-family: 'Noto Sans Thai', sans-serif;
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1.35;
+      letter-spacing: 0.01em;
+    }
+    .romanization {
+      color: var(--teal);
+      font-weight: 600;
+      line-height: 1.3;
+      transition: opacity 0.2s ease, filter 0.2s ease;
+    }
+    body.hide-romanization .romanization {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .meaning {
+      color: var(--dark-gray);
+      font-weight: 500;
+      line-height: 1.35;
+    }
+
+    /* Listen Button (Web Speech API) */
+    .listen-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: var(--coral-light);
+      color: var(--coral);
+      border: 1.5px solid rgba(244, 124, 107, 0.35);
+      padding: 7px 14px;
+      border-radius: 999px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      flex-shrink: 0;
+    }
+    .listen-btn:hover {
+      background: var(--coral);
+      color: #FFFFFF;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(244, 124, 107, 0.35);
+    }
+    .listen-btn:active {
+      transform: translateY(0);
+    }
+    .listen-btn.speaking {
+      background: var(--coral);
+      color: #FFFFFF;
+      animation: pulse-coral 1s infinite;
+    }
+    @keyframes pulse-coral {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(244, 124, 107, 0.5); }
+      50% { box-shadow: 0 0 0 8px rgba(244, 124, 107, 0); }
+    }
+    /* Hide Listen buttons automatically if no Thai voice is available */
+    body.no-thai-voice .listen-btn {
+      display: none !important;
+    }
+
+    /* Hero / Title & Goal / Closing Slides */
+    .hero-card {
+      flex: 1;
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+      padding: 54px 68px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(20, 163, 160, 0.12);
+    }
+    .hero-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 10px;
+      background: var(--gradient-brand);
+    }
+    .hero-emoji-row {
+      font-size: 3.7rem;
+      margin-bottom: 22px;
+      display: flex;
+      gap: 20px;
+      background: var(--gradient-soft);
+      padding: 16px 34px;
+      border-radius: 999px;
+    }
+    .hero-badge {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--teal);
+      background: var(--teal-light);
+      padding: 8px 20px;
+      border-radius: 999px;
+      margin-bottom: 18px;
+    }
+    .hero-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 3.5rem;
+      color: var(--navy);
+      line-height: 1.15;
+      max-width: 1120px;
+      margin-bottom: 18px;
+    }
+    .hero-subtitle {
+      font-size: 1.5rem;
+      color: var(--dark-gray);
+      max-width: 860px;
+      line-height: 1.5;
+      font-weight: 500;
+    }
+    .hero-sample-box {
+      margin-top: 28px;
+      background: var(--off-white);
+      border-radius: var(--radius-md);
+      padding: 20px 36px;
+      display: inline-flex;
+      align-items: center;
+      gap: 24px;
+      border: 1.5px solid rgba(11, 42, 91, 0.08);
+    }
+
+    /* Vocabulary / Step Cards */
+    .vocab-grid {
+      flex: 1;
+      display: grid;
+      gap: 18px;
+      align-content: stretch;
+    }
+    .vocab-grid.cols-3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .vocab-grid.cols-2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .vocab-card {
+      background: var(--card-bg);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-card);
+      padding: 22px 26px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 1.5px solid rgba(11, 42, 91, 0.05);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .vocab-card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .vocab-emoji {
+      font-size: 2.5rem;
+      line-height: 1;
+      background: var(--gradient-soft);
+      width: 58px;
+      height: 58px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* Reveal Practice Cards (L1–L7 Review Grids) */
+    .reveal-toolbar {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 10px;
+      gap: 10px;
+    }
+    .secondary-btn {
+      background: #FFFFFF;
+      color: var(--navy);
+      border: 1.5px solid rgba(11, 42, 91, 0.18);
+      padding: 7px 16px;
+      border-radius: 999px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+    .secondary-btn:hover {
+      border-color: var(--coral);
+      color: var(--coral);
+    }
+
+    .reveal-grid {
+      flex: 1;
+      display: grid;
+      gap: 16px;
+      align-content: stretch;
+    }
+    .reveal-grid.cols-3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .reveal-grid.cols-2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .reveal-card {
+      background: var(--card-bg);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-card);
+      padding: 18px 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: pointer;
+      border: 2px solid rgba(20, 163, 160, 0.18);
+      transition: all 0.22s ease;
+      position: relative;
+    }
+    .reveal-card:hover {
+      border-color: var(--coral);
+      transform: translateY(-2px);
+    }
+    .reveal-card.revealed {
+      border-color: var(--teal);
+      background: #FFFFFF;
+    }
+    .reveal-prompt-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .reveal-prompt-tag {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--teal);
+      background: var(--teal-light);
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+    .reveal-prompt {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.38rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-top: 8px;
+      line-height: 1.25;
+    }
+    .reveal-answer-area {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1.5px dashed rgba(11, 42, 91, 0.12);
+      min-height: 102px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .reveal-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: var(--coral-light);
+      color: var(--coral);
+      font-weight: 700;
+      font-size: 1rem;
+      padding: 14px;
+      border-radius: var(--radius-sm);
+      border: 1.5px dashed rgba(244, 124, 107, 0.5);
+    }
+    .reveal-content {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .reveal-card.revealed .reveal-placeholder {
+      display: none;
+    }
+    .reveal-card.revealed .reveal-content {
+      display: flex;
+    }
+    .reveal-card .thai {
+      font-size: 2.05rem;
+    }
+    .reveal-card .romanization {
+      font-size: 1.12rem;
+      margin-top: 2px;
+    }
+
+    /* Quick-Fire Random Flashcard Game Slide */
+    .quickfire-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 22px;
+    }
+    .quickfire-card {
+      width: 100%;
+      max-width: 1020px;
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+      padding: 40px 54px;
+      border-top: 8px solid var(--teal);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .quickfire-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+    }
+    .quickfire-lesson-pill {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.92rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--teal);
+      background: var(--teal-light);
+      padding: 6px 18px;
+      border-radius: 999px;
+      margin-bottom: 14px;
+    }
+    .quickfire-prompt {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 2.6rem;
+      color: var(--navy);
+      margin-bottom: 24px;
+    }
+    .quickfire-answer-box {
+      width: 100%;
+      min-height: 155px;
+      border-radius: var(--radius-md);
+      background: var(--off-white);
+      border: 2px dashed rgba(20, 163, 160, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 22px 32px;
+    }
+    .quickfire-card.revealed .quickfire-answer-box {
+      border-style: solid;
+      border-color: var(--teal);
+      background: #F4FBFB;
+    }
+    .quickfire-btn {
+      background: var(--coral);
+      color: #FFFFFF;
+      border: none;
+      padding: 16px 38px;
+      border-radius: 999px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 1.25rem;
+      cursor: pointer;
+      box-shadow: 0 10px 24px rgba(244, 124, 107, 0.35);
+      transition: all 0.18s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .quickfire-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px rgba(244, 124, 107, 0.45);
+    }
+
+    /* Callout Banner (Politeness Reminder) */
+    .note-banner {
+      background: var(--gradient-soft);
+      border-left: 6px solid var(--coral);
+      border-radius: var(--radius-sm);
+      padding: 13px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-top: 12px;
+      flex-shrink: 0;
+    }
+    .note-banner-text {
+      font-size: 1.08rem;
+      color: var(--navy);
+      font-weight: 600;
+      line-height: 1.4;
+    }
+    .note-banner-text strong {
+      color: var(--coral);
+    }
+
+    /* Role-Play Dialogue Slides */
+    .dialogue-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      justify-content: center;
+    }
+    .dialogue-line {
+      background: var(--card-bg);
+      border-radius: var(--radius-sm);
+      padding: 13px 22px;
+      box-shadow: 0 4px 14px rgba(11, 42, 91, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      border-left: 7px solid var(--navy);
+      transition: all 0.2s ease;
+    }
+    .dialogue-line.speaker-a {
+      border-left-color: var(--navy);
+    }
+    .dialogue-line.speaker-b {
+      border-left-color: var(--teal);
+      background: #F4FBFB;
+    }
+    .dialogue-line.hidden-step {
+      opacity: 0.22;
+      filter: blur(4px);
+      pointer-events: none;
+    }
+    .dialogue-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex: 1;
+    }
+    .speaker-badge {
+      min-width: 110px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      text-align: center;
+      color: #FFFFFF;
+      background: var(--navy);
+      flex-shrink: 0;
+    }
+    .speaker-b .speaker-badge {
+      background: var(--teal);
+    }
+    .dialogue-text-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      column-gap: 18px;
+      row-gap: 2px;
+    }
+    .dialogue-line .thai {
+      font-size: 1.9rem;
+      color: var(--navy);
+    }
+    .dialogue-line.speaker-b .thai {
+      color: #0D7A78;
+    }
+    .dialogue-line .romanization {
+      font-size: 1.1rem;
+    }
+    .dialogue-line .meaning {
+      font-size: 1.04rem;
+      color: var(--muted-gray);
+    }
+
+    /* Interactive Checklist Slides (Your Turn 5-Step & "I can..." 10-Item) */
+    .checklist-grid-5 {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      justify-content: center;
+    }
+    .checklist-grid-10 {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px 20px;
+      align-content: center;
+    }
+    .check-item {
+      background: var(--card-bg);
+      border-radius: var(--radius-md);
+      padding: 15px 22px;
+      box-shadow: var(--shadow-card);
+      border: 2px solid rgba(11, 42, 91, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+    .check-item:hover {
+      border-color: var(--teal);
+      transform: translateY(-1px);
+    }
+    .check-item.checked {
+      background: #F2FBF9;
+      border-color: var(--teal);
+    }
+    .check-box-circle {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 2.5px solid rgba(11, 42, 91, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: transparent;
+      background: #FFFFFF;
+      flex-shrink: 0;
+      transition: all 0.18s ease;
+    }
+    .check-item.checked .check-box-circle {
+      background: var(--teal);
+      border-color: var(--teal);
+      color: #FFFFFF;
+    }
+
+    /* Certificate Slide */
+    .certificate-wrapper {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .certificate-card {
+      width: 100%;
+      max-width: 1120px;
+      background: #FFFFFF;
+      border-radius: 26px;
+      padding: 44px 64px;
+      box-shadow: 0 20px 55px rgba(11, 42, 91, 0.12);
+      border: 3px solid var(--teal);
+      position: relative;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+    .certificate-card::before {
+      content: "";
+      position: absolute;
+      inset: 10px;
+      border: 1.5px dashed rgba(244, 124, 107, 0.55);
+      border-radius: 18px;
+      pointer-events: none;
+    }
+    .cert-name-box {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 2.7rem;
+      font-weight: 800;
+      color: var(--coral);
+      border-bottom: 3px solid var(--navy);
+      padding: 4px 36px 8px;
+      margin: 6px 0;
+      min-width: 420px;
+    }
+
+    /* Bottom Navigation Bar */
+    .slide-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 56px 22px;
+      position: relative;
+      z-index: 15;
+      flex-shrink: 0;
+    }
+    .footer-brand-corner {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 1.05rem;
+      color: var(--navy);
+      opacity: 0.75;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .footer-shortcuts {
+      font-size: 0.86rem;
+      color: var(--muted-gray);
+      font-weight: 500;
+    }
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .nav-btn {
+      background: var(--card-bg);
+      color: var(--navy);
+      border: 1.5px solid rgba(11, 42, 91, 0.15);
+      padding: 10px 22px;
+      border-radius: 999px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.98rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.18s ease;
+      box-shadow: 0 3px 10px rgba(11, 42, 91, 0.06);
+    }
+    .nav-btn.primary {
+      background: var(--coral);
+      color: #FFFFFF;
+      border-color: var(--coral);
+    }
+    .nav-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(11, 42, 91, 0.12);
+    }
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .slide-counter {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 1.08rem;
+      color: var(--navy);
+      min-width: 78px;
+      text-align: center;
+    }
+
+    /* Teacher Notes Drawer (toggled with "N") */
+    .teacher-notes-panel {
+      position: absolute;
+      bottom: 76px;
+      right: 56px;
+      width: 520px;
+      background: rgba(11, 42, 91, 0.96);
+      color: #FFFFFF;
+      border-radius: var(--radius-md);
+      padding: 20px 24px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+      z-index: 50;
+      border: 1.5px solid rgba(20, 163, 160, 0.45);
+      display: none;
+      backdrop-filter: blur(8px);
+    }
+    body.show-notes .teacher-notes-panel {
+      display: block;
+      animation: fadeUp 0.2s ease;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .notes-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #6CE5E2;
+    }
+    .notes-body {
+      font-size: 1.02rem;
+      line-height: 1.5;
+      color: #F0F4F8;
+    }
+  </style>
+</head>
+<body>
+  <div class="viewport">
+    <main class="deck-stage" id="deckStage">
+      <!-- Decorative soft background accents -->
+      <div class="bg-decor bg-decor-1"></div>
+      <div class="bg-decor bg-decor-2"></div>
+
+      <!-- Top Progress Bar -->
+      <div class="progress-track" aria-hidden="true">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+
+      <!-- Top Bar -->
+      <header class="slide-topbar">
+        <div class="brand-wordmark">
+          <span>Speako</span>
+          <span class="dot"></span>
+          <span class="lesson-tag">Beginner Thai · Lesson 8</span>
+        </div>
+
+        <div class="topbar-controls">
+          <button type="button" class="pill-toggle" id="toggleRomBtn" title="Press T to show/hide romanization">
+            <span>Romanization: <strong id="romStateText">ON</strong></span>
+            <kbd>T</kbd>
+          </button>
+          <button type="button" class="pill-toggle" id="toggleNotesBtn" title="Press N to show/hide teacher notes">
+            <span>Teacher Notes</span>
+            <kbd>N</kbd>
+          </button>
+          <button type="button" class="pill-toggle" id="fullscreenBtn" title="Press F for fullscreen">
+            <span>Fullscreen</span>
+            <kbd>F</kbd>
+          </button>
+        </div>
+      </header>
+
+      <!-- Active Slide Container -->
+      <section class="slide-viewport" id="slideViewport" aria-live="polite"></section>
+
+      <!-- Teacher Notes Floating Panel (Hidden by default, toggle with N) -->
+      <aside class="teacher-notes-panel" id="teacherNotesPanel">
+        <div class="notes-header">
+          <span>👩‍🏫 Teacher Speaker Notes</span>
+          <span>Press N to close</span>
+        </div>
+        <div class="notes-body" id="teacherNotesBody"></div>
+      </aside>
+
+      <!-- Footer Navigation & Speako Corner Wordmark -->
+      <footer class="slide-footer">
+        <div class="footer-brand-corner">
+          <span>Speako</span>
+          <span class="footer-shortcuts">Keys: ← → / Space · T (Romanization) · N (Notes) · F (Fullscreen)</span>
+        </div>
+
+        <div class="nav-controls">
+          <button type="button" class="nav-btn" id="prevBtn" aria-label="Previous slide">← Prev</button>
+          <div class="slide-counter" id="slideCounter">1 / 22</div>
+          <button type="button" class="nav-btn primary" id="nextBtn" aria-label="Next slide">Next →</button>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       1. STUDENT NAME & SLIDE CONTENT DATA ARRAY (Edit all text & notes here)
+       ========================================================================== */
+    // Teacher: Edit the student's name below for the Lesson 8 Certificate slide!
+    const STUDENT_NAME = "Alex";
+
+    const SLIDES = [
+      // Slide 1: Title slide
+      {
+        id: 1,
+        type: "hero",
+        badge: "Speako · Live 1-on-1 Thai",
+        emojis: ["🇹🇭", "🚕", "🛍️", "🍛", "🎉"],
+        title: "Lesson 8: Review and Role Play",
+        subtitle: "Welcome to our grand finale! Today we celebrate your progress and bring Lessons 1 to 7 together into real-life conversations.",
+        sample: {
+          thai: "สวัสดีครับ/ค่ะ · ยินดีที่ได้รู้จักครับ/ค่ะ",
+          romanization: "sà-wàt-dii khráp/khâ · yin-dii thîi dâai rúu-jàk khráp/khâ",
+          meaning: "Hello! · Nice to meet you!",
+          speakText: "สวัสดีครับ ยินดีที่ได้รู้จักครับ"
+        },
+        notes: "Welcome the student warmly to Lesson 8! Congratulate them on reaching the final lesson of the course."
+      },
+
+      // Slide 2: Goal slide
+      {
+        id: 2,
+        type: "hero",
+        badge: "Today's Goal",
+        emojis: ["🌅", "🚕", "🛍️", "🍜", "🤝"],
+        title: "Use everything you learned in one real day in Thailand",
+        subtitle: "We will review 42 core phrases from Lessons 1–7, play a Quick-Fire flashcard game, and role-play 5 scenes across a full day in Thailand.",
+        sample: {
+          thai: "พร้อมไหมครับ/คะ — พร้อมครับ/ค่ะ!",
+          romanization: "phráawm mái khráp/khá — phráawm khráp/khâ!",
+          meaning: "Are you ready? — Ready!",
+          speakText: "พร้อมไหมครับ พร้อมครับ"
+        },
+        notes: "Read the goal together and build excitement for the 5-scene 'Full Day in Thailand' role-play!"
+      },
+
+      // Slide 3: Review L1 (6 key phrases)
+      {
+        id: 3,
+        type: "reveal",
+        eyebrow: "Course Review · 1 of 7",
+        title: "Lesson 1 Review: Greetings and Polite Words",
+        subtitle: "Say each Thai phrase aloud before clicking the card to reveal!",
+        columns: 3,
+        items: [
+          { tag: "L1 · Greeting", prompt: "Hello", thai: "สวัสดี", romanization: "sà-wàt-dii", meaning: "hello" },
+          { tag: "L1 · Gratitude", prompt: "Thank you", thai: "ขอบคุณ", romanization: "khàawp-khun", meaning: "thank you" },
+          { tag: "L1 · Courtesy", prompt: "Sorry / Excuse me", thai: "ขอโทษ", romanization: "khǎaw-thôot", meaning: "sorry / excuse me" },
+          { tag: "L1 · Reassurance", prompt: "It's okay / No problem", thai: "ไม่เป็นไร", romanization: "mâi bpen rai", meaning: "it's okay / no problem" },
+          { tag: "L1 · Check-In", prompt: "How are you?", thai: "สบายดีไหม", romanization: "sà-baai-dii mái", meaning: "how are you?" },
+          { tag: "L1 · Parting", prompt: "Goodbye", thai: "ลาก่อน", romanization: "laa-gàawn", meaning: "goodbye" }
+        ],
+        notes: "Remind the student to add their polite particle (ครับ or ค่ะ/คะ) to each phrase!"
+      },
+
+      // Slide 4: Review L2 (6 key phrases)
+      {
+        id: 4,
+        type: "reveal",
+        eyebrow: "Course Review · 2 of 7",
+        title: "Lesson 2 Review: Self-Introduction",
+        subtitle: "Say each Thai phrase aloud before clicking the card to reveal!",
+        columns: 3,
+        items: [
+          { tag: "L2 · My Name", prompt: "My name is...", thai: "ผม/ฉันชื่อ...", romanization: "phǒm/chǎn chûue...", meaning: "my name is...", speakText: "ฉันชื่อ" },
+          { tag: "L2 · Ask Name", prompt: "What is your name?", thai: "คุณชื่ออะไร", romanization: "khun chûue à-rai", meaning: "what is your name?" },
+          { tag: "L2 · My Origin", prompt: "I am from...", thai: "ผม/ฉันมาจาก...", romanization: "phǒm/chǎn maa jàak...", meaning: "I am from...", speakText: "ฉันมาจาก" },
+          { tag: "L2 · Ask Origin", prompt: "Which country are you from?", thai: "คุณมาจากประเทศอะไร", romanization: "khun maa jàak bprà-thêet à-rai", meaning: "which country are you from?" },
+          { tag: "L2 · Greeting", prompt: "Nice to meet you", thai: "ยินดีที่ได้รู้จัก", romanization: "yin-dii thîi dâai rúu-jàk", meaning: "nice to meet you" },
+          { tag: "L2 · Noun", prompt: "Country", thai: "ประเทศ", romanization: "bprà-thêet", meaning: "country" }
+        ],
+        notes: "Have the student complete ผม/ฉันชื่อ... and ผม/ฉันมาจาก... with their own real name and country."
+      },
+
+      // Slide 5: Review L3 (6 key phrases)
+      {
+        id: 5,
+        type: "reveal",
+        eyebrow: "Course Review · 3 of 7",
+        title: "Lesson 3 Review: Numbers, Time, and Basic Questions",
+        subtitle: "Say each Thai phrase aloud before clicking the card to reveal!",
+        columns: 3,
+        items: [
+          { tag: "L3 · Numbers", prompt: "1, 2, 3", thai: "หนึ่ง สอง สาม", romanization: "nùeng sǎawng sǎam", meaning: "one, two, three" },
+          { tag: "L3 · Time", prompt: "What time is it now?", thai: "ตอนนี้กี่โมง", romanization: "dtaawn-níi gìi moong", meaning: "what time is it now?" },
+          { tag: "L3 · Price", prompt: "How much?", thai: "เท่าไหร่", romanization: "thâo-rài", meaning: "how much?" },
+          { tag: "L3 · Location", prompt: "Where?", thai: "ที่ไหน", romanization: "thîi-nǎi", meaning: "where?" },
+          { tag: "L3 · Question", prompt: "What?", thai: "อะไร", romanization: "à-rai", meaning: "what?" },
+          { tag: "L3 · Currency", prompt: "Baht", thai: "บาท", romanization: "bàat", meaning: "baht (Thai currency)" }
+        ],
+        notes: "Ask the student to count from 1 to 10 in Thai as a quick bonus warm-up!"
+      },
+
+      // Slide 6: Review L4 (6 key phrases)
+      {
+        id: 6,
+        type: "reveal",
+        eyebrow: "Course Review · 4 of 7",
+        title: "Lesson 4 Review: Ordering Food and Drinks",
+        subtitle: "Say each Thai phrase aloud before clicking the card to reveal!",
+        columns: 3,
+        items: [
+          { tag: "L4 · Menu", prompt: "May I have the menu, please?", thai: "ขอเมนูหน่อย", romanization: "khǎaw mee-nuu nàwy", meaning: "May I have the menu, please?" },
+          { tag: "L4 · Dish", prompt: "One fried rice, please.", thai: "ขอข้าวผัดหนึ่งจาน", romanization: "khǎaw khâao-phàt nùeng jaan", meaning: "One fried rice, please." },
+          { tag: "L4 · Spice", prompt: "Not spicy", thai: "ไม่เผ็ด", romanization: "mâi phèt", meaning: "not spicy" },
+          { tag: "L4 · Taste", prompt: "Very delicious", thai: "อร่อยมาก", romanization: "à-ràwy mâak", meaning: "very delicious" },
+          { tag: "L4 · Bill", prompt: "Check, please.", thai: "เช็คบิลด้วย", romanization: "chék-bin dûai", meaning: "check, please" },
+          { tag: "L4 · Drink", prompt: "One glass of drinking water, please.", thai: "ขอน้ำเปล่าหนึ่งแก้ว", romanization: "khǎaw náam-bplàao nùeng gâaeo", meaning: "One glass of drinking water, please." }
+        ],
+        notes: "Check that the student remembers the classifiers จาน (plate) and แก้ว (glass)."
+      },
+
+      // Slide 7: Review L5 (6 key phrases)
+      {
+        id: 7,
+        type: "reveal",
+        eyebrow: "Course Review · 5 of 7",
+        title: "Lesson 5 Review: Directions and Transportation",
+        subtitle: "Say each Thai phrase aloud before clicking the card to reveal!",
+        columns: 3,
+        items: [
+          { tag: "L5 · Direction", prompt: "Go straight", thai: "ตรงไป", romanization: "dtrong bpai", meaning: "go straight" },
+          { tag: "L5 · Direction", prompt: "Turn left", thai: "เลี้ยวซ้าย", romanization: "líao sáai", meaning: "turn left" },
+          { tag: "L5 · Direction", prompt: "Turn right", thai: "เลี้ยวขวา", romanization: "líao khwǎa", meaning: "turn right" },
+          { tag: "L5 · Distance", prompt: "Near", thai: "ใกล้", romanization: "glâi", meaning: "near" },
+          { tag: "L5 · Distance", prompt: "Far", thai: "ไกล", romanization: "glai", meaning: "far" },
+          { tag: "L5 · Taxi", prompt: "Go to the hotel, please.", thai: "ไปโรงแรมครับ/ค่ะ", romanization: "bpai roong-raaem khráp/khâ", meaning: "Go to the hotel, please.", speakText: "ไปโรงแรมครับ" }
+        ],
+        notes: "Spot-check the tone contrast between ใกล้ (glâi = near) and ไกล (glai = far)."
+      },
+
+      // Slide 8: Review L6 (6 key phrases)
+      {
+        id: 8,
+        type: "reveal",
+        eyebrow: "Course Review · 6 of 7",
+        title: "Lesson 6 Review: Shopping and Prices",
+        subtitle: "Say each Thai phrase aloud before clicking the card to reveal!",
+        columns: 3,
+        items: [
+          { tag: "L6 · Price", prompt: "How much is this one?", thai: "อันนี้เท่าไหร่", romanization: "an-níi thâo-rài", meaning: "how much is this one?" },
+          { tag: "L6 · Reaction", prompt: "Too expensive", thai: "แพงไป", romanization: "phaaeng bpai", meaning: "too expensive" },
+          { tag: "L6 · Bargain", prompt: "Can you give a small discount?", thai: "ลดหน่อยได้ไหม", romanization: "lót nàwy dâai mái", meaning: "can you give a small discount?" },
+          { tag: "L6 · Decision", prompt: "I'll take this one.", thai: "เอาอันนี้", romanization: "ao an-níi", meaning: "I'll take this one." },
+          { tag: "L6 · Payment", prompt: "Can I pay by card?", thai: "จ่ายด้วยบัตรได้ไหม", romanization: "jàai dûai bàt dâai mái", meaning: "can I pay by card?" },
+          { tag: "L6 · Total", prompt: "How much in total?", thai: "ทั้งหมดเท่าไหร่", romanization: "tháng-mòt thâo-rài", meaning: "how much in total?" }
+        ],
+        notes: "Praise the student's fluency with เท่าไหร่ (how much) and ได้ไหม (can I / can you)."
+      },
+
+      // Slide 9: Review L7 (6 key phrases)
+      {
+        id: 9,
+        type: "reveal",
+        eyebrow: "Course Review · 7 of 7",
+        title: "Lesson 7 Review: Daily Needs and Common Situations",
+        subtitle: "Say each Thai phrase aloud before clicking the card to reveal!",
+        columns: 3,
+        items: [
+          { tag: "L7 · Comprehension", prompt: "I don't understand", thai: "ผม/ฉันไม่เข้าใจ", romanization: "phǒm/chǎn mâi khâo-jai", meaning: "I don't understand", speakText: "ฉันไม่เข้าใจ" },
+          { tag: "L7 · Speed", prompt: "Please speak slowly", thai: "พูดช้าๆ หน่อย", romanization: "phûut cháa-cháa nàwy", meaning: "please speak slowly" },
+          { tag: "L7 · Facility", prompt: "Where is the bathroom?", thai: "ห้องน้ำอยู่ที่ไหน", romanization: "hâawng-náam yùu thîi-nǎi", meaning: "where is the bathroom?" },
+          { tag: "L7 · Urgent", prompt: "Help!", thai: "ช่วยด้วย", romanization: "chûai dûai", meaning: "Help!" },
+          { tag: "L7 · Navigation", prompt: "Lost (lost my way)", thai: "หลงทาง", romanization: "lǒng thaang", meaning: "lost (lost my way)" },
+          { tag: "L7 · Language", prompt: "I speak a little Thai", thai: "ผม/ฉันพูดภาษาไทยนิดหน่อย", romanization: "phǒm/chǎn phûut phaa-sǎa thai nít-nàwy", meaning: "I speak a little Thai", speakText: "ผมพูดภาษาไทยนิดหน่อย" }
+        ],
+        notes: "Great job reviewing all 7 lessons! Next up is the Quick-Fire random flashcard challenge."
+      },
+
+      // Slide 10: Quick-fire game slide
+      {
+        id: 10,
+        type: "quickfire",
+        eyebrow: "Interactive Challenge · Lessons 1 to 7",
+        title: "Quick-Fire Flashcard Game! ⚡",
+        subtitle: "Press 'Next Random Prompt' to draw a phrase from L1–L7, say it in Thai, then click the card to reveal!",
+        notes: "Do 8 to 10 random cards with the student! For an extra challenge, press T to hide the romanization when the answer is revealed."
+      },
+
+      // Slide 11: "A Full Day in Thailand" — Scene 1: Hotel in the morning
+      {
+        id: 11,
+        type: "roleplay",
+        eyebrow: "A Full Day in Thailand · Scene 1 of 5",
+        title: "Scene 1: Hotel in the Morning 🏨🌅",
+        subtitle: "Person A in Navy · Person B in Teal. Greet the staff and check the morning time!",
+        politenessReminder: "Men end with ครับ (khráp). Women end with ค่ะ (khâ) for statements and คะ (khá) for questions.",
+        lines: [
+          {
+            role: "A",
+            speakerClass: "speaker-a",
+            thai: "สวัสดีครับ/ค่ะ สบายดีไหมครับ/คะ",
+            romanization: "sà-wàt-dii khráp/khâ · sà-baai-dii mái khráp/khá",
+            meaning: "Hello! How are you?",
+            speakText: "สวัสดีครับ สบายดีไหมครับ"
+          },
+          {
+            role: "B",
+            speakerClass: "speaker-b",
+            thai: "สบายดี ขอบคุณครับ/ค่ะ แล้วคุณล่ะครับ/คะ",
+            romanization: "sà-baai-dii khàawp-khun khráp/khâ · láew khun lâ khráp/khá",
+            meaning: "I'm fine, thank you. And you?",
+            speakText: "สบายดี ขอบคุณครับ แล้วคุณล่ะครับ"
+          },
+          {
+            role: "A",
+            speakerClass: "speaker-a",
+            thai: "สบายดีครับ/ค่ะ ตอนนี้เจ็ดโมงเช้าครับ/ค่ะ",
+            romanization: "sà-baai-dii khráp/khâ · dtaawn-níi jèt moong cháao khráp/khâ",
+            meaning: "I'm fine. Right now it is 7:00 AM in the morning.",
+            speakText: "สบายดีครับ ตอนนี้เจ็ดโมงเช้าครับ"
+          }
+        ],
+        notes: "Scene 1 combines Lesson 1 greetings with Lesson 3 morning time (เจ็ดโมงเช้า = 7:00 AM). Practice both roles!"
+      },
+
+      // Slide 12: "A Full Day in Thailand" — Scene 2: Taxi
+      {
+        id: 12,
+        type: "roleplay",
+        eyebrow: "A Full Day in Thailand · Scene 2 of 5",
+        title: "Scene 2: Taking a Taxi to the Market 🚕",
+        subtitle: "Person A (Passenger) in Navy · Person B (Driver) in Teal.",
+        politenessReminder: "Men end with ครับ (khráp). Women end with ค่ะ (khâ) for statements and คะ (khá) for questions.",
+        lines: [
+          {
+            role: "A",
+            speakerClass: "speaker-a",
+            thai: "ไปตลาดครับ/ค่ะ ใช้เวลากี่นาทีครับ/คะ",
+            romanization: "bpai dtà-làat khráp/khâ · chái wee-laa gìi naa-thii khráp/khá",
+            meaning: "Go to the market, please. How many minutes does it take?",
+            speakText: "ไปตลาดครับ ใช้เวลากี่นาทีครับ"
+          },
+          {
+            role: "B",
+            speakerClass: "speaker-b",
+            thai: "ยี่สิบนาทีครับ/ค่ะ",
+            romanization: "yîi-sìp naa-thii khráp/khâ",
+            meaning: "Twenty minutes.",
+            speakText: "ยี่สิบนาทีครับ"
+          },
+          {
+            role: "A",
+            speakerClass: "speaker-a",
+            thai: "หยุดที่นี่ครับ/ค่ะ ขอบคุณครับ/ค่ะ",
+            romanization: "yùt thîi-nîi khráp/khâ · khàawp-khun khráp/khâ",
+            meaning: "Stop here, please. Thank you.",
+            speakText: "หยุดที่นี่ครับ ขอบคุณครับ"
+          }
+        ],
+        notes: "Scene 2 puts Lesson 5 taxi phrases into action. Have the student play A (Passenger) first, then switch!"
+      },
+
+      // Slide 13: "A Full Day in Thailand" — Scene 3: Market
+      {
+        id: 13,
+        type: "roleplay",
+        eyebrow: "A Full Day in Thailand · Scene 3 of 5",
+        title: "Scene 3: Shopping & Bargaining at the Market 🛍️",
+        subtitle: "Person A (Customer) in Navy · Person B (Seller) in Teal.",
+        politenessReminder: "Men end with ครับ (khráp). Women end with ค่ะ (khâ) for statements and คะ (khá) for questions.",
+        lines: [
+          {
+            role: "A",
+            speakerClass: "speaker-a",
+            thai: "อันนี้เท่าไหร่ครับ/คะ",
+            romanization: "an-níi thâo-rài khráp/khá",
+            meaning: "How much is this one?",
+            speakText: "อันนี้เท่าไหร่ครับ"
+          },
+          {
+            role: "B",
+            speakerClass: "speaker-b",
+            thai: "แปดสิบบาทครับ/ค่ะ",
+            romanization: "bpàaet-sìp bàat khráp/khâ",
+            meaning: "Eighty baht.",
+            speakText: "แปดสิบบาทครับ"
+          },
+          {
+            role: "A",
+            speakerClass: "speaker-a",
+            thai: "แพงไปครับ/ค่ะ ลดหน่อยได้ไหมครับ/คะ",
+            romanization: "phaaeng bpai khráp/khâ · lót nàwy dâai mái khráp/khá",
+            meaning: "That's too expensive. Can you give a small discount?",
+            speakText: "แพงไปครับ ลดหน่อยได้ไหมครับ"
+          },
+          {
+            role: "B",
+            speakerClass: "speaker-b",
+            thai: "ได้ครับ/ค่ะ เจ็ดสิบบาท",
+            romanization: "dâai khráp/khâ · jèt-sìp bàat",
+            meaning: "Okay! Seventy baht.",
+            speakText: "ได้ครับ เจ็ดสิบบาท"
+          },
+          {
+            role: "A",
+            speakerClass: "speaker-a",
+            thai: "เอาอันนี้ครับ/ค่ะ",
+            romanization: "ao an-níi khráp/khâ",
+            meaning: "I'll take this one.",
+            speakText: "เอาอันนี้ครับ"
+          }
+        ],
+        notes: "Scene 3 brings back Lesson 6 market bargaining. Encourage expressive, friendly intonation!"
+      },
+
+      // Slide 14: "A Full Day in Thailand" — Scene 4: Restaurant
+      {
+        id: 14,
+        type: "roleplay",
+        eyebrow: "A Full Day in Thailand · Scene 4 of 5",
+        title: "Scene 4: Lunch at a Thai Restaurant 🍛💧",
+        subtitle: "Person A (Customer) in Navy · Person B (Waiter) in Teal.",
+        politenessReminder: "Men end with ครับ (khráp). Women end with ค่ะ (khâ) for statements and คะ (khá) for questions.",
+        lines: [
+          {
+            role: "A",
+            speakerClass: "speaker-a",
+            thai: "ขอเมนูหน่อยครับ/ค่ะ",
+            romanization: "khǎaw mee-nuu nàwy khráp/khâ",
+            meaning: "May I have the menu, please?",
+            speakText: "ขอเมนูหน่อยครับ"
+          },
+          {
+            role: "B",
+            speakerClass: "speaker-b",
+            thai: "รับอะไรดีครับ/คะ",
+            romanization: "ráp à-rai dii khráp/khá",
+            meaning: "What would you like?",
+            speakText: "รับอะไรดีครับ"
+          },
+          {
+            role: "A",
+            speakerClass: "speaker-a",
+            thai: "ขอข้าวผัดหนึ่งจานครับ/ค่ะ ไม่เผ็ดครับ/ค่ะ",
+            romanization: "khǎaw khâao-phàt nùeng jaan khráp/khâ · mâi phèt khráp/khâ",
+            meaning: "One plate of fried rice, please. Not spicy, please.",
+            speakText: "ขอข้าวผัดหนึ่งจานครับ ไม่เผ็ดครับ"
+          },
+          {
+            role: "B",
+            speakerClass: "speaker-b",
+            thai: "รับเครื่องดื่มไหมครับ/คะ",
+            romanization: "ráp khrûueang-dùuem mái khráp/khá",
+            meaning: "Would you like a drink?",
+            speakText: "รับเครื่องดื่มไหมครับ"
+          },
+          {
+            role: "A",
+            speakerClass: "speaker-a",
+            thai: "ขอน้ำเปล่าหนึ่งแก้วครับ/ค่ะ",
+            romanization: "khǎaw náam-bplàao nùeng gâaeo khráp/khâ",
+            meaning: "One glass of drinking water, please.",
+            speakText: "ขอน้ำเปล่าหนึ่งแก้วครับ"
+          },
+          {
+            role: "A",
+            speakerClass: "speaker-a",
+            thai: "อร่อยมากครับ/ค่ะ เช็คบิลด้วยครับ/ค่ะ",
+            romanization: "à-ràwy mâak khráp/khâ · chék-bin dûai khráp/khâ",
+            meaning: "Very delicious! Check, please.",
+            speakText: "อร่อยมากครับ เช็คบิลด้วยครับ"
+          }
+        ],
+        notes: "Scene 4 reviews Lesson 4 restaurant ordering from asking for the menu to paying the bill."
+      },
+
+      // Slide 15: "A Full Day in Thailand" — Scene 5: A small problem
+      {
+        id: 15,
+        type: "roleplay",
+        eyebrow: "A Full Day in Thailand · Scene 5 of 5",
+        title: "Scene 5: Handling a Small Problem Calmly 🤝",
+        subtitle: "Person A in Navy · Person B in Teal.",
+        politenessReminder: "Men end with ครับ (khráp). Women end with ค่ะ (khâ) for statements and คะ (khá) for questions.",
+        lines: [
+          {
+            role: "A",
+            speakerClass: "speaker-a",
+            thai: "ขอโทษครับ/ค่ะ ผม/ฉันไม่เข้าใจครับ/ค่ะ พูดช้าๆ หน่อยได้ไหมครับ/คะ",
+            romanization: "khǎaw-thôot khráp/khâ · phǒm/chǎn mâi khâo-jai khráp/khâ · phûut cháa-cháa nàwy dâai mái khráp/khá",
+            meaning: "Excuse me, I don't understand. Can you speak slowly, please?",
+            speakText: "ขอโทษครับ ผมไม่เข้าใจครับ พูดช้าๆ หน่อยได้ไหมครับ"
+          },
+          {
+            role: "B",
+            speakerClass: "speaker-b",
+            thai: "ได้ครับ/ค่ะ",
+            romanization: "dâai khráp/khâ",
+            meaning: "Sure / Okay.",
+            speakText: "ได้ครับ"
+          },
+          {
+            role: "A",
+            speakerClass: "speaker-a",
+            thai: "ขอบคุณครับ/ค่ะ",
+            romanization: "khàawp-khun khráp/khâ",
+            meaning: "Thank you.",
+            speakText: "ขอบคุณครับ"
+          },
+          {
+            role: "B",
+            speakerClass: "speaker-b",
+            thai: "ไม่เป็นไรครับ/ค่ะ",
+            romanization: "mâi bpen rai khráp/khâ",
+            meaning: "No problem / You're welcome.",
+            speakText: "ไม่เป็นไรครับ"
+          }
+        ],
+        notes: "Scene 5 brings in Lesson 7 survival Thai. Now the student is ready to role-play all 5 scenes from memory on the next slide!"
+      },
+
+      // Slide 16: "Your turn: Role-play a full day in Thailand" slide (5-step checklist teacher can tick off)
+      {
+        id: 16,
+        type: "yourturn_checklist",
+        eyebrow: "Interactive Role-Play Challenge",
+        title: "Your Turn: Role-Play a Full Day in Thailand",
+        subtitle: "Your teacher plays the Thai person in each scene; you play the visitor! Click each scene to tick it off as you complete it.",
+        steps: [
+          {
+            scene: "Scene 1 · Hotel in the Morning 🏨",
+            desc: "Greet staff politely, ask how they are, and state the time in the morning.",
+            cue: "สวัสดีครับ/ค่ะ · สบายดีไหมครับ/คะ · ตอนนี้...โมงเช้าครับ/ค่ะ"
+          },
+          {
+            scene: "Scene 2 · Taking a Taxi 🚕",
+            desc: "Tell the driver your destination, ask how many minutes it takes, and ask to stop here.",
+            cue: "ไปตลาดครับ/ค่ะ · ใช้เวลากี่นาทีครับ/คะ · หยุดที่นี่ครับ/ค่ะ"
+          },
+          {
+            scene: "Scene 3 · Bargaining at the Market 🛍️",
+            desc: "Ask the price of an item, say it's too expensive, ask for a small discount, and buy it.",
+            cue: "อันนี้เท่าไหร่ครับ/คะ · แพงไป · ลดหน่อยได้ไหม · เอาอันนี้ครับ/ค่ะ"
+          },
+          {
+            scene: "Scene 4 · Ordering at a Restaurant 🍛",
+            desc: "Ask for the menu, order a dish (not spicy) + a drink, compliment the food, and ask for the bill.",
+            cue: "ขอเมนูหน่อย · ขอข้าวผัดหนึ่งจาน ไม่เผ็ด · ขอน้ำเปล่าหนึ่งแก้ว · อร่อยมาก เช็คบิลด้วย"
+          },
+          {
+            scene: "Scene 5 · Solving a Small Problem 🤝",
+            desc: "Politely excuse yourself, say you don't understand, ask them to speak slowly, and thank them.",
+            cue: "ขอโทษครับ/ค่ะ · ผม/ฉันไม่เข้าใจ · พูดช้าๆ หน่อยได้ไหม · ขอบคุณครับ/ค่ะ"
+          }
+        ],
+        notes: "Lead the student through all 5 scenes without switching slides! Tick each row as the student completes that scene."
+      },
+
+      // Slide 17: "Final conversation" slide
+      {
+        id: 17,
+        type: "final_conversation",
+        eyebrow: "Final Speaking Assessment · Free Conversation",
+        title: "Final Conversation with Your Teacher",
+        subtitle: "Speak freely and naturally without reading! Complete all 3 parts below while your teacher listens and gives feedback.",
+        prompts: [
+          {
+            emoji: "👋",
+            title: "1. Introduce Yourself (Name & Country)",
+            detail: "Greet your teacher, share your name, say which country you are from, and say 'Nice to meet you'.",
+            thaiHint: "สวัสดีครับ/ค่ะ · ผม/ฉันชื่อ... · ผม/ฉันมาจาก... · ยินดีที่ได้รู้จักครับ/ค่ะ"
+          },
+          {
+            emoji: "🕒",
+            title: "2. Ask About the Time",
+            detail: "Ask your teacher what time it is right now, and understand their answer.",
+            thaiHint: "ตอนนี้กี่โมงครับ/คะ"
+          },
+          {
+            emoji: "🥤",
+            title: "3. Order One Drink Politely",
+            detail: "Order your favorite drink (water, hot/iced coffee, or tea) with a number and แก้ว (glass), then say thank you!",
+            thaiHint: "ขอ...หนึ่งแก้วครับ/ค่ะ · ขอบคุณครับ/ค่ะ"
+          }
+        ],
+        notes: "Let the student complete all 3 parts in a natural back-and-forth conversation. Press T to hide the Thai hints if they are ready, then give warm, specific feedback on their pronunciation, tones, and confidence!"
+      },
+
+      // Slide 18: "I can..." checklist slide (10 items the student can click to tick)
+      {
+        id: 18,
+        type: "ican_checklist",
+        eyebrow: "Self-Evaluation · Course Outcomes",
+        title: "“I Can...” Checklist — Look How Far You've Come!",
+        subtitle: "Click each skill to tick it off and celebrate what you can now do in Thai:",
+        items: [
+          { text: "Greet politely", sample: "สวัสดี · ขอบคุณ · ขอโทษ · ไม่เป็นไร" },
+          { text: "Introduce myself", sample: "ผม/ฉันชื่อ... · ผม/ฉันมาจาก..." },
+          { text: "Count numbers", sample: "หนึ่ง สอง สาม ... หนึ่งร้อย" },
+          { text: "Ask the time", sample: "ตอนนี้กี่โมงครับ/คะ" },
+          { text: "Order food", sample: "ขอข้าวผัดหนึ่งจาน · ไม่เผ็ด · เช็คบิลด้วย" },
+          { text: "Ask for directions", sample: "...อยู่ที่ไหน · ตรงไป · เลี้ยวซ้าย/ขวา" },
+          { text: "Ask prices", sample: "อันนี้เท่าไหร่ · ลดหน่อยได้ไหม" },
+          { text: "Ask for help", sample: "ช่วยหน่อย · ช่วยด้วย · หลงทาง" },
+          { text: "Say I don't understand", sample: "ผม/ฉันไม่เข้าใจ · พูดช้าๆ หน่อย" },
+          { text: "Use polite particles", sample: "ครับ (khráp) · ค่ะ (khâ) · คะ (khá)" }
+        ],
+        notes: "Have the student read or demonstrate one quick example as you tick off each of the 10 'I can...' milestones together!"
+      },
+
+      // Slide 19: Congratulations slide (Certificate-style card)
+      {
+        id: 19,
+        type: "certificate",
+        studentName: STUDENT_NAME,
+        headline: "You completed Basic Thai for Daily Communication and Survival Thai!",
+        notes: "Congratulate the student warmly! Note: You can change STUDENT_NAME at the top of the script array or click the student name directly on the certificate to customize it live."
+      },
+
+      // Slide 20: "What's next" slide
+      {
+        id: 20,
+        type: "whatsnext",
+        eyebrow: "Continuing Your Thai Journey",
+        title: "What's Next? Keep Your Momentum Going!",
+        subtitle: "Three simple habits that will turn your beginner Thai into lifelong confidence:",
+        cards: [
+          {
+            emoji: "🔁",
+            title: "1. Keep Practicing Daily",
+            thai: "ฝึกพูดทุกวัน",
+            romanization: "fùek phûut thúk wan",
+            meaning: "Spend 5 minutes a day reviewing your slide decks and speaking phrases out loud so your tones stay sharp."
+          },
+          {
+            emoji: "🎙️",
+            title: "2. Record Yourself Speaking",
+            thai: "อัดเสียงตัวเอง",
+            romanization: "àt sǐang dtua-eeng",
+            meaning: "Record short 30-second voice notes introducing yourself or ordering a meal, and listen back to hear your progress."
+          },
+          {
+            emoji: "🇹🇭",
+            title: "3. Try These Phrases in Real Life",
+            thai: "พูดในชีวิตจริง",
+            romanization: "phûut nai chii-wít jing",
+            meaning: "Use your Thai at Thai restaurants, markets, cafés, and on your next trip to Thailand — locals will love your effort!"
+          }
+        ],
+        notes: "Encourage the student to keep using their 8 slide decks anytime they want a refresher."
+      },
+
+      // Slide 21: Homework slide
+      {
+        id: 21,
+        type: "homework",
+        eyebrow: "Post-Course Practice",
+        title: "Final Homework & Review",
+        subtitle: "Two final missions to lock in everything from Lessons 1 to 8:",
+        mainAssignment: "Review notes from all lessons. Prepare a final speaking practice conversation.",
+        cards: [
+          {
+            emoji: "📚",
+            title: "1. Review Notes from All Lessons",
+            thai: "ทบทวนบทเรียน 1–8",
+            romanization: "thóp-thuan bòt-rian nùeng thǔeng bpàaet",
+            meaning: "Review your favorite vocabulary and patterns across all 8 lessons — greetings, introductions, numbers, food, directions, shopping, and survival Thai.",
+            speakText: "สวัสดี ขอบคุณ ขอโทษ ไม่เป็นไร"
+          },
+          {
+            emoji: "🗣️",
+            title: "2. Prepare a Final Speaking Practice Conversation",
+            thai: "ฝึกพูดบทสนทนาจริง",
+            romanization: "fùek phûut bòt-sǒn-thá-naa jing",
+            meaning: "Put together a 1-minute full-day monologue or dialogue combining self-introduction, ordering food/drink, asking directions, and shopping.",
+            speakText: "สวัสดีครับ ผมชื่ออเล็กซ์ ขอข้าวผัดหนึ่งจานครับ ตลาดอยู่ที่ไหนครับ"
+          }
+        ],
+        notes: "Remind the student they can always book follow-up conversation practice sessions on Speako!"
+      },
+
+      // Slide 22: Closing slide
+      {
+        id: 22,
+        type: "hero",
+        badge: "Course Complete! 🎓🇹🇭",
+        emojis: ["🙏", "🎉", "🌟", "💙"],
+        title: "ขอบคุณครับ/ค่ะ Thank you for learning with Speako!",
+        subtitle: "Speak with confidence, one lesson at a time. We are so proud of your Thai journey!",
+        sample: {
+          thai: "ขอบคุณครับ/ค่ะ · โชคดีครับ/ค่ะ!",
+          romanization: "khàawp-khun khráp/khâ · chôok dii khráp/khâ!",
+          meaning: "Thank you! · Good luck!",
+          speakText: "ขอบคุณครับ โชคดีครับ"
+        },
+        notes: "Give a warm final thank-you (ขอบคุณครับ/ค่ะ) and wish the student the very best on their adventures in Thailand!"
+      }
+    ];
+
+    /* ==========================================================================
+       2. STATE, QUICK-FIRE POOL & WEB SPEECH API (THAI TTS) INITIALIZATION
+       ========================================================================== */
+    let currentSlideIndex = 0;
+    let romanizationVisible = true;
+    let notesVisible = false;
+    let thaiVoice = null;
+    let hasThaiVoice = false;
+    let roleplayStepCount = null;
+
+    // Persistent state for interactive checklists, quick-fire game, and certificate name
+    const yourTurnChecked = new Set();
+    const iCanChecked = new Set();
+    let customStudentName = STUDENT_NAME;
+
+    // Build the Quick-Fire flashcard pool automatically from the L1–L7 review slides (42 items)
+    const QUICKFIRE_POOL = [];
+    SLIDES.filter(s => s.type === "reveal" && Array.isArray(s.items)).forEach(s => {
+      s.items.forEach(item => {
+        QUICKFIRE_POOL.push({
+          lessonTag: item.tag,
+          prompt: item.prompt,
+          thai: item.thai,
+          romanization: item.romanization,
+          meaning: item.meaning,
+          speakText: item.speakText || item.thai
+        });
+      });
+    });
+
+    let quickfireIndex = 0;
+    let quickfireRevealed = false;
+    let quickfireCount = 1;
+
+    function detectThaiVoice() {
+      if (!("speechSynthesis" in window)) {
+        document.body.classList.add("no-thai-voice");
+        hasThaiVoice = false;
+        return;
+      }
+
+      const voices = window.speechSynthesis.getVoices() || [];
+      const found = voices.find(v => v.lang && v.lang.toLowerCase().startsWith("th"));
+
+      if (found) {
+        thaiVoice = found;
+        hasThaiVoice = true;
+        document.body.classList.remove("no-thai-voice");
+      } else if (voices.length > 0) {
+        thaiVoice = null;
+        hasThaiVoice = false;
+        document.body.classList.add("no-thai-voice");
+      }
+    }
+
+    if ("speechSynthesis" in window) {
+      detectThaiVoice();
+      window.speechSynthesis.onvoiceschanged = detectThaiVoice;
+      setTimeout(() => {
+        const voices = window.speechSynthesis.getVoices() || [];
+        const found = voices.find(v => v.lang && v.lang.toLowerCase().startsWith("th"));
+        if (!found) {
+          document.body.classList.add("no-thai-voice");
+        } else {
+          thaiVoice = found;
+          hasThaiVoice = true;
+          document.body.classList.remove("no-thai-voice");
+        }
+      }, 900);
+    } else {
+      document.body.classList.add("no-thai-voice");
+    }
+
+    function speakThai(rawText, btnElement) {
+      if (!("speechSynthesis" in window)) return;
+
+      window.speechSynthesis.cancel();
+
+      const cleaned = rawText
+        .replace(/ครับ\/ค่ะ/g, "ครับ")
+        .replace(/ครับ\/คะ/g, "ครับ")
+        .replace(/ผม\/ฉัน/g, "ฉัน")
+        .replace(/\.\.\./g, " ")
+        .replace(/·/g, " ")
+        .trim();
+
+      const utterance = new SpeechSynthesisUtterance(cleaned);
+      utterance.lang = "th-TH";
+      utterance.rate = 0.88;
+      if (thaiVoice) {
+        utterance.voice = thaiVoice;
+      }
+
+      document.querySelectorAll(".listen-btn.speaking").forEach(b => b.classList.remove("speaking"));
+      if (btnElement) {
+        btnElement.classList.add("speaking");
+        utterance.onend = () => btnElement.classList.remove("speaking");
+        utterance.onerror = () => btnElement.classList.remove("speaking");
+      }
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function renderListenButton(textToSpeak) {
+      const escaped = String(textToSpeak || "").replace(/"/g, "&quot;");
+      return `<button type="button" class="listen-btn" data-speak="${escaped}" aria-label="Listen to ${escaped}">🔊 Listen</button>`;
+    }
+
+    /* ==========================================================================
+       3. SLIDE RENDERING ENGINE
+       ========================================================================== */
+    const slideViewport = document.getElementById("slideViewport");
+    const progressFill = document.getElementById("progressFill");
+    const slideCounter = document.getElementById("slideCounter");
+    const teacherNotesBody = document.getElementById("teacherNotesBody");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+
+    function buildSlideHTML(slide) {
+      // 1. HERO SLIDE (Title, Goal, Closing)
+      if (slide.type === "hero") {
+        const emojisHtml = (slide.emojis || []).map(e => `<span>${e}</span>`).join("");
+        const sampleHtml = slide.sample
+          ? `<div class="hero-sample-box">
+               <div style="text-align:left;">
+                 <div class="thai" style="font-size:2.4rem;">${slide.sample.thai}</div>
+                 <div class="romanization" style="font-size:1.25rem;">${slide.sample.romanization}</div>
+                 <div class="meaning" style="font-size:1.1rem;">${slide.sample.meaning}</div>
+               </div>
+               ${renderListenButton(slide.sample.speakText || slide.sample.thai)}
+             </div>`
+          : "";
+
+        return `
+          <div class="hero-card">
+            <div class="hero-badge">${slide.badge}</div>
+            <div class="hero-emoji-row">${emojisHtml}</div>
+            <h1 class="hero-title">${slide.title}</h1>
+            <p class="hero-subtitle">${slide.subtitle}</p>
+            ${sampleHtml}
+          </div>
+        `;
+      }
+
+      // 2. REVEAL INTERACTIVE SLIDE (L1–L7 Review Grids)
+      if (slide.type === "reveal") {
+        const colsClass = `cols-${slide.columns || 3}`;
+        const cardsHtml = slide.items
+          .map((item, idx) => {
+            const speakTarget = item.speakText || item.thai;
+            return `
+              <div class="reveal-card" data-reveal-card="${idx}" tabindex="0" role="button" aria-label="Reveal Thai for ${item.prompt}">
+                <div>
+                  <div class="reveal-prompt-row">
+                    <span class="reveal-prompt-tag">${item.tag}</span>
+                    <span style="font-size:0.82rem; color:var(--muted-gray); font-weight:600;">Click to reveal</span>
+                  </div>
+                  <div class="reveal-prompt">${item.prompt}</div>
+                </div>
+
+                <div class="reveal-answer-area">
+                  <div class="reveal-placeholder">👆 Click to Reveal Thai Answer</div>
+                  <div class="reveal-content">
+                    <div>
+                      <div class="thai">${item.thai}</div>
+                      <div class="romanization">${item.romanization}</div>
+                      <div class="meaning" style="font-size:0.95rem; color:var(--muted-gray);">${item.meaning}</div>
+                    </div>
+                    ${renderListenButton(speakTarget)}
+                  </div>
+                </div>
+              </div>
+            `;
+          })
+          .join("");
+
+        return `
+          <div class="slide-header" style="display:flex; justify-content:space-between; align-items:flex-end;">
+            <div>
+              <div class="slide-eyebrow">${slide.eyebrow}</div>
+              <h1 class="slide-title">${slide.title}</h1>
+              <p class="slide-subtitle">${slide.subtitle}</p>
+            </div>
+            <div class="reveal-toolbar">
+              <button type="button" class="secondary-btn" id="revealAllBtn">Reveal All</button>
+              <button type="button" class="secondary-btn" id="hideAllBtn">Reset Cards</button>
+            </div>
+          </div>
+          <div class="reveal-grid ${colsClass}">${cardsHtml}</div>
+        `;
+      }
+
+      // 3. QUICK-FIRE RANDOM FLASHCARD GAME SLIDE
+      if (slide.type === "quickfire") {
+        const currentCard = QUICKFIRE_POOL[quickfireIndex] || QUICKFIRE_POOL[0];
+        return `
+          <div class="slide-header" style="display:flex; justify-content:space-between; align-items:flex-end;">
+            <div>
+              <div class="slide-eyebrow">${slide.eyebrow}</div>
+              <h1 class="slide-title">${slide.title}</h1>
+              <p class="slide-subtitle">${slide.subtitle}</p>
+            </div>
+            <div style="font-family:'Montserrat',sans-serif; font-weight:700; color:var(--teal); background:var(--teal-light); padding:8px 18px; border-radius:999px;">
+              Card #${quickfireCount} · Pool of ${QUICKFIRE_POOL.length} Phrases
+            </div>
+          </div>
+          <div class="quickfire-wrap">
+            <div class="quickfire-card ${quickfireRevealed ? "revealed" : ""}" id="quickfireCard" tabindex="0" role="button" aria-label="Click to reveal Thai answer">
+              <span class="quickfire-lesson-pill">${currentCard.lessonTag}</span>
+              <div style="font-size:0.95rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted-gray); margin-bottom:6px;">English Prompt</div>
+              <div class="quickfire-prompt">“${currentCard.prompt}”</div>
+              <div class="quickfire-answer-box">
+                ${
+                  quickfireRevealed
+                    ? `<div style="display:flex; align-items:center; justify-content:space-between; width:100%; gap:24px;">
+                         <div style="text-align:left;">
+                           <div class="thai" style="font-size:3.1rem;">${currentCard.thai}</div>
+                           <div class="romanization" style="font-size:1.5rem;">${currentCard.romanization}</div>
+                           <div class="meaning" style="font-size:1.18rem;">${currentCard.meaning}</div>
+                         </div>
+                         ${renderListenButton(currentCard.speakText)}
+                       </div>`
+                    : `<div style="font-family:'Montserrat',sans-serif; font-weight:700; font-size:1.3rem; color:var(--coral);">
+                         👆 Click Card to Reveal Thai Answer
+                       </div>`
+                }
+              </div>
+            </div>
+            <div style="display:flex; gap:16px; align-items:center;">
+              <button type="button" class="quickfire-btn" id="nextQuickfireBtn">🎲 Next Random Prompt</button>
+              <button type="button" class="secondary-btn" id="toggleQuickfireRevealBtn" style="padding:14px 24px; font-size:1.05rem;">
+                ${quickfireRevealed ? "Hide Answer" : "Reveal Answer"}
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      // 4. ROLE-PLAY DIALOGUE SLIDE (5 Scenes of "A Full Day in Thailand")
+      if (slide.type === "roleplay") {
+        const linesHtml = slide.lines
+          .map((line, idx) => {
+            const hiddenClass = roleplayStepCount !== null && idx >= roleplayStepCount ? "hidden-step" : "";
+            return `
+              <div class="dialogue-line ${line.speakerClass} ${hiddenClass}" data-line-idx="${idx}">
+                <div class="dialogue-left">
+                  <span class="speaker-badge">${line.role}</span>
+                  <div class="dialogue-text-group">
+                    <span class="thai">${line.thai}</span>
+                    <span class="romanization">${line.romanization}</span>
+                    <span class="meaning">“${line.meaning}”</span>
+                  </div>
+                </div>
+                ${renderListenButton(line.speakText || line.thai)}
+              </div>
+            `;
+          })
+          .join("");
+
+        return `
+          <div class="slide-header" style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:10px;">
+            <div>
+              <div class="slide-eyebrow">${slide.eyebrow}</div>
+              <h1 class="slide-title" style="font-size:2.1rem;">${slide.title}</h1>
+              <p class="slide-subtitle" style="font-size:1.05rem;">${slide.subtitle}</p>
+            </div>
+            <div class="reveal-toolbar" style="margin-bottom:0;">
+              <button type="button" class="secondary-btn" id="stepRoleplayBtn">Step Line-by-Line</button>
+              <button type="button" class="secondary-btn" id="showAllRoleplayBtn">Show All Lines</button>
+            </div>
+          </div>
+          <div class="dialogue-container">${linesHtml}</div>
+          <div class="note-banner" style="margin-top:8px; padding:10px 20px;">
+            <div class="note-banner-text">🙏 <strong>Politeness reminder:</strong> ${slide.politenessReminder}</div>
+            ${renderListenButton("ครับ ค่ะ คะ")}
+          </div>
+        `;
+      }
+
+      // 5. "YOUR TURN: ROLE-PLAY A FULL DAY IN THAILAND" (5-step clickable checklist)
+      if (slide.type === "yourturn_checklist") {
+        const rowsHtml = slide.steps
+          .map((step, idx) => {
+            const isChecked = yourTurnChecked.has(idx);
+            return `
+              <div class="check-item ${isChecked ? "checked" : ""}" data-yourturn-idx="${idx}" tabindex="0" role="button" aria-pressed="${isChecked}">
+                <div style="display:flex; align-items:center; gap:18px; flex:1;">
+                  <div class="check-box-circle">✓</div>
+                  <div>
+                    <div style="font-family:'Montserrat',sans-serif; font-weight:800; font-size:1.22rem; color:var(--navy);">${step.scene}</div>
+                    <div class="meaning" style="font-size:1.02rem; margin-top:2px;">${step.desc}</div>
+                  </div>
+                </div>
+                <div class="thai" style="font-size:1.35rem; color:var(--teal); text-align:right;">${step.cue}</div>
+              </div>
+            `;
+          })
+          .join("");
+
+        return `
+          <div class="slide-header" style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:12px;">
+            <div>
+              <div class="slide-eyebrow">${slide.eyebrow}</div>
+              <h1 class="slide-title" style="font-size:2.15rem;">${slide.title}</h1>
+              <p class="slide-subtitle">${slide.subtitle}</p>
+            </div>
+            <div style="font-family:'Montserrat',sans-serif; font-weight:800; color:var(--teal); background:var(--teal-light); padding:8px 18px; border-radius:999px;">
+              Completed: ${yourTurnChecked.size} / ${slide.steps.length}
+            </div>
+          </div>
+          <div class="checklist-grid-5">${rowsHtml}</div>
+        `;
+      }
+
+      // 6. "FINAL CONVERSATION" SLIDE
+      if (slide.type === "final_conversation") {
+        const cardsHtml = slide.prompts
+          .map(p => `
+            <div class="vocab-card" style="border-top:6px solid var(--teal);">
+              <div class="vocab-card-top">
+                <div class="vocab-emoji">${p.emoji}</div>
+                ${renderListenButton(p.thaiHint)}
+              </div>
+              <div style="margin-top:12px;">
+                <h2 style="font-family:'Montserrat',sans-serif; font-size:1.45rem; color:var(--navy); margin-bottom:8px;">${p.title}</h2>
+                <p class="meaning" style="font-size:1.12rem; line-height:1.5; margin-bottom:14px;">${p.detail}</p>
+                <div style="background:var(--off-white); padding:12px 16px; border-radius:12px; border:1px solid rgba(11,42,91,0.08);">
+                  <div style="font-size:0.8rem; font-weight:700; text-transform:uppercase; color:var(--coral); margin-bottom:4px;">Helpful Thai Structure</div>
+                  <div class="thai" style="font-size:1.55rem;">${p.thaiHint}</div>
+                </div>
+              </div>
+            </div>
+          `)
+          .join("");
+
+        return `
+          <div class="slide-header">
+            <div class="slide-eyebrow">${slide.eyebrow}</div>
+            <h1 class="slide-title">${slide.title}</h1>
+            <p class="slide-subtitle">${slide.subtitle}</p>
+          </div>
+          <div class="vocab-grid cols-3">${cardsHtml}</div>
+          <div class="note-banner">
+            <div class="note-banner-text">👩‍🏫 <strong>Teacher Feedback Time:</strong> Listen to the student's full conversation, then share praise and 1–2 helpful pronunciation tips!</div>
+          </div>
+        `;
+      }
+
+      // 7. "I CAN..." CHECKLIST SLIDE (10 items the student can click to tick)
+      if (slide.type === "ican_checklist") {
+        const itemsHtml = slide.items
+          .map((item, idx) => {
+            const isChecked = iCanChecked.has(idx);
+            return `
+              <div class="check-item ${isChecked ? "checked" : ""}" data-ican-idx="${idx}" tabindex="0" role="button" aria-pressed="${isChecked}">
+                <div style="display:flex; align-items:center; gap:14px;">
+                  <div class="check-box-circle">✓</div>
+                  <div>
+                    <div style="font-family:'Montserrat',sans-serif; font-weight:700; font-size:1.18rem; color:var(--navy);">I can ${item.text}</div>
+                    <div class="thai" style="font-size:1.25rem; color:var(--teal);">${item.sample}</div>
+                  </div>
+                </div>
+              </div>
+            `;
+          })
+          .join("");
+
+        return `
+          <div class="slide-header" style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:12px;">
+            <div>
+              <div class="slide-eyebrow">${slide.eyebrow}</div>
+              <h1 class="slide-title" style="font-size:2.15rem;">${slide.title}</h1>
+              <p class="slide-subtitle">${slide.subtitle}</p>
+            </div>
+            <div style="display:flex; gap:10px; align-items:center;">
+              <button type="button" class="secondary-btn" id="tickAllICanBtn">Tick All 10</button>
+              <span style="font-family:'Montserrat',sans-serif; font-weight:800; color:var(--teal); background:var(--teal-light); padding:8px 18px; border-radius:999px;">
+                ${iCanChecked.size} / ${slide.items.length} Ticked
+              </span>
+            </div>
+          </div>
+          <div class="checklist-grid-10">${itemsHtml}</div>
+        `;
+      }
+
+      // 8. CONGRATULATIONS CERTIFICATE SLIDE
+      if (slide.type === "certificate") {
+        return `
+          <div class="certificate-wrapper">
+            <div class="certificate-card">
+              <div class="hero-badge" style="margin-bottom:4px;">Speako · Certificate of Completion 🏆</div>
+              <h1 style="font-family:'Montserrat',sans-serif; font-size:2.55rem; font-weight:800; color:var(--navy);">
+                ${slide.headline}
+              </h1>
+              <p style="font-size:1.2rem; color:var(--muted-gray); font-weight:500;">This certificate is proudly presented to</p>
+              <div class="cert-name-box" id="certNameBox" title="Click to edit student name">${customStudentName}</div>
+              <p style="font-size:1.2rem; color:var(--dark-gray); max-width:780px; line-height:1.5;">
+                For successfully completing all 8 live 1-on-1 lessons in practical Thai conversation, polite communication, and real-life survival Thai.
+              </p>
+              <div style="display:flex; align-items:center; justify-content:space-between; width:100%; max-width:780px; margin-top:14px; padding-top:16px; border-top:1.5px solid rgba(11,42,91,0.1);">
+                <div style="text-align:left;">
+                  <div style="font-family:'Montserrat',sans-serif; font-weight:800; color:var(--navy); font-size:1.2rem;">Speako Language Tutoring</div>
+                  <div style="font-size:0.95rem; color:var(--muted-gray);">Speak with confidence, one lesson at a time.</div>
+                </div>
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <span class="thai" style="font-size:2rem; color:var(--teal);">เก่งมาก! (gèng mâak! — Well done!)</span>
+                  ${renderListenButton("เก่งมาก ยินดีด้วยครับ")}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // 9. "WHAT'S NEXT" SLIDE
+      if (slide.type === "whatsnext") {
+        const cardsHtml = slide.cards
+          .map(c => `
+            <div class="vocab-card" style="padding:26px 28px; border-top:6px solid var(--coral);">
+              <div class="vocab-card-top">
+                <div class="vocab-emoji">${c.emoji}</div>
+                ${renderListenButton(c.thai)}
+              </div>
+              <div style="margin-top:14px;">
+                <h2 style="font-family:'Montserrat',sans-serif; font-size:1.45rem; color:var(--navy); margin-bottom:8px;">${c.title}</h2>
+                <div class="thai" style="font-size:2rem;">${c.thai}</div>
+                <div class="romanization" style="font-size:1.12rem; margin-bottom:10px;">${c.romanization}</div>
+                <p class="meaning" style="font-size:1.1rem; line-height:1.5;">${c.meaning}</p>
+              </div>
+            </div>
+          `)
+          .join("");
+
+        return `
+          <div class="slide-header">
+            <div class="slide-eyebrow">${slide.eyebrow}</div>
+            <h1 class="slide-title">${slide.title}</h1>
+            <p class="slide-subtitle">${slide.subtitle}</p>
+          </div>
+          <div class="vocab-grid cols-3">${cardsHtml}</div>
+        `;
+      }
+
+      // 10. HOMEWORK SLIDE
+      if (slide.type === "homework") {
+        const cardsHtml = slide.cards
+          .map(c => `
+            <div class="vocab-card" style="padding:28px 32px;">
+              <div class="vocab-card-top">
+                <div class="vocab-emoji">${c.emoji}</div>
+                ${renderListenButton(c.speakText || c.thai)}
+              </div>
+              <div style="margin-top:14px;">
+                <h2 style="font-family:'Montserrat',sans-serif; font-size:1.55rem; color:var(--navy); margin-bottom:8px;">${c.title}</h2>
+                <div class="thai" style="font-size:2.1rem;">${c.thai}</div>
+                <div class="romanization" style="font-size:1.15rem; margin-bottom:10px;">${c.romanization}</div>
+                <p class="meaning" style="font-size:1.15rem; line-height:1.5;">${c.meaning}</p>
+              </div>
+            </div>
+          `)
+          .join("");
+
+        return `
+          <div class="slide-header">
+            <div class="slide-eyebrow">${slide.eyebrow}</div>
+            <h1 class="slide-title">${slide.title}</h1>
+            <p class="slide-subtitle">${slide.subtitle}</p>
+          </div>
+          <div class="note-banner" style="margin-top:0; margin-bottom:18px;">
+            <div class="note-banner-text">📌 <strong>Homework:</strong> ${slide.mainAssignment}</div>
+          </div>
+          <div class="vocab-grid cols-2">${cardsHtml}</div>
+        `;
+      }
+
+      return "";
+    }
+
+    function renderCurrentSlide(withFade = true) {
+      const slide = SLIDES[currentSlideIndex];
+      roleplayStepCount = null;
+
+      const updateDOM = () => {
+        slideViewport.innerHTML = buildSlideHTML(slide);
+        attachSlideInteractions();
+
+        const progressPercent = ((currentSlideIndex + 1) / SLIDES.length) * 100;
+        progressFill.style.width = `${progressPercent}%`;
+        slideCounter.textContent = `${currentSlideIndex + 1} / ${SLIDES.length}`;
+
+        prevBtn.disabled = currentSlideIndex === 0;
+        nextBtn.disabled = currentSlideIndex === SLIDES.length - 1;
+
+        teacherNotesBody.textContent = slide.notes || "No speaker notes for this slide.";
+      };
+
+      if (withFade) {
+        slideViewport.classList.add("fading");
+        setTimeout(() => {
+          updateDOM();
+          slideViewport.classList.remove("fading");
+        }, 160);
+      } else {
+        updateDOM();
+      }
+    }
+
+    function attachSlideInteractions() {
+      // Listen buttons
+      slideViewport.querySelectorAll(".listen-btn").forEach(btn => {
+        btn.addEventListener("click", e => {
+          e.stopPropagation();
+          const phrase = btn.getAttribute("data-speak");
+          if (phrase) speakThai(phrase, btn);
+        });
+      });
+
+      // Reveal cards
+      slideViewport.querySelectorAll(".reveal-card").forEach(card => {
+        card.addEventListener("click", () => {
+          card.classList.toggle("revealed");
+        });
+        card.addEventListener("keydown", e => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            e.stopPropagation();
+            card.classList.toggle("revealed");
+          }
+        });
+      });
+
+      const revealAllBtn = document.getElementById("revealAllBtn");
+      const hideAllBtn = document.getElementById("hideAllBtn");
+      if (revealAllBtn) {
+        revealAllBtn.addEventListener("click", () => {
+          slideViewport.querySelectorAll(".reveal-card").forEach(c => c.classList.add("revealed"));
+        });
+      }
+      if (hideAllBtn) {
+        hideAllBtn.addEventListener("click", () => {
+          slideViewport.querySelectorAll(".reveal-card").forEach(c => c.classList.remove("revealed"));
+        });
+      }
+
+      // Quick-fire random flashcard interactions
+      const quickfireCard = document.getElementById("quickfireCard");
+      const nextQuickfireBtn = document.getElementById("nextQuickfireBtn");
+      const toggleQuickfireRevealBtn = document.getElementById("toggleQuickfireRevealBtn");
+
+      if (quickfireCard) {
+        quickfireCard.addEventListener("click", () => {
+          quickfireRevealed = !quickfireRevealed;
+          renderCurrentSlide(false);
+        });
+      }
+      if (toggleQuickfireRevealBtn) {
+        toggleQuickfireRevealBtn.addEventListener("click", () => {
+          quickfireRevealed = !quickfireRevealed;
+          renderCurrentSlide(false);
+        });
+      }
+      if (nextQuickfireBtn) {
+        nextQuickfireBtn.addEventListener("click", () => {
+          let nextIdx = Math.floor(Math.random() * QUICKFIRE_POOL.length);
+          if (nextIdx === quickfireIndex && QUICKFIRE_POOL.length > 1) {
+            nextIdx = (nextIdx + 1) % QUICKFIRE_POOL.length;
+          }
+          quickfireIndex = nextIdx;
+          quickfireRevealed = false;
+          quickfireCount += 1;
+          renderCurrentSlide(false);
+        });
+      }
+
+      // Role-play line-by-line stepping
+      const stepRoleplayBtn = document.getElementById("stepRoleplayBtn");
+      const showAllRoleplayBtn = document.getElementById("showAllRoleplayBtn");
+      if (stepRoleplayBtn) {
+        stepRoleplayBtn.addEventListener("click", () => {
+          const lines = slideViewport.querySelectorAll(".dialogue-line");
+          if (roleplayStepCount === null || roleplayStepCount >= lines.length) {
+            roleplayStepCount = 1;
+          } else {
+            roleplayStepCount += 1;
+          }
+          lines.forEach((lineEl, idx) => {
+            lineEl.classList.toggle("hidden-step", idx >= roleplayStepCount);
+          });
+          stepRoleplayBtn.textContent =
+            roleplayStepCount < lines.length
+              ? `Next Line (${roleplayStepCount}/${lines.length})`
+              : "Restart Step-by-Step";
+        });
+      }
+      if (showAllRoleplayBtn) {
+        showAllRoleplayBtn.addEventListener("click", () => {
+          roleplayStepCount = null;
+          slideViewport.querySelectorAll(".dialogue-line").forEach(lineEl => {
+            lineEl.classList.remove("hidden-step");
+          });
+          if (stepRoleplayBtn) stepRoleplayBtn.textContent = "Step Line-by-Line";
+        });
+      }
+
+      // "Your turn" 5-step checklist
+      slideViewport.querySelectorAll("[data-yourturn-idx]").forEach(el => {
+        el.addEventListener("click", () => {
+          const idx = Number(el.getAttribute("data-yourturn-idx"));
+          if (yourTurnChecked.has(idx)) yourTurnChecked.delete(idx);
+          else yourTurnChecked.add(idx);
+          renderCurrentSlide(false);
+        });
+      });
+
+      // "I can..." 10-item checklist
+      slideViewport.querySelectorAll("[data-ican-idx]").forEach(el => {
+        el.addEventListener("click", () => {
+          const idx = Number(el.getAttribute("data-ican-idx"));
+          if (iCanChecked.has(idx)) iCanChecked.delete(idx);
+          else iCanChecked.add(idx);
+          renderCurrentSlide(false);
+        });
+      });
+
+      const tickAllICanBtn = document.getElementById("tickAllICanBtn");
+      if (tickAllICanBtn) {
+        tickAllICanBtn.addEventListener("click", () => {
+          const slide = SLIDES[currentSlideIndex];
+          if (iCanChecked.size === slide.items.length) {
+            iCanChecked.clear();
+          } else {
+            slide.items.forEach((_, idx) => iCanChecked.add(idx));
+          }
+          renderCurrentSlide(false);
+        });
+      }
+
+      // Certificate student name inline edit convenience
+      const certNameBox = document.getElementById("certNameBox");
+      if (certNameBox) {
+        certNameBox.addEventListener("click", () => {
+          const updated = window.prompt("Enter the student's name for the certificate:", customStudentName);
+          if (updated && updated.trim()) {
+            customStudentName = updated.trim();
+            renderCurrentSlide(false);
+          }
+        });
+      }
+    }
+
+    /* ==========================================================================
+       4. NAVIGATION, KEYBOARD SHORTCUTS, TOUCH SWIPE & 16:9 SCALING
+       ========================================================================== */
+    function goToSlide(index) {
+      if (index < 0 || index >= SLIDES.length || index === currentSlideIndex) return;
+      if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+      currentSlideIndex = index;
+      renderCurrentSlide(true);
+    }
+
+    function nextSlide() {
+      goToSlide(currentSlideIndex + 1);
+    }
+
+    function prevSlide() {
+      goToSlide(currentSlideIndex - 1);
+    }
+
+    function toggleRomanization() {
+      romanizationVisible = !romanizationVisible;
+      document.body.classList.toggle("hide-romanization", !romanizationVisible);
+      document.getElementById("romStateText").textContent = romanizationVisible ? "ON" : "OFF";
+      document.getElementById("toggleRomBtn").classList.toggle("active", !romanizationVisible);
+    }
+
+    function toggleTeacherNotes() {
+      notesVisible = !notesVisible;
+      document.body.classList.toggle("show-notes", notesVisible);
+      document.getElementById("toggleNotesBtn").classList.toggle("active", notesVisible);
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    prevBtn.addEventListener("click", prevSlide);
+    nextBtn.addEventListener("click", nextSlide);
+    document.getElementById("toggleRomBtn").addEventListener("click", toggleRomanization);
+    document.getElementById("toggleNotesBtn").addEventListener("click", toggleTeacherNotes);
+    document.getElementById("fullscreenBtn").addEventListener("click", toggleFullscreen);
+
+    window.addEventListener("keydown", e => {
+      if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) return;
+
+      const key = e.key;
+      if (key === "ArrowRight" || key === "PageDown") {
+        e.preventDefault();
+        nextSlide();
+      } else if (key === "ArrowLeft" || key === "PageUp") {
+        e.preventDefault();
+        prevSlide();
+      } else if (key === " ") {
+        if (document.activeElement && document.activeElement.tagName === "BUTTON") return;
+        e.preventDefault();
+        nextSlide();
+      } else if (key === "t" || key === "T") {
+        e.preventDefault();
+        toggleRomanization();
+      } else if (key === "n" || key === "N") {
+        e.preventDefault();
+        toggleTeacherNotes();
+      } else if (key === "f" || key === "F") {
+        e.preventDefault();
+        toggleFullscreen();
+      }
+    });
+
+    let touchStartX = 0;
+    let touchStartY = 0;
+    window.addEventListener("touchstart", e => {
+      if (e.changedTouches && e.changedTouches.length > 0) {
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+      }
+    }, { passive: true });
+
+    window.addEventListener("touchend", e => {
+      if (e.changedTouches && e.changedTouches.length > 0) {
+        const dx = e.changedTouches[0].screenX - touchStartX;
+        const dy = e.changedTouches[0].screenY - touchStartY;
+        if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.4) {
+          if (dx < 0) nextSlide();
+          else prevSlide();
+        }
+      }
+    }, { passive: true });
+
+    function updateStageScale() {
+      const stageWidth = 1600;
+      const stageHeight = 900;
+      const scaleX = window.innerWidth / stageWidth;
+      const scaleY = window.innerHeight / stageHeight;
+      const scale = Math.min(scaleX, scaleY);
+      document.documentElement.style.setProperty("--stage-scale", scale.toFixed(4));
+    }
+
+    window.addEventListener("resize", updateStageScale);
+    updateStageScale();
+    renderCurrentSlide(false);
+  </script>
+</body>
+</html>

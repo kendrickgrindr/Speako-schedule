@@ -1,0 +1,2655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Speako — Lesson 6: Shopping and Prices</title>
+  <!-- Google Fonts: Montserrat (headings), Inter (body), Noto Sans Thai (Thai script) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --navy: #0B2A5B;
+      --teal: #14A3A0;
+      --teal-light: #E6F6F5;
+      --off-white: #F7F5F2;
+      --card-bg: #FFFFFF;
+      --dark-gray: #2B2F36;
+      --muted-gray: #5E6470;
+      --coral: #F47C6B;
+      --coral-light: #FFF0ED;
+      --gradient-brand: linear-gradient(135deg, #14A3A0 0%, #F47C6B 100%);
+      --gradient-soft: linear-gradient(135deg, rgba(20, 163, 160, 0.12) 0%, rgba(244, 124, 107, 0.12) 100%);
+      --shadow-card: 0 10px 28px rgba(11, 42, 91, 0.07), 0 2px 6px rgba(11, 42, 91, 0.04);
+      --shadow-hover: 0 14px 34px rgba(11, 42, 91, 0.12), 0 4px 10px rgba(11, 42, 91, 0.06);
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+      --stage-scale: 1;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #1A2230;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--dark-gray);
+      -webkit-font-smoothing: antialiased;
+      user-select: none;
+    }
+
+    /* Outer viewport wrapper that centers and scales the 16:9 slide deck */
+    .viewport {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Fixed 16:9 virtual stage (1600 x 900) scaled dynamically to fit window */
+    .deck-stage {
+      width: 1600px;
+      height: 900px;
+      background-color: var(--off-white);
+      position: relative;
+      overflow: hidden;
+      border-radius: 12px;
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.45);
+      transform: scale(var(--stage-scale));
+      transform-origin: center center;
+      display: flex;
+      flex-direction: column;
+    }
+
+    :fullscreen .deck-stage,
+    :-webkit-full-screen .deck-stage {
+      border-radius: 0;
+    }
+
+    /* Subtle decorative background blobs */
+    .bg-decor {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(70px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.45;
+    }
+    .bg-decor-1 {
+      width: 420px;
+      height: 420px;
+      background: rgba(20, 163, 160, 0.16);
+      top: -140px;
+      right: -100px;
+    }
+    .bg-decor-2 {
+      width: 380px;
+      height: 380px;
+      background: rgba(244, 124, 107, 0.15);
+      bottom: -140px;
+      left: -100px;
+    }
+
+    /* Top Progress Bar */
+    .progress-track {
+      width: 100%;
+      height: 8px;
+      background: rgba(11, 42, 91, 0.08);
+      position: relative;
+      z-index: 20;
+      flex-shrink: 0;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--gradient-brand);
+      transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+      border-radius: 0 4px 4px 0;
+    }
+
+    /* Top Header Bar (Speako wordmark + Slide badge + Status pills) */
+    .slide-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 22px 52px 10px;
+      position: relative;
+      z-index: 15;
+      flex-shrink: 0;
+    }
+
+    .brand-wordmark {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 1.55rem;
+      letter-spacing: -0.03em;
+      color: var(--navy);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-wordmark .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--coral);
+      display: inline-block;
+    }
+    .brand-wordmark .lesson-tag {
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--teal);
+      background: var(--teal-light);
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-left: 8px;
+      letter-spacing: 0;
+    }
+
+    .topbar-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pill-toggle {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 7px 14px;
+      border-radius: 999px;
+      border: 1.5px solid rgba(11, 42, 91, 0.14);
+      background: rgba(255, 255, 255, 0.85);
+      color: var(--navy);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .pill-toggle:hover {
+      border-color: var(--teal);
+      background: #FFFFFF;
+    }
+    .pill-toggle.active {
+      background: var(--navy);
+      color: #FFFFFF;
+      border-color: var(--navy);
+    }
+    .pill-toggle kbd {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.76rem;
+      padding: 1px 6px;
+      border-radius: 5px;
+      background: rgba(11, 42, 91, 0.09);
+      color: inherit;
+    }
+    .pill-toggle.active kbd {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Main Slide Content Area with Smooth Fade Transition */
+    .slide-viewport {
+      flex: 1;
+      position: relative;
+      z-index: 10;
+      padding: 10px 56px 16px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.28s ease, transform 0.28s ease;
+    }
+    .slide-viewport.fading {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+
+    /* Slide Header */
+    .slide-header {
+      margin-bottom: 18px;
+      flex-shrink: 0;
+    }
+    .slide-eyebrow {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--teal);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .slide-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 2.35rem;
+      font-weight: 800;
+      color: var(--navy);
+      line-height: 1.18;
+      letter-spacing: -0.02em;
+    }
+    .slide-subtitle {
+      font-size: 1.18rem;
+      color: var(--muted-gray);
+      margin-top: 5px;
+      font-weight: 500;
+    }
+
+    /* Thai Typography & Romanization Toggle */
+    .thai {
+      font-family: 'Noto Sans Thai', sans-serif;
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1.35;
+      letter-spacing: 0.01em;
+    }
+    .romanization {
+      color: var(--teal);
+      font-weight: 600;
+      line-height: 1.3;
+      transition: opacity 0.2s ease, filter 0.2s ease;
+    }
+    body.hide-romanization .romanization {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .meaning {
+      color: var(--dark-gray);
+      font-weight: 500;
+      line-height: 1.35;
+    }
+
+    /* Coral highlight inside patterns */
+    .coral-hl {
+      color: var(--coral);
+      background: var(--coral-light);
+      padding: 2px 10px;
+      border-radius: 10px;
+      font-weight: 700;
+      display: inline-block;
+    }
+
+    /* Listen Button (Web Speech API) */
+    .listen-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: var(--coral-light);
+      color: var(--coral);
+      border: 1.5px solid rgba(244, 124, 107, 0.35);
+      padding: 7px 14px;
+      border-radius: 999px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      flex-shrink: 0;
+    }
+    .listen-btn:hover {
+      background: var(--coral);
+      color: #FFFFFF;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(244, 124, 107, 0.35);
+    }
+    .listen-btn:active {
+      transform: translateY(0);
+    }
+    .listen-btn.speaking {
+      background: var(--coral);
+      color: #FFFFFF;
+      animation: pulse-coral 1s infinite;
+    }
+    @keyframes pulse-coral {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(244, 124, 107, 0.5); }
+      50% { box-shadow: 0 0 0 8px rgba(244, 124, 107, 0); }
+    }
+    /* Hide Listen buttons automatically if no Thai voice is available */
+    body.no-thai-voice .listen-btn {
+      display: none !important;
+    }
+
+    /* Hero / Title & Goal / Closing Slides */
+    .hero-card {
+      flex: 1;
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+      padding: 54px 68px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(20, 163, 160, 0.12);
+    }
+    .hero-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 10px;
+      background: var(--gradient-brand);
+    }
+    .hero-emoji-row {
+      font-size: 3.7rem;
+      margin-bottom: 22px;
+      display: flex;
+      gap: 20px;
+      background: var(--gradient-soft);
+      padding: 16px 34px;
+      border-radius: 999px;
+    }
+    .hero-badge {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--teal);
+      background: var(--teal-light);
+      padding: 8px 20px;
+      border-radius: 999px;
+      margin-bottom: 18px;
+    }
+    .hero-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 3.5rem;
+      color: var(--navy);
+      line-height: 1.15;
+      max-width: 1120px;
+      margin-bottom: 18px;
+    }
+    .hero-subtitle {
+      font-size: 1.5rem;
+      color: var(--dark-gray);
+      max-width: 860px;
+      line-height: 1.5;
+      font-weight: 500;
+    }
+    .hero-sample-box {
+      margin-top: 28px;
+      background: var(--off-white);
+      border-radius: var(--radius-md);
+      padding: 20px 36px;
+      display: inline-flex;
+      align-items: center;
+      gap: 24px;
+      border: 1.5px solid rgba(11, 42, 91, 0.08);
+    }
+
+    /* Key Phrase Spotlight Slide (1 slide per key phrase) */
+    .keyphrase-layout {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+      gap: 26px;
+      align-items: stretch;
+    }
+    .keyphrase-main-card {
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+      padding: 42px 46px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      border-top: 8px solid var(--teal);
+    }
+    .keyphrase-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+    }
+    .keyphrase-emoji {
+      font-size: 3.6rem;
+      background: var(--gradient-soft);
+      width: 86px;
+      height: 86px;
+      border-radius: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .keyphrase-main-card .thai {
+      font-size: 3.6rem;
+      line-height: 1.25;
+      margin-bottom: 12px;
+    }
+    .keyphrase-main-card .romanization {
+      font-size: 1.85rem;
+      margin-bottom: 12px;
+    }
+    .keyphrase-main-card .meaning {
+      font-size: 1.55rem;
+      color: var(--dark-gray);
+      font-weight: 600;
+    }
+    .keyphrase-example-card {
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+      padding: 36px 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-top: 8px solid var(--coral);
+    }
+    .keyphrase-ex-badge {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--coral);
+      background: var(--coral-light);
+      padding: 6px 14px;
+      border-radius: 999px;
+      align-self: flex-start;
+    }
+    .keyphrase-ex-box {
+      background: var(--off-white);
+      border-radius: var(--radius-md);
+      padding: 24px 26px;
+      border: 1.5px solid rgba(11, 42, 91, 0.08);
+      margin: 16px 0;
+    }
+    .keyphrase-ex-box .thai {
+      font-size: 2.25rem;
+      margin-bottom: 6px;
+    }
+    .keyphrase-ex-box .romanization {
+      font-size: 1.26rem;
+      margin-bottom: 6px;
+    }
+    .keyphrase-ex-box .meaning {
+      font-size: 1.15rem;
+    }
+    .keyphrase-tip {
+      font-size: 1.08rem;
+      line-height: 1.5;
+      background: var(--teal-light);
+      padding: 14px 18px;
+      border-radius: var(--radius-sm);
+      color: var(--navy);
+      font-weight: 500;
+    }
+
+    /* Vocabulary Card Grids */
+    .vocab-grid {
+      flex: 1;
+      display: grid;
+      gap: 18px;
+      align-content: stretch;
+    }
+    .vocab-grid.cols-4 {
+      grid-template-columns: repeat(4, 1fr);
+    }
+    .vocab-grid.cols-3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .vocab-grid.cols-2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .vocab-card {
+      background: var(--card-bg);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-card);
+      padding: 18px 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 1.5px solid rgba(11, 42, 91, 0.05);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .vocab-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+      border-color: rgba(20, 163, 160, 0.3);
+    }
+    .vocab-card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .vocab-emoji {
+      font-size: 2.4rem;
+      line-height: 1;
+      background: var(--gradient-soft);
+      width: 54px;
+      height: 54px;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .vocab-body {
+      margin-top: 8px;
+    }
+    .vocab-card .thai {
+      font-size: 2.5rem;
+      margin-bottom: 4px;
+    }
+    .vocab-grid.cols-3 .vocab-card .thai {
+      font-size: 2.7rem;
+    }
+    .vocab-card .romanization {
+      font-size: 1.22rem;
+      margin-bottom: 4px;
+    }
+    .vocab-card .meaning {
+      font-size: 1.12rem;
+      color: var(--dark-gray);
+    }
+
+    /* Reveal Practice Cards (Review, Drills) */
+    .reveal-toolbar {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 10px;
+      gap: 10px;
+    }
+    .secondary-btn {
+      background: #FFFFFF;
+      color: var(--navy);
+      border: 1.5px solid rgba(11, 42, 91, 0.18);
+      padding: 7px 16px;
+      border-radius: 999px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+    .secondary-btn:hover {
+      border-color: var(--coral);
+      color: var(--coral);
+    }
+
+    .reveal-grid {
+      flex: 1;
+      display: grid;
+      gap: 16px;
+      align-content: stretch;
+    }
+    .reveal-grid.cols-4 {
+      grid-template-columns: repeat(4, 1fr);
+    }
+    .reveal-grid.cols-3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .reveal-grid.cols-2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .reveal-card {
+      background: var(--card-bg);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-card);
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: pointer;
+      border: 2px solid rgba(20, 163, 160, 0.18);
+      transition: all 0.22s ease;
+      position: relative;
+    }
+    .reveal-card:hover {
+      border-color: var(--coral);
+      transform: translateY(-2px);
+    }
+    .reveal-card.revealed {
+      border-color: var(--teal);
+      background: #FFFFFF;
+    }
+    .reveal-prompt-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .reveal-prompt-tag {
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--teal);
+      background: var(--teal-light);
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+    .reveal-prompt {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-top: 8px;
+      line-height: 1.25;
+    }
+    .reveal-grid.cols-3 .reveal-prompt,
+    .reveal-grid.cols-4 .reveal-prompt {
+      font-size: 1.32rem;
+    }
+    .reveal-answer-area {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1.5px dashed rgba(11, 42, 91, 0.12);
+      min-height: 108px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .reveal-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: var(--coral-light);
+      color: var(--coral);
+      font-weight: 700;
+      font-size: 1.02rem;
+      padding: 14px;
+      border-radius: var(--radius-sm);
+      border: 1.5px dashed rgba(244, 124, 107, 0.5);
+    }
+    .reveal-content {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .reveal-card.revealed .reveal-placeholder {
+      display: none;
+    }
+    .reveal-card.revealed .reveal-content {
+      display: flex;
+    }
+    .reveal-card .thai {
+      font-size: 2.25rem;
+    }
+    .reveal-grid.cols-3 .reveal-card .thai,
+    .reveal-grid.cols-4 .reveal-card .thai {
+      font-size: 2.05rem;
+    }
+    .reveal-card .romanization {
+      font-size: 1.16rem;
+      margin-top: 2px;
+    }
+
+    /* Pattern & Grammar Slides */
+    .pattern-layout {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+      align-items: stretch;
+    }
+    .pattern-box {
+      background: var(--card-bg);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-card);
+      padding: 24px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      border-top: 6px solid var(--teal);
+    }
+    .pattern-box.coral-top {
+      border-top-color: var(--coral);
+    }
+    .pattern-formula {
+      background: var(--off-white);
+      border-radius: var(--radius-sm);
+      padding: 16px 20px;
+      border: 1.5px solid rgba(11, 42, 91, 0.08);
+    }
+    .pattern-formula .thai {
+      font-size: 2.2rem;
+    }
+    .pattern-formula .romanization {
+      font-size: 1.18rem;
+      margin-top: 4px;
+    }
+    .pattern-formula .meaning {
+      font-size: 1.06rem;
+      margin-top: 2px;
+    }
+    .example-list {
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+      flex: 1;
+      justify-content: center;
+    }
+    .example-row {
+      background: #FFFFFF;
+      border: 1.5px solid rgba(11, 42, 91, 0.08);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+    .example-row .thai {
+      font-size: 1.85rem;
+    }
+    .example-row .romanization {
+      font-size: 1.08rem;
+    }
+    .example-row .meaning {
+      font-size: 1rem;
+      color: var(--muted-gray);
+    }
+
+    /* Callout Banner (Memory Note / Politeness Reminder / Culture Note) */
+    .note-banner {
+      background: var(--gradient-soft);
+      border-left: 6px solid var(--coral);
+      border-radius: var(--radius-sm);
+      padding: 13px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-top: 12px;
+      flex-shrink: 0;
+    }
+    .note-banner-text {
+      font-size: 1.08rem;
+      color: var(--navy);
+      font-weight: 600;
+      line-height: 1.4;
+    }
+    .note-banner-text strong {
+      color: var(--coral);
+    }
+
+    /* Role-Play Dialogue Slides */
+    .dialogue-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      justify-content: center;
+    }
+    .dialogue-line {
+      background: var(--card-bg);
+      border-radius: var(--radius-sm);
+      padding: 13px 22px;
+      box-shadow: 0 4px 14px rgba(11, 42, 91, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      border-left: 7px solid var(--navy);
+      transition: all 0.2s ease;
+    }
+    .dialogue-line.speaker-a {
+      border-left-color: var(--navy);
+    }
+    .dialogue-line.speaker-b {
+      border-left-color: var(--teal);
+      background: #F4FBFB;
+    }
+    .dialogue-line.hidden-step {
+      opacity: 0.22;
+      filter: blur(4px);
+      pointer-events: none;
+    }
+    .dialogue-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex: 1;
+    }
+    .speaker-badge {
+      min-width: 130px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      text-align: center;
+      color: #FFFFFF;
+      background: var(--navy);
+      flex-shrink: 0;
+    }
+    .speaker-b .speaker-badge {
+      background: var(--teal);
+    }
+    .dialogue-text-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      column-gap: 18px;
+      row-gap: 2px;
+    }
+    .dialogue-line .thai {
+      font-size: 1.95rem;
+      color: var(--navy);
+    }
+    .dialogue-line.speaker-b .thai {
+      color: #0D7A78;
+    }
+    .dialogue-line .romanization {
+      font-size: 1.12rem;
+    }
+    .dialogue-line .meaning {
+      font-size: 1.04rem;
+      color: var(--muted-gray);
+    }
+
+    /* "Your Turn" Free Practice Slide */
+    .your-turn-grid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      gap: 22px;
+      align-items: stretch;
+    }
+    .menu-board {
+      background: var(--card-bg);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-card);
+      padding: 22px 26px;
+      border: 2px solid rgba(11, 42, 91, 0.08);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .menu-board-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--navy);
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--teal-light);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .menu-section-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .menu-chip {
+      background: var(--off-white);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .menu-chip .thai {
+      font-size: 1.55rem;
+    }
+    .menu-chip .romanization {
+      font-size: 0.95rem;
+    }
+    .menu-chip .meaning {
+      font-size: 0.9rem;
+    }
+    .step-checklist {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      justify-content: space-between;
+    }
+    .step-item {
+      background: var(--card-bg);
+      border-radius: var(--radius-sm);
+      padding: 14px 20px;
+      box-shadow: var(--shadow-card);
+      border-left: 6px solid var(--coral);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .step-num {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--coral-light);
+      color: var(--coral);
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* Recap All New Words Slide */
+    .recap-columns {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+    .recap-col {
+      background: var(--card-bg);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-card);
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      border-top: 5px solid var(--navy);
+    }
+    .recap-col:nth-child(2) {
+      border-top-color: var(--teal);
+    }
+    .recap-col:nth-child(3) {
+      border-top-color: var(--coral);
+    }
+    .recap-col-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.02rem;
+      font-weight: 800;
+      color: var(--navy);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .recap-items {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px 10px;
+      flex: 1;
+      align-content: start;
+    }
+    .recap-col.single-col .recap-items {
+      grid-template-columns: 1fr;
+      gap: 6px;
+    }
+    .recap-pill {
+      background: var(--off-white);
+      border-radius: 9px;
+      padding: 6px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+    .recap-pill .thai {
+      font-size: 1.2rem;
+      line-height: 1.25;
+    }
+    .recap-pill .romanization {
+      font-size: 0.82rem;
+    }
+    .recap-pill .meaning {
+      font-size: 0.8rem;
+      color: var(--muted-gray);
+    }
+    .recap-pill .listen-btn {
+      padding: 4px 8px;
+      font-size: 0.75rem;
+    }
+
+    /* Bottom Navigation Bar */
+    .slide-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 56px 22px;
+      position: relative;
+      z-index: 15;
+      flex-shrink: 0;
+    }
+    .footer-brand-corner {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 1.05rem;
+      color: var(--navy);
+      opacity: 0.75;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .footer-shortcuts {
+      font-size: 0.86rem;
+      color: var(--muted-gray);
+      font-weight: 500;
+    }
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .nav-btn {
+      background: var(--card-bg);
+      color: var(--navy);
+      border: 1.5px solid rgba(11, 42, 91, 0.15);
+      padding: 10px 22px;
+      border-radius: 999px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.98rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.18s ease;
+      box-shadow: 0 3px 10px rgba(11, 42, 91, 0.06);
+    }
+    .nav-btn.primary {
+      background: var(--coral);
+      color: #FFFFFF;
+      border-color: var(--coral);
+    }
+    .nav-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(11, 42, 91, 0.12);
+    }
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .slide-counter {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 1.08rem;
+      color: var(--navy);
+      min-width: 78px;
+      text-align: center;
+    }
+
+    /* Teacher Notes Drawer (toggled with "N") */
+    .teacher-notes-panel {
+      position: absolute;
+      bottom: 76px;
+      right: 56px;
+      width: 520px;
+      background: rgba(11, 42, 91, 0.96);
+      color: #FFFFFF;
+      border-radius: var(--radius-md);
+      padding: 20px 24px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+      z-index: 50;
+      border: 1.5px solid rgba(20, 163, 160, 0.45);
+      display: none;
+      backdrop-filter: blur(8px);
+    }
+    body.show-notes .teacher-notes-panel {
+      display: block;
+      animation: fadeUp 0.2s ease;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .notes-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #6CE5E2;
+    }
+    .notes-body {
+      font-size: 1.02rem;
+      line-height: 1.5;
+      color: #F0F4F8;
+    }
+  </style>
+</head>
+<body>
+  <div class="viewport">
+    <main class="deck-stage" id="deckStage">
+      <!-- Decorative soft background accents -->
+      <div class="bg-decor bg-decor-1"></div>
+      <div class="bg-decor bg-decor-2"></div>
+
+      <!-- Top Progress Bar -->
+      <div class="progress-track" aria-hidden="true">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+
+      <!-- Top Bar -->
+      <header class="slide-topbar">
+        <div class="brand-wordmark">
+          <span>Speako</span>
+          <span class="dot"></span>
+          <span class="lesson-tag">Beginner Thai · Lesson 6</span>
+        </div>
+
+        <div class="topbar-controls">
+          <button type="button" class="pill-toggle" id="toggleRomBtn" title="Press T to show/hide romanization">
+            <span>Romanization: <strong id="romStateText">ON</strong></span>
+            <kbd>T</kbd>
+          </button>
+          <button type="button" class="pill-toggle" id="toggleNotesBtn" title="Press N to show/hide teacher notes">
+            <span>Teacher Notes</span>
+            <kbd>N</kbd>
+          </button>
+          <button type="button" class="pill-toggle" id="fullscreenBtn" title="Press F for fullscreen">
+            <span>Fullscreen</span>
+            <kbd>F</kbd>
+          </button>
+        </div>
+      </header>
+
+      <!-- Active Slide Container -->
+      <section class="slide-viewport" id="slideViewport" aria-live="polite"></section>
+
+      <!-- Teacher Notes Floating Panel (Hidden by default, toggle with N) -->
+      <aside class="teacher-notes-panel" id="teacherNotesPanel">
+        <div class="notes-header">
+          <span>👩‍🏫 Teacher Speaker Notes</span>
+          <span>Press N to close</span>
+        </div>
+        <div class="notes-body" id="teacherNotesBody"></div>
+      </aside>
+
+      <!-- Footer Navigation & Speako Corner Wordmark -->
+      <footer class="slide-footer">
+        <div class="footer-brand-corner">
+          <span>Speako</span>
+          <span class="footer-shortcuts">Keys: ← → / Space · T (Romanization) · N (Notes) · F (Fullscreen)</span>
+        </div>
+
+        <div class="nav-controls">
+          <button type="button" class="nav-btn" id="prevBtn" aria-label="Previous slide">← Prev</button>
+          <div class="slide-counter" id="slideCounter">1 / 25</div>
+          <button type="button" class="nav-btn primary" id="nextBtn" aria-label="Next slide">Next →</button>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       1. SLIDE CONTENT DATA ARRAY (Edit all lesson text & notes here)
+       ========================================================================== */
+    const SLIDES = [
+      // Slide 1: Title slide
+      {
+        id: 1,
+        type: "hero",
+        badge: "Speako · Live 1-on-1 Thai",
+        emojis: ["🛍️", "💰", "🏷️", "💳", "🏪"],
+        title: "Lesson 6: Shopping and Prices",
+        subtitle: "Explore Thai markets and shops! Learn how to ask prices, bargain with a friendly smile, and pay by cash or card.",
+        sample: {
+          thai: "อันนี้เท่าไหร่ครับ/คะ",
+          romanization: "an-níi thâo-rài khráp/khá",
+          meaning: "How much is this one?",
+          speakText: "อันนี้เท่าไหร่ครับ"
+        },
+        notes: "Welcome the student (สวัสดีครับ/ค่ะ). Ask if they practiced direction words from Lesson 5, and ask what they enjoy shopping for when traveling in Thailand."
+      },
+
+      // Slide 2: Quick review of Lesson 3 & Lesson 4 (Reveal slide)
+      {
+        id: 2,
+        type: "reveal",
+        eyebrow: "Warm-Up Review · Lessons 3 & 4",
+        title: "Quick Review: Numbers 1–100, เท่าไหร่, บาท & เอา",
+        subtitle: "Say the Thai aloud before clicking each card to reveal the answer!",
+        columns: 3,
+        items: [
+          { tag: "Numbers 1–5 (L3)", prompt: "1, 2, 3, 4, 5", thai: "หนึ่ง สอง สาม สี่ ห้า", romanization: "nùeng sǎawng sǎam sìi hâa", meaning: "1, 2, 3, 4, 5" },
+          { tag: "Tens (L3)", prompt: "10, 20, 50, 80", thai: "สิบ ยี่สิบ ห้าสิบ แปดสิบ", romanization: "sìp · yîi-sìp · hâa-sìp · bpàaet-sìp", meaning: "10, 20, 50, 80", speakText: "สิบ ยี่สิบ ห้าสิบ แปดสิบ" },
+          { tag: "Hundred (L3)", prompt: "100 (one hundred)", thai: "หนึ่งร้อย", romanization: "nùeng-rááwy", meaning: "100 (one hundred)" },
+          { tag: "Question (L3)", prompt: "How much?", thai: "เท่าไหร่", romanization: "thâo-rài", meaning: "how much?" },
+          { tag: "Currency (L3)", prompt: "Baht (Thai currency)", thai: "บาท", romanization: "bàat", meaning: "baht (฿)" },
+          { tag: "Ordering (L4)", prompt: "I'll take ... / I want ...", thai: "เอา", romanization: "ao", meaning: "take / want" }
+        ],
+        notes: "Review numbers 10 to 100 and เท่าไหร่ (thâo-rài = how much?) + บาท (bàat). These are the building blocks for every price in today's lesson!"
+      },
+
+      // Slide 3: Lesson Goal
+      {
+        id: 3,
+        type: "hero",
+        badge: "Today's Goal",
+        emojis: ["🛍️", "🏷️", "🤝", "💰"],
+        title: "By the end of this lesson you will be able to buy things, ask prices, and bargain politely in Thai",
+        subtitle: "You will be able to point to items, ask how much they cost, ask for a friendly discount at markets, and pay by cash or card.",
+        sample: {
+          thai: "ลดหน่อยได้ไหมครับ/คะ",
+          romanization: "lót nàwy dâai mái khráp/khá",
+          meaning: "Can you give a small discount?",
+          speakText: "ลดหน่อยได้ไหมครับ"
+        },
+        notes: "Read the goal together. Tell the student that Thai sellers love it when visitors bargain politely with a smile in Thai!"
+      },
+
+      // Slide 4: Vocabulary Grid 1 — Buying, Selling & Pointing
+      {
+        id: 4,
+        type: "vocab",
+        eyebrow: "Core Vocabulary · Part 1 of 3",
+        title: "Shopping, Places & Pointing at Items",
+        subtitle: "Listen and repeat. Use อันนี้ (this one) and อันนั้น (that one) whenever you point at an item!",
+        columns: 3,
+        items: [
+          { emoji: "🛒", thai: "ซื้อ", romanization: "súue", meaning: "buy" },
+          { emoji: "🏷️", thai: "ขาย", romanization: "khǎai", meaning: "sell" },
+          { emoji: "🏪", thai: "ร้าน", romanization: "ráan", meaning: "shop" },
+          { emoji: "🛍️", thai: "ตลาด", romanization: "dtà-làat", meaning: "market" },
+          { emoji: "👇", thai: "อันนี้", romanization: "an-níi", meaning: "this one" },
+          { emoji: "👉", thai: "อันนั้น", romanization: "an-nán", meaning: "that one" }
+        ],
+        notes: "Explain that อันนี้ (an-níi = this one) and อันนั้น (an-nán = that one) are magic words in Thailand — even if you don't know the name of an object, you can point and say อันนี้!"
+      },
+
+      // Slide 5: Vocabulary Grid 2 — Money, Payment & Prices
+      {
+        id: 5,
+        type: "vocab",
+        eyebrow: "Core Vocabulary · Part 2 of 3",
+        title: "Money, Payment & Prices (💰 💳)",
+        subtitle: "Everything you need when it is time to check the price and pay.",
+        columns: 4,
+        items: [
+          { emoji: "💵", thai: "เงิน", romanization: "ngern", meaning: "money" },
+          { emoji: "💴", thai: "เงินสด", romanization: "ngern-sòt", meaning: "cash" },
+          { emoji: "💳", thai: "บัตร", romanization: "bàt", meaning: "card" },
+          { emoji: "🤝", thai: "จ่าย", romanization: "jàai", meaning: "pay" },
+          { emoji: "🏷️", thai: "ราคา", romanization: "raa-khaa", meaning: "price" },
+          { emoji: "🪙", thai: "ทอนเงิน", romanization: "thaawn ngern", meaning: "change (money back)" },
+          { emoji: "🧮", thai: "ทั้งหมด", romanization: "tháng-mòt", meaning: "total / all" },
+          { emoji: "฿", thai: "บาท", romanization: "bàat", meaning: "baht (currency)" }
+        ],
+        notes: "Point out เงิน (ngern = money) vs. เงินสด (ngern-sòt = 'fresh money' = cash!). Practice the 'ng' sound at the start of เงิน."
+      },
+
+      // Slide 6: Vocabulary Grid 3 — Bargaining & Decisions
+      {
+        id: 6,
+        type: "vocab",
+        eyebrow: "Core Vocabulary · Part 3 of 3",
+        title: "Bargaining & Decisions",
+        subtitle: "Describe prices and say what you can or cannot accept.",
+        columns: 3,
+        items: [
+          { emoji: "📈", thai: "แพง", romanization: "phaaeng", meaning: "expensive" },
+          { emoji: "📉", thai: "ถูก", romanization: "thùuk", meaning: "cheap" },
+          { emoji: "✂️", thai: "ลด", romanization: "lót", meaning: "discount / reduce" },
+          { emoji: "✅", thai: "ได้", romanization: "dâai", meaning: "can / okay" },
+          { emoji: "❌", thai: "ไม่ได้", romanization: "mâi dâai", meaning: "cannot / not okay" },
+          { emoji: "🙅", thai: "ไม่เอา", romanization: "mâi ao", meaning: "no thanks / I don't want it" }
+        ],
+        bannerText: "🛍️ <strong>Culture Note:</strong> Bargaining is normal at markets, but not in malls or fixed-price shops.",
+        notes: "Share the cultural tip: at street stalls and night markets (ตลาด), friendly bargaining with a smile is normal. In malls, 7-Eleven, and restaurants with printed menus, prices are fixed."
+      },
+
+      // Slide 7: Key Phrase 1
+      {
+        id: 7,
+        type: "keyphrase",
+        eyebrow: "Key Phrase · 1 of 9",
+        title: "Asking the Price of an Item",
+        emoji: "🏷️",
+        thai: "อันนี้เท่าไหร่ครับ/คะ",
+        romanization: "an-níi thâo-rài khráp/khá",
+        meaning: "How much is this one?",
+        speakText: "อันนี้เท่าไหร่ครับ",
+        example: {
+          context: "Pointing at an item further away",
+          thai: "อันนั้นเท่าไหร่ครับ/คะ",
+          romanization: "an-nán thâo-rài khráp/khá",
+          meaning: "How much is that one?",
+          speakText: "อันนั้นเท่าไหร่ครับ"
+        },
+        tip: "💡 อันนี้ (this one) + เท่าไหร่ (how much?). Swap อันนี้ with อันนั้น for 'that one'!",
+        notes: "Have the student point at something near them and say อันนี้เท่าไหร่ครับ/คะ, then point across the room and say อันนั้นเท่าไหร่ครับ/คะ."
+      },
+
+      // Slide 8: Key Phrase 2
+      {
+        id: 8,
+        type: "keyphrase",
+        eyebrow: "Key Phrase · 2 of 9",
+        title: "Deciding to Buy an Item",
+        emoji: "🛍️",
+        thai: "เอาอันนี้ครับ/ค่ะ",
+        romanization: "ao an-níi khráp/khâ",
+        meaning: "I'll take this one.",
+        speakText: "เอาอันนี้ครับ",
+        example: {
+          context: "Politely declining an item",
+          thai: "ไม่เอาครับ/ค่ะ ขอบคุณครับ/ค่ะ",
+          romanization: "mâi ao khráp/khâ · khàawp-khun khráp/khâ",
+          meaning: "No thanks / I don't want it. Thank you.",
+          speakText: "ไม่เอาครับ ขอบคุณครับ"
+        },
+        tip: "💡 เอา (ao = take/want) + อันนี้ (this one). Add ไม่ (mâi) in front to say 'no thanks'!",
+        notes: "Practice the contrast between เอาอันนี้ครับ/ค่ะ (I'll take this one) and ไม่เอาครับ/ค่ะ (No thanks)."
+      },
+
+      // Slide 9: Key Phrase 3
+      {
+        id: 9,
+        type: "keyphrase",
+        eyebrow: "Key Phrase · 3 of 9",
+        title: "Asking to Browse or Inspect an Item",
+        emoji: "👀",
+        thai: "ขอดูหน่อยครับ/ค่ะ",
+        romanization: "khǎaw duu nàwy khráp/khâ",
+        meaning: "Can I take a look?",
+        speakText: "ขอดูหน่อยครับ",
+        example: {
+          context: "Asking to look at a specific item",
+          thai: "ขอดูอันนี้หน่อยครับ/ค่ะ",
+          romanization: "khǎaw duu an-níi nàwy khráp/khâ",
+          meaning: "Can I take a look at this one?",
+          speakText: "ขอดูอันนี้หน่อยครับ"
+        },
+        tip: "💡 Uses our ขอ...หน่อย pattern from Lesson 4 with ดู (duu = look)!",
+        notes: "Remind the student of ขอ...หน่อย from Lesson 4. Inserting ดู (duu = to look) gives 'May I take a look, please?'"
+      },
+
+      // Slide 10: Key Phrase 4
+      {
+        id: 10,
+        type: "keyphrase",
+        eyebrow: "Key Phrase · 4 of 9",
+        title: "Asking If a Shop Has Something",
+        emoji: "🔍",
+        thai: "มี...ไหมครับ/คะ",
+        romanization: "mii ... mái khráp/khá",
+        meaning: "Do you have ...?",
+        speakText: "มีไหมครับ",
+        example: {
+          context: "Asking if a shop has maps or water",
+          thai: "มีแผนที่ไหมครับ/คะ · มีน้ำเปล่าไหมครับ/คะ",
+          romanization: "mii phǎaen-thîi mái khráp/khá · mii náam-bplàao mái khráp/khá",
+          meaning: "Do you have a map? · Do you have drinking water?",
+          speakText: "มีแผนที่ไหมครับ มีน้ำเปล่าไหมครับ"
+        },
+        tip: "💡 มี (mii = have) + [item] + ไหม (mái = question particle).",
+        notes: "Tell the student they will use มี...ไหม in Lesson 7 too (e.g., มีไวไฟไหม = Do you have Wi-Fi?)."
+      },
+
+      // Slide 11: Key Phrase 5
+      {
+        id: 11,
+        type: "keyphrase",
+        eyebrow: "Key Phrase · 5 of 9",
+        title: "Saying Something Is Too Expensive",
+        emoji: "💸",
+        thai: "แพงไปครับ/ค่ะ",
+        romanization: "phaaeng bpai khráp/khâ",
+        meaning: "That's too expensive.",
+        speakText: "แพงไปครับ",
+        example: {
+          context: "Following up with a polite bargain request",
+          thai: "แพงไปครับ/ค่ะ ลดหน่อยได้ไหมครับ/คะ",
+          romanization: "phaaeng bpai khráp/khâ · lót nàwy dâai mái khráp/khá",
+          meaning: "That's too expensive. Can you give a small discount?",
+          speakText: "แพงไปครับ ลดหน่อยได้ไหมครับ"
+        },
+        tip: "💡 Adjective + ไป (bpai) means 'too ...' — so แพงไป = 'too expensive'!",
+        notes: "Coach the student to say แพงไปครับ/ค่ะ with a warm, friendly smile rather than a stern tone."
+      },
+
+      // Slide 12: Key Phrase 6
+      {
+        id: 12,
+        type: "keyphrase",
+        eyebrow: "Key Phrase · 6 of 9",
+        title: "Asking for a Small Discount",
+        emoji: "✂️",
+        thai: "ลดหน่อยได้ไหมครับ/คะ",
+        romanization: "lót nàwy dâai mái khráp/khá",
+        meaning: "Can you give a small discount?",
+        speakText: "ลดหน่อยได้ไหมครับ",
+        example: {
+          context: "Seller agrees and offers a lower price",
+          thai: "ได้ครับ/ค่ะ เจ็ดสิบบาท",
+          romanization: "dâai khráp/khâ · jèt-sìp bàat",
+          meaning: "Okay / Sure! Seventy baht.",
+          speakText: "ได้ครับ เจ็ดสิบบาท"
+        },
+        tip: "💡 ลด (discount) + หน่อย (a little) + ได้ไหม (can you?).",
+        notes: "Have the student practice ลดหน่อยได้ไหมครับ/คะ 3 times until it flows smoothly."
+      },
+
+      // Slide 13: Key Phrase 7
+      {
+        id: 13,
+        type: "keyphrase",
+        eyebrow: "Key Phrase · 7 of 9",
+        title: "Asking If It Can Be Cheaper",
+        emoji: "📉",
+        thai: "ถูกกว่านี้ได้ไหมครับ/คะ",
+        romanization: "thùuk gwàa níi dâai mái khráp/khá",
+        meaning: "Can it be cheaper?",
+        speakText: "ถูกกว่านี้ได้ไหมครับ",
+        example: {
+          context: "Alternative way to bargain at a market",
+          thai: "ถูกกว่านี้ได้ไหมครับ/คะ · ลดหน่อยได้ไหมครับ/คะ",
+          romanization: "thùuk gwàa níi dâai mái khráp/khá · lót nàwy dâai mái khráp/khá",
+          meaning: "Can it be cheaper? · Can you give a small discount?",
+          speakText: "ถูกกว่านี้ได้ไหมครับ"
+        },
+        tip: "💡 ถูก (cheap) + กว่านี้ (more than this) + ได้ไหม (can it?).",
+        notes: "Explain that กว่านี้ (gwàa níi) turns 'cheap' (ถูก) into 'cheaper than this' (ถูกกว่านี้)."
+      },
+
+      // Slide 14: Key Phrase 8
+      {
+        id: 14,
+        type: "keyphrase",
+        eyebrow: "Key Phrase · 8 of 9",
+        title: "Asking for the Total Price",
+        emoji: "🧮",
+        thai: "ทั้งหมดเท่าไหร่ครับ/คะ",
+        romanization: "tháng-mòt thâo-rài khráp/khá",
+        meaning: "How much is it in total?",
+        speakText: "ทั้งหมดเท่าไหร่ครับ",
+        example: {
+          context: "Buying multiple items and asking the total",
+          thai: "ทั้งหมดเท่าไหร่ครับ/คะ → สองร้อยบาทครับ/ค่ะ",
+          romanization: "tháng-mòt thâo-rài khráp/khá → sǎawng-rááwy bàat khráp/khâ",
+          meaning: "How much is it in total? → Two hundred baht.",
+          speakText: "ทั้งหมดเท่าไหร่ครับ สองร้อยบาทครับ"
+        },
+        tip: "💡 ทั้งหมด (tháng-mòt = all / total) + เท่าไหร่ (how much?).",
+        notes: "Great phrase when buying more than one item at a market or convenience store!"
+      },
+
+      // Slide 15: Key Phrase 9
+      {
+        id: 15,
+        type: "keyphrase",
+        eyebrow: "Key Phrase · 9 of 9",
+        title: "Asking to Pay by Card",
+        emoji: "💳",
+        thai: "จ่ายด้วยบัตรได้ไหมครับ/คะ",
+        romanization: "jàai dûai bàt dâai mái khráp/khá",
+        meaning: "Can I pay by card?",
+        speakText: "จ่ายด้วยบัตรได้ไหมครับ",
+        example: {
+          context: "Paying with cash instead",
+          thai: "จ่ายด้วยเงินสดครับ/ค่ะ",
+          romanization: "jàai dûai ngern-sòt khráp/khâ",
+          meaning: "I'll pay with cash.",
+          speakText: "จ่ายด้วยเงินสดครับ"
+        },
+        tip: "💡 จ่ายด้วย (jàai dûai = pay by/with) + บัตร (card) or เงินสด (cash).",
+        notes: "Practice both จ่ายด้วยบัตรได้ไหมครับ/คะ (Can I pay by card?) and the possible answers: ได้ครับ/ค่ะ (Yes/can) or ไม่ได้ครับ/ค่ะ (No/cannot)."
+      },
+
+      // Slide 16: Pattern / Grammar-Focus Slide 1
+      {
+        id: 16,
+        type: "patterns",
+        eyebrow: "Pattern & Grammar Focus · 1",
+        title: "Asking Prices & Availability",
+        subtitle: "Swap the coral words to ask the price of anything or check if a shop has it.",
+        leftBox: {
+          heading: "Pattern 1: [Item] + เท่าไหร่ครับ/คะ",
+          formulaThai: '<span class="coral-hl">อันนี้</span>เท่าไหร่ครับ/คะ',
+          formulaRom: '<span class="coral-hl">an-níi</span> thâo-rài khráp/khá',
+          formulaMeaning: "How much is this one?",
+          speakText: "อันนี้เท่าไหร่ครับ",
+          examples: [
+            {
+              thaiHtml: '<span class="coral-hl">อันนั้น</span>เท่าไหร่ครับ/คะ',
+              romHtml: '<span class="coral-hl">an-nán</span> thâo-rài khráp/khá',
+              meaning: "How much is that one?",
+              speakText: "อันนั้นเท่าไหร่ครับ"
+            },
+            {
+              thaiHtml: '<span class="coral-hl">ทั้งหมด</span>เท่าไหร่ครับ/คะ',
+              romHtml: '<span class="coral-hl">tháng-mòt</span> thâo-rài khráp/khá',
+              meaning: "How much is it in total?",
+              speakText: "ทั้งหมดเท่าไหร่ครับ"
+            },
+            {
+              thaiHtml: 'เอา<span class="coral-hl">อันนี้</span>ครับ/ค่ะ',
+              romHtml: 'ao <span class="coral-hl">an-níi</span> khráp/khâ',
+              meaning: "I'll take this one.",
+              speakText: "เอาอันนี้ครับ"
+            }
+          ]
+        },
+        rightBox: {
+          heading: "Pattern 2: มี + [Item] + ไหมครับ/คะ",
+          formulaThai: 'มี<span class="coral-hl">...</span>ไหมครับ/คะ',
+          formulaRom: 'mii <span class="coral-hl">...</span> mái khráp/khá',
+          formulaMeaning: "Do you have ...?",
+          speakText: "มีไหมครับ",
+          examples: [
+            {
+              thaiHtml: 'มี<span class="coral-hl">น้ำเปล่า</span>ไหมครับ/คะ',
+              romHtml: 'mii <span class="coral-hl">náam-bplàao</span> mái khráp/khá',
+              meaning: "Do you have drinking water?",
+              speakText: "มีน้ำเปล่าไหมครับ"
+            },
+            {
+              thaiHtml: 'มี<span class="coral-hl">แผนที่</span>ไหมครับ/คะ',
+              romHtml: 'mii <span class="coral-hl">phǎaen-thîi</span> mái khráp/khá',
+              meaning: "Do you have a map?",
+              speakText: "มีแผนที่ไหมครับ"
+            },
+            {
+              thaiHtml: 'ขอ<span class="coral-hl">ดู</span>หน่อยครับ/ค่ะ',
+              romHtml: 'khǎaw <span class="coral-hl">duu</span> nàwy khráp/khâ',
+              meaning: "Can I take a look?",
+              speakText: "ขอดูหน่อยครับ"
+            }
+          ]
+        },
+        notes: "Have the student practice substituting items from Lessons 4 and 5 into both patterns."
+      },
+
+      // Slide 17: Pattern / Grammar-Focus Slide 2
+      {
+        id: 17,
+        type: "patterns",
+        eyebrow: "Pattern & Grammar Focus · 2",
+        title: "Polite Requests with ...ได้ไหมครับ/คะ (Can I / Can you ...?)",
+        subtitle: "Add ได้ไหมครับ/คะ (dâai mái khráp/khá) at the end of a phrase to ask 'Can you / Can I ...?'",
+        leftBox: {
+          heading: "Pattern 3: [Action] + ได้ไหมครับ/คะ",
+          formulaThai: '<span class="coral-hl">ลดหน่อย</span>ได้ไหมครับ/คะ',
+          formulaRom: '<span class="coral-hl">lót nàwy</span> dâai mái khráp/khá',
+          formulaMeaning: "Can you give a small discount?",
+          speakText: "ลดหน่อยได้ไหมครับ",
+          examples: [
+            {
+              thaiHtml: '<span class="coral-hl">ถูกกว่านี้</span>ได้ไหมครับ/คะ',
+              romHtml: '<span class="coral-hl">thùuk gwàa níi</span> dâai mái khráp/khá',
+              meaning: "Can it be cheaper?",
+              speakText: "ถูกกว่านี้ได้ไหมครับ"
+            },
+            {
+              thaiHtml: '<span class="coral-hl">จ่ายด้วยบัตร</span>ได้ไหมครับ/คะ',
+              romHtml: '<span class="coral-hl">jàai dûai bàt</span> dâai mái khráp/khá',
+              meaning: "Can I pay by card?",
+              speakText: "จ่ายด้วยบัตรได้ไหมครับ"
+            }
+          ]
+        },
+        rightBox: {
+          heading: "Answering ได้ไหม: ได้ vs. ไม่ได้",
+          formulaThai: '<span class="coral-hl">ได้</span>ครับ/ค่ะ · <span class="coral-hl">ไม่ได้</span>ครับ/ค่ะ',
+          formulaRom: '<span class="coral-hl">dâai</span> khráp/khâ · <span class="coral-hl">mâi dâai</span> khráp/khâ',
+          formulaMeaning: "Can / Okay · Cannot / Not okay",
+          speakText: "ได้ครับ ไม่ได้ครับ",
+          examples: [
+            {
+              thaiHtml: '<span class="coral-hl">แพง</span>ไปครับ/ค่ะ',
+              romHtml: '<span class="coral-hl">phaaeng</span> bpai khráp/khâ',
+              meaning: "That's too expensive.",
+              speakText: "แพงไปครับ"
+            },
+            {
+              thaiHtml: '<span class="coral-hl">ไม่เอา</span>ครับ/ค่ะ',
+              romHtml: '<span class="coral-hl">mâi ao</span> khráp/khâ',
+              meaning: "No thanks / I don't want it.",
+              speakText: "ไม่เอาครับ"
+            }
+          ]
+        },
+        bannerText: "🛍️ <strong>Note:</strong> Bargaining is normal at markets, but not in malls or fixed-price shops.",
+        notes: "Highlight how versatile ...ได้ไหม (dâai mái) is: whatever you put before ได้ไหม becomes 'Can I / Can you ...?' And the answer is simply ได้ (dâai) or ไม่ได้ (mâi dâai)!"
+      },
+
+      // Slide 18: Drill Slide 1 (Price examples for Reveal drills)
+      {
+        id: 18,
+        type: "reveal",
+        eyebrow: "Speaking Drills · Part 1 (Prices in Baht)",
+        title: "Repeat After Me: Prices & How Much",
+        subtitle: "Say each Thai price aloud before clicking to reveal the answer!",
+        columns: 2,
+        items: [
+          {
+            tag: "Price Drill · 1",
+            prompt: "80 baht",
+            thai: "แปดสิบบาท",
+            romanization: "bpàaet-sìp bàat",
+            meaning: "80 baht"
+          },
+          {
+            tag: "Price Drill · 2",
+            prompt: "120 baht",
+            thai: "หนึ่งร้อยยี่สิบบาท",
+            romanization: "nùeng-rááwy-yîi-sìp bàat",
+            meaning: "120 baht"
+          },
+          {
+            tag: "Price Drill · 3",
+            prompt: "200 baht",
+            thai: "สองร้อยบาท",
+            romanization: "sǎawng-rááwy bàat",
+            meaning: "200 baht"
+          },
+          {
+            tag: "Price Question · 4",
+            prompt: "How much is this one?",
+            thai: "อันนี้เท่าไหร่ครับ/คะ",
+            romanization: "an-níi thâo-rài khráp/khá",
+            meaning: "How much is this one?",
+            speakText: "อันนี้เท่าไหร่ครับ"
+          }
+        ],
+        notes: "Drill the three exact prices carefully: แปดสิบบาท (bpàaet-sìp bàat = 80 baht), หนึ่งร้อยยี่สิบบาท (nùeng-rááwy-yîi-sìp bàat = 120 baht), and สองร้อยบาท (sǎawng-rááwy bàat = 200 baht)."
+      },
+
+      // Slide 19: Drill Slide 2 ("Repeat after me" with Reveal)
+      {
+        id: 19,
+        type: "reveal",
+        eyebrow: "Speaking Drills · Part 2 (Bargaining & Paying)",
+        title: "Repeat After Me: Bargaining & Checkout",
+        subtitle: "Look at the English prompt, say the Thai phrase, then click to reveal!",
+        columns: 2,
+        items: [
+          {
+            tag: "1 · Browse",
+            prompt: "Can I take a look?",
+            thai: "ขอดูหน่อยครับ/ค่ะ",
+            romanization: "khǎaw duu nàwy khráp/khâ",
+            meaning: "Can I take a look?",
+            speakText: "ขอดูหน่อยครับ"
+          },
+          {
+            tag: "2 · Bargain",
+            prompt: "That's too expensive. Can you give a small discount?",
+            thai: "แพงไปครับ/ค่ะ ลดหน่อยได้ไหมครับ/คะ",
+            romanization: "phaaeng bpai khráp/khâ · lót nàwy dâai mái khráp/khá",
+            meaning: "That's too expensive. Can you give a small discount?",
+            speakText: "แพงไปครับ ลดหน่อยได้ไหมครับ"
+          },
+          {
+            tag: "3 · Total",
+            prompt: "How much is it in total?",
+            thai: "ทั้งหมดเท่าไหร่ครับ/คะ",
+            romanization: "tháng-mòt thâo-rài khráp/khá",
+            meaning: "How much is it in total?",
+            speakText: "ทั้งหมดเท่าไหร่ครับ"
+          },
+          {
+            tag: "4 · Payment",
+            prompt: "Can I pay by card?",
+            thai: "จ่ายด้วยบัตรได้ไหมครับ/คะ",
+            romanization: "jàai dûai bàt dâai mái khráp/khá",
+            meaning: "Can I pay by card?",
+            speakText: "จ่ายด้วยบัตรได้ไหมครับ"
+          }
+        ],
+        notes: "Test the student with Romanization ON first, then reset the cards, press T to hide Romanization, and try again!"
+      },
+
+      // Slide 20: Role Play 1 (market)
+      {
+        id: 20,
+        type: "roleplay",
+        eyebrow: "Role-Play 1 · At the Market (ตลาด)",
+        title: "Bargaining at a Thai Market",
+        subtitle: "Customer in Navy · Seller in Teal. Practice both roles!",
+        politenessReminder: "Men end with ครับ (khráp). Women end with ค่ะ (khâ) for statements and คะ (khá) for questions.",
+        lines: [
+          {
+            role: "Customer",
+            speakerClass: "speaker-a",
+            thai: "ขอดูอันนี้หน่อยครับ/ค่ะ อันนี้เท่าไหร่ครับ/คะ",
+            romanization: "khǎaw duu an-níi nàwy khráp/khâ · an-níi thâo-rài khráp/khá",
+            meaning: "Can I take a look at this one? How much is this one?",
+            speakText: "ขอดูอันนี้หน่อยครับ อันนี้เท่าไหร่ครับ"
+          },
+          {
+            role: "Seller",
+            speakerClass: "speaker-b",
+            thai: "แปดสิบบาทครับ/ค่ะ",
+            romanization: "bpàaet-sìp bàat khráp/khâ",
+            meaning: "Eighty baht.",
+            speakText: "แปดสิบบาทครับ"
+          },
+          {
+            role: "Customer",
+            speakerClass: "speaker-a",
+            thai: "แพงไปครับ/ค่ะ ลดหน่อยได้ไหมครับ/คะ",
+            romanization: "phaaeng bpai khráp/khâ · lót nàwy dâai mái khráp/khá",
+            meaning: "That's too expensive. Can you give a small discount?",
+            speakText: "แพงไปครับ ลดหน่อยได้ไหมครับ"
+          },
+          {
+            role: "Seller",
+            speakerClass: "speaker-b",
+            thai: "ได้ครับ/ค่ะ เจ็ดสิบบาท",
+            romanization: "dâai khráp/khâ · jèt-sìp bàat",
+            meaning: "Okay! Seventy baht.",
+            speakText: "ได้ครับ เจ็ดสิบบาท"
+          },
+          {
+            role: "Customer",
+            speakerClass: "speaker-a",
+            thai: "เอาอันนี้ครับ/ค่ะ",
+            romanization: "ao an-níi khráp/khâ",
+            meaning: "I'll take this one.",
+            speakText: "เอาอันนี้ครับ"
+          }
+        ],
+        notes: "First run: Student is Customer (navy), Teacher is Seller (teal). Second run: Swap roles or change the price to หนึ่งร้อยยี่สิบบาท (120 baht) discounted to หนึ่งร้อยบาท (100 baht)!"
+      },
+
+      // Slide 21: Role Play 2 (paying)
+      {
+        id: 21,
+        type: "roleplay",
+        eyebrow: "Role-Play 2 · At the Checkout (ร้าน)",
+        title: "Asking the Total & Paying by Card",
+        subtitle: "Customer in Navy · Seller in Teal. Let's act it out line by line!",
+        politenessReminder: "Men end with ครับ (khráp). Women end with ค่ะ (khâ) for statements and คะ (khá) for questions.",
+        lines: [
+          {
+            role: "Customer",
+            speakerClass: "speaker-a",
+            thai: "ทั้งหมดเท่าไหร่ครับ/คะ",
+            romanization: "tháng-mòt thâo-rài khráp/khá",
+            meaning: "How much is it in total?",
+            speakText: "ทั้งหมดเท่าไหร่ครับ"
+          },
+          {
+            role: "Seller",
+            speakerClass: "speaker-b",
+            thai: "สองร้อยบาทครับ/ค่ะ",
+            romanization: "sǎawng-rááwy bàat khráp/khâ",
+            meaning: "Two hundred baht.",
+            speakText: "สองร้อยบาทครับ"
+          },
+          {
+            role: "Customer",
+            speakerClass: "speaker-a",
+            thai: "จ่ายด้วยบัตรได้ไหมครับ/คะ",
+            romanization: "jàai dûai bàt dâai mái khráp/khá",
+            meaning: "Can I pay by card?",
+            speakText: "จ่ายด้วยบัตรได้ไหมครับ"
+          },
+          {
+            role: "Seller",
+            speakerClass: "speaker-b",
+            thai: "ได้ครับ/ค่ะ",
+            romanization: "dâai khráp/khâ",
+            meaning: "Yes, you can.",
+            speakText: "ได้ครับ"
+          },
+          {
+            role: "Customer",
+            speakerClass: "speaker-a",
+            thai: "ขอบคุณครับ/ค่ะ",
+            romanization: "khàawp-khun khráp/khâ",
+            meaning: "Thank you.",
+            speakText: "ขอบคุณครับ"
+          }
+        ],
+        notes: "After practicing the dialogue as written, try a variation where the Seller says 'ไม่ได้ครับ/ค่ะ เงินสดครับ/ค่ะ' (Cannot — cash only!) so the student can react naturally."
+      },
+
+      // Slide 22: "Your turn" slide
+      {
+        id: 22,
+        type: "yourturn",
+        eyebrow: "Free Production · Solo Task",
+        title: "Your Turn! Shop, Bargain & Pay Alone",
+        subtitle: "You are at a Thai night market! Pick an item, ask the price, bargain, and pay.",
+        boardTitle: "🛍️ Night Market Phrases & Prices",
+        boardSub: "Bargaining is welcome here!",
+        menuItems: [
+          { thai: "อันนี้ / อันนั้น", romanization: "an-níi / an-nán", meaning: "this one / that one 👇👉", speakText: "อันนี้ อันนั้น" },
+          { thai: "ขอดูหน่อย", romanization: "khǎaw duu nàwy", meaning: "can I take a look? 👀" },
+          { thai: "แปดสิบบาท", romanization: "bpàaet-sìp bàat", meaning: "80 baht 🏷️" },
+          { thai: "หนึ่งร้อยยี่สิบบาท", romanization: "nùeng-rááwy-yîi-sìp bàat", meaning: "120 baht 🏷️" },
+          { thai: "สองร้อยบาท", romanization: "sǎawng-rááwy bàat", meaning: "200 baht 🏷️" },
+          { thai: "ลดหน่อยได้ไหม", romanization: "lót nàwy dâai mái", meaning: "small discount? ✂️" },
+          { thai: "ถูกกว่านี้ได้ไหม", romanization: "thùuk gwàa níi dâai mái", meaning: "can it be cheaper? 📉" },
+          { thai: "เงินสด / บัตร", romanization: "ngern-sòt / bàt", meaning: "cash / card 💵💳", speakText: "เงินสด บัตร" }
+        ],
+        steps: [
+          {
+            num: "1",
+            title: "Ask to Look & Ask How Much It Is",
+            hint: "ขอดูอันนี้หน่อยครับ/ค่ะ · อันนี้เท่าไหร่ครับ/คะ"
+          },
+          {
+            num: "2",
+            title: "Say It's Too Expensive & Ask for a Discount",
+            hint: "แพงไปครับ/ค่ะ · ลดหน่อยได้ไหมครับ/คะ (or ถูกกว่านี้ได้ไหมครับ/คะ)"
+          },
+          {
+            num: "3",
+            title: "Take the Item (or Decline Politely)",
+            hint: "เอาอันนี้ครับ/ค่ะ (or ไม่เอาครับ/ค่ะ)"
+          },
+          {
+            num: "4",
+            title: "Ask the Total & How to Pay",
+            hint: "ทั้งหมดเท่าไหร่ครับ/คะ · จ่ายด้วยบัตรได้ไหมครับ/คะ · ขอบคุณครับ/ค่ะ"
+          }
+        ],
+        notes: "Play the market seller! Give the student different starting prices (80 baht, 120 baht, 200 baht) and let them bargain you down and complete the payment."
+      },
+
+      // Slide 23: Recap slide with all new words
+      {
+        id: 23,
+        type: "recap",
+        eyebrow: "Lesson 6 Summary",
+        title: "Recap: All 19 New Words & 9 Key Patterns",
+        subtitle: "Click any Listen button to review pronunciation.",
+        groups: [
+          {
+            title: "🛍️ Shopping & Money (10)",
+            singleCol: false,
+            items: [
+              { thai: "ซื้อ", romanization: "súue", meaning: "buy" },
+              { thai: "ขาย", romanization: "khǎai", meaning: "sell" },
+              { thai: "ร้าน", romanization: "ráan", meaning: "shop" },
+              { thai: "ตลาด", romanization: "dtà-làat", meaning: "market" },
+              { thai: "เงิน", romanization: "ngern", meaning: "money" },
+              { thai: "เงินสด", romanization: "ngern-sòt", meaning: "cash" },
+              { thai: "บัตร", romanization: "bàt", meaning: "card" },
+              { thai: "จ่าย", romanization: "jàai", meaning: "pay" },
+              { thai: "ราคา", romanization: "raa-khaa", meaning: "price" },
+              { thai: "ทอนเงิน", romanization: "thaawn ngern", meaning: "change (money back)" }
+            ]
+          },
+          {
+            title: "🏷️ Bargaining & Choices (9)",
+            singleCol: false,
+            items: [
+              { thai: "แพง", romanization: "phaaeng", meaning: "expensive" },
+              { thai: "ถูก", romanization: "thùuk", meaning: "cheap" },
+              { thai: "อันนี้", romanization: "an-níi", meaning: "this one" },
+              { thai: "อันนั้น", romanization: "an-nán", meaning: "that one" },
+              { thai: "ลด", romanization: "lót", meaning: "discount / reduce" },
+              { thai: "ได้", romanization: "dâai", meaning: "can / okay" },
+              { thai: "ไม่ได้", romanization: "mâi dâai", meaning: "cannot / not okay" },
+              { thai: "ไม่เอา", romanization: "mâi ao", meaning: "no thanks / I don't want it" },
+              { thai: "ทั้งหมด", romanization: "tháng-mòt", meaning: "total / all" }
+            ]
+          },
+          {
+            title: "🗣️ Key Patterns (9)",
+            singleCol: true,
+            items: [
+              { thai: "อันนี้เท่าไหร่ครับ/คะ", romanization: "an-níi thâo-rài khráp/khá", meaning: "How much is this one?", speakText: "อันนี้เท่าไหร่ครับ" },
+              { thai: "เอาอันนี้ครับ/ค่ะ", romanization: "ao an-níi khráp/khâ", meaning: "I'll take this one.", speakText: "เอาอันนี้ครับ" },
+              { thai: "ขอดูหน่อยครับ/ค่ะ", romanization: "khǎaw duu nàwy khráp/khâ", meaning: "Can I take a look?", speakText: "ขอดูหน่อยครับ" },
+              { thai: "มี...ไหมครับ/คะ", romanization: "mii ... mái khráp/khá", meaning: "Do you have ...?", speakText: "มีไหมครับ" },
+              { thai: "แพงไปครับ/ค่ะ", romanization: "phaaeng bpai khráp/khâ", meaning: "That's too expensive.", speakText: "แพงไปครับ" },
+              { thai: "ลดหน่อยได้ไหมครับ/คะ", romanization: "lót nàwy dâai mái khráp/khá", meaning: "Can you give a small discount?", speakText: "ลดหน่อยได้ไหมครับ" },
+              { thai: "ถูกกว่านี้ได้ไหมครับ/คะ", romanization: "thùuk gwàa níi dâai mái khráp/khá", meaning: "Can it be cheaper?", speakText: "ถูกกว่านี้ได้ไหมครับ" },
+              { thai: "ทั้งหมดเท่าไหร่ครับ/คะ", romanization: "tháng-mòt thâo-rài khráp/khá", meaning: "How much is it in total?", speakText: "ทั้งหมดเท่าไหร่ครับ" },
+              { thai: "จ่ายด้วยบัตรได้ไหมครับ/คะ", romanization: "jàai dûai bàt dâai mái khráp/khá", meaning: "Can I pay by card?", speakText: "จ่ายด้วยบัตรได้ไหมครับ" }
+            ]
+          }
+        ],
+        notes: "Ask the student to pick 3 favorite shopping phrases from Column 3 and say them aloud from memory."
+      },
+
+      // Slide 24: Homework slide
+      {
+        id: 24,
+        type: "homework",
+        eyebrow: "Take-Home Practice",
+        title: "Homework Before Lesson 7",
+        subtitle: "Practice your market & shopping skills before our next class:",
+        mainAssignment: "Practice the shopping phrases aloud. Write 5 price-related questions.",
+        cards: [
+          {
+            emoji: "🗣️",
+            title: "1. Practice the Shopping Phrases Aloud",
+            thai: "อันนี้เท่าไหร่ · ลดหน่อยได้ไหม · เอาอันนี้",
+            romanization: "an-níi thâo-rài · lót nàwy dâai mái · ao an-níi",
+            meaning: "Say the market bargaining and payment phrases aloud until they feel natural and automatic.",
+            speakText: "อันนี้เท่าไหร่ครับ ลดหน่อยได้ไหมครับ เอาอันนี้ครับ"
+          },
+          {
+            emoji: "✍️",
+            title: "2. Write 5 Price-Related Questions",
+            thai: "...เท่าไหร่ครับ/คะ · ลดหน่อยได้ไหมครับ/คะ",
+            romanization: "... thâo-rài khráp/khá · lót nàwy dâai mái khráp/khá",
+            meaning: "Write 5 questions asking about prices, discounts, totals, or payment methods to share at the start of Lesson 7.",
+            speakText: "ทั้งหมดเท่าไหร่ครับ จ่ายด้วยบัตรได้ไหมครับ"
+          }
+        ],
+        notes: "Encourage the student to practice reading price tags around them in Thai numbers this week!"
+      },
+
+      // Slide 25: Closing slide
+      {
+        id: 25,
+        type: "hero",
+        badge: "Lesson 6 Complete! 🎉",
+        emojis: ["🌟", "🛍️", "💰", "🙏"],
+        title: "Great work! See you next lesson!",
+        subtitle: "Next time in Lesson 7, we will learn Daily Needs and Common Situations (survival Thai)!",
+        sample: {
+          thai: "ขอบคุณครับ/ค่ะ · แล้วเจอกัน!",
+          romanization: "khàawp-khun khráp/khâ · láaeo jeeo gan!",
+          meaning: "Thank you · See you next lesson!",
+          speakText: "ขอบคุณครับ แล้วเจอกัน"
+        },
+        notes: "Congratulate the student on completing Lesson 6! Confirm the schedule for Lesson 7 and say goodbye in Thai."
+      }
+    ];
+
+    /* ==========================================================================
+       2. STATE & WEB SPEECH API (THAI TTS) INITIALIZATION
+       ========================================================================== */
+    let currentSlideIndex = 0;
+    let romanizationVisible = true;
+    let notesVisible = false;
+    let thaiVoice = null;
+    let hasThaiVoice = false;
+    let roleplayStepCount = null; // null = show all lines; integer = step-by-step mode
+
+    /**
+     * Checks whether a Thai ("th" / "th-TH") speechSynthesis voice is available.
+     * Hides all Listen buttons automatically if no Thai voice exists.
+     */
+    function detectThaiVoice() {
+      if (!("speechSynthesis" in window)) {
+        document.body.classList.add("no-thai-voice");
+        hasThaiVoice = false;
+        return;
+      }
+
+      const voices = window.speechSynthesis.getVoices() || [];
+      const found = voices.find(v => v.lang && v.lang.toLowerCase().startsWith("th"));
+
+      if (found) {
+        thaiVoice = found;
+        hasThaiVoice = true;
+        document.body.classList.remove("no-thai-voice");
+      } else if (voices.length > 0) {
+        thaiVoice = null;
+        hasThaiVoice = false;
+        document.body.classList.add("no-thai-voice");
+      }
+    }
+
+    if ("speechSynthesis" in window) {
+      detectThaiVoice();
+      window.speechSynthesis.onvoiceschanged = detectThaiVoice;
+      setTimeout(() => {
+        const voices = window.speechSynthesis.getVoices() || [];
+        const found = voices.find(v => v.lang && v.lang.toLowerCase().startsWith("th"));
+        if (!found) {
+          document.body.classList.add("no-thai-voice");
+        } else {
+          thaiVoice = found;
+          hasThaiVoice = true;
+          document.body.classList.remove("no-thai-voice");
+        }
+      }, 900);
+    } else {
+      document.body.classList.add("no-thai-voice");
+    }
+
+    /**
+     * Speaks a Thai word or phrase using Web Speech API (lang "th-TH").
+     */
+    function speakThai(rawText, btnElement) {
+      if (!("speechSynthesis" in window)) return;
+
+      window.speechSynthesis.cancel();
+
+      const cleaned = rawText
+        .replace(/ครับ\/ค่ะ/g, "ครับ")
+        .replace(/ครับ\/คะ/g, "ครับ")
+        .replace(/ผม\/ฉัน/g, "ฉัน")
+        .replace(/\.\.\./g, " ")
+        .replace(/·/g, " ")
+        .trim();
+
+      const utterance = new SpeechSynthesisUtterance(cleaned);
+      utterance.lang = "th-TH";
+      utterance.rate = 0.88;
+      if (thaiVoice) {
+        utterance.voice = thaiVoice;
+      }
+
+      document.querySelectorAll(".listen-btn.speaking").forEach(b => b.classList.remove("speaking"));
+      if (btnElement) {
+        btnElement.classList.add("speaking");
+        utterance.onend = () => btnElement.classList.remove("speaking");
+        utterance.onerror = () => btnElement.classList.remove("speaking");
+      }
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    /**
+     * Helper to create a Listen button HTML string
+     */
+    function renderListenButton(textToSpeak) {
+      const escaped = String(textToSpeak || "").replace(/"/g, "&quot;");
+      return `<button type="button" class="listen-btn" data-speak="${escaped}" aria-label="Listen to ${escaped}">🔊 Listen</button>`;
+    }
+
+    /* ==========================================================================
+       3. SLIDE RENDERING ENGINE
+       ========================================================================== */
+    const slideViewport = document.getElementById("slideViewport");
+    const progressFill = document.getElementById("progressFill");
+    const slideCounter = document.getElementById("slideCounter");
+    const teacherNotesBody = document.getElementById("teacherNotesBody");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+
+    function buildSlideHTML(slide) {
+      // 1. HERO SLIDE (Title, Goal, Closing)
+      if (slide.type === "hero") {
+        const emojisHtml = (slide.emojis || []).map(e => `<span>${e}</span>`).join("");
+        const sampleHtml = slide.sample
+          ? `<div class="hero-sample-box">
+               <div style="text-align:left;">
+                 <div class="thai" style="font-size:2.4rem;">${slide.sample.thai}</div>
+                 <div class="romanization" style="font-size:1.25rem;">${slide.sample.romanization}</div>
+                 <div class="meaning" style="font-size:1.1rem;">${slide.sample.meaning}</div>
+               </div>
+               ${renderListenButton(slide.sample.speakText || slide.sample.thai)}
+             </div>`
+          : "";
+
+        return `
+          <div class="hero-card">
+            <div class="hero-badge">${slide.badge}</div>
+            <div class="hero-emoji-row">${emojisHtml}</div>
+            <h1 class="hero-title">${slide.title}</h1>
+            <p class="hero-subtitle">${slide.subtitle}</p>
+            ${sampleHtml}
+          </div>
+        `;
+      }
+
+      // 2. KEY PHRASE SPOTLIGHT SLIDE (1 slide per key phrase)
+      if (slide.type === "keyphrase") {
+        const ex = slide.example || {};
+        return `
+          <div class="slide-header">
+            <div class="slide-eyebrow">${slide.eyebrow}</div>
+            <h1 class="slide-title">${slide.title}</h1>
+          </div>
+          <div class="keyphrase-layout">
+            <div class="keyphrase-main-card">
+              <div class="keyphrase-top-row">
+                <div class="keyphrase-emoji" aria-hidden="true">${slide.emoji || "🗣️"}</div>
+                ${renderListenButton(slide.speakText || slide.thai)}
+              </div>
+              <div class="thai">${slide.thai}</div>
+              <div class="romanization">${slide.romanization}</div>
+              <div class="meaning">${slide.meaning}</div>
+            </div>
+            <div class="keyphrase-example-card">
+              <div>
+                <span class="keyphrase-ex-badge">Usage Example · ${ex.context || "In Conversation"}</span>
+                <div class="keyphrase-ex-box">
+                  <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">
+                    <div>
+                      <div class="thai">${ex.thai}</div>
+                      <div class="romanization">${ex.romanization}</div>
+                      <div class="meaning">${ex.meaning}</div>
+                    </div>
+                    ${renderListenButton(ex.speakText || ex.thai)}
+                  </div>
+                </div>
+              </div>
+              ${slide.tip ? `<div class="keyphrase-tip">${slide.tip}</div>` : ""}
+            </div>
+          </div>
+        `;
+      }
+
+      // 3. VOCABULARY GRID SLIDE
+      if (slide.type === "vocab") {
+        const colsClass = `cols-${slide.columns || 4}`;
+        const cardsHtml = slide.items
+          .map(item => {
+            const speakTarget = item.speakText || item.thai;
+            return `
+              <div class="vocab-card">
+                <div class="vocab-card-top">
+                  <div class="vocab-emoji" aria-hidden="true">${item.emoji || "✨"}</div>
+                  ${renderListenButton(speakTarget)}
+                </div>
+                <div class="vocab-body">
+                  <div class="thai">${item.thai}</div>
+                  <div class="romanization">${item.romanization}</div>
+                  <div class="meaning">${item.meaning}</div>
+                </div>
+              </div>
+            `;
+          })
+          .join("");
+
+        let bannerHtml = "";
+        if (slide.banner) {
+          bannerHtml = `
+            <div class="note-banner">
+              <div style="display:flex; align-items:baseline; gap:18px; flex-wrap:wrap;">
+                <span style="font-weight:700; color:var(--coral); text-transform:uppercase; font-size:0.9rem;">Useful Phrase:</span>
+                <span class="thai" style="font-size:1.8rem;">${slide.banner.thai}</span>
+                <span class="romanization" style="font-size:1.15rem;">${slide.banner.romanization}</span>
+                <span class="meaning" style="font-size:1.1rem;">— ${slide.banner.meaning}</span>
+              </div>
+              ${renderListenButton(slide.banner.speakText || slide.banner.thai)}
+            </div>
+          `;
+        } else if (slide.bannerText) {
+          bannerHtml = `
+            <div class="note-banner">
+              <div class="note-banner-text">${slide.bannerText}</div>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="slide-header">
+            <div class="slide-eyebrow">${slide.eyebrow}</div>
+            <h1 class="slide-title">${slide.title}</h1>
+            <p class="slide-subtitle">${slide.subtitle}</p>
+          </div>
+          <div class="vocab-grid ${colsClass}">${cardsHtml}</div>
+          ${bannerHtml}
+        `;
+      }
+
+      // 4. REVEAL INTERACTIVE SLIDE (Review & Drills)
+      if (slide.type === "reveal") {
+        const colsClass = `cols-${slide.columns || 2}`;
+        const cardsHtml = slide.items
+          .map((item, idx) => {
+            const speakTarget = item.speakText || item.thai;
+            return `
+              <div class="reveal-card" data-reveal-card="${idx}" tabindex="0" role="button" aria-label="Reveal Thai for ${item.prompt}">
+                <div>
+                  <div class="reveal-prompt-row">
+                    <span class="reveal-prompt-tag">${item.tag}</span>
+                    <span style="font-size:0.85rem; color:var(--muted-gray); font-weight:600;">Click to reveal</span>
+                  </div>
+                  <div class="reveal-prompt">${item.prompt}</div>
+                </div>
+
+                <div class="reveal-answer-area">
+                  <div class="reveal-placeholder">👆 Click to Reveal Thai Answer</div>
+                  <div class="reveal-content">
+                    <div>
+                      <div class="thai">${item.thai}</div>
+                      <div class="romanization">${item.romanization}</div>
+                      <div class="meaning" style="font-size:0.98rem; color:var(--muted-gray);">${item.meaning}</div>
+                    </div>
+                    ${renderListenButton(speakTarget)}
+                  </div>
+                </div>
+              </div>
+            `;
+          })
+          .join("");
+
+        return `
+          <div class="slide-header" style="display:flex; justify-content:space-between; align-items:flex-end;">
+            <div>
+              <div class="slide-eyebrow">${slide.eyebrow}</div>
+              <h1 class="slide-title">${slide.title}</h1>
+              <p class="slide-subtitle">${slide.subtitle}</p>
+            </div>
+            <div class="reveal-toolbar">
+              <button type="button" class="secondary-btn" id="revealAllBtn">Reveal All</button>
+              <button type="button" class="secondary-btn" id="hideAllBtn">Reset Cards</button>
+            </div>
+          </div>
+          <div class="reveal-grid ${colsClass}">${cardsHtml}</div>
+        `;
+      }
+
+      // 5. PATTERNS & GRAMMAR SLIDE
+      if (slide.type === "patterns") {
+        const renderBox = (box, isSecond) => {
+          const examplesHtml = (box.examples || [])
+            .map(ex => `
+              <div class="example-row">
+                <div>
+                  <div class="thai">${ex.thaiHtml}</div>
+                  <div class="romanization">${ex.romHtml}</div>
+                  <div class="meaning">${ex.meaning}</div>
+                </div>
+                ${renderListenButton(ex.speakText)}
+              </div>
+            `)
+            .join("");
+
+          return `
+            <div class="pattern-box ${isSecond ? "coral-top" : ""}">
+              <div style="display:flex; align-items:center; justify-content:space-between;">
+                <h2 style="font-family:'Montserrat',sans-serif; font-size:1.3rem; color:var(--navy);">${box.heading}</h2>
+                ${renderListenButton(box.speakText)}
+              </div>
+              <div class="pattern-formula">
+                <div class="thai">${box.formulaThai}</div>
+                <div class="romanization">${box.formulaRom}</div>
+                <div class="meaning">${box.formulaMeaning}</div>
+              </div>
+              <div class="example-list">${examplesHtml}</div>
+            </div>
+          `;
+        };
+
+        const bannerHtml = slide.bannerText
+          ? `<div class="note-banner"><div class="note-banner-text">${slide.bannerText}</div></div>`
+          : "";
+
+        return `
+          <div class="slide-header">
+            <div class="slide-eyebrow">${slide.eyebrow}</div>
+            <h1 class="slide-title">${slide.title}</h1>
+            <p class="slide-subtitle">${slide.subtitle}</p>
+          </div>
+          <div class="pattern-layout">
+            ${renderBox(slide.leftBox, false)}
+            ${renderBox(slide.rightBox, true)}
+          </div>
+          ${bannerHtml}
+        `;
+      }
+
+      // 6. ROLE-PLAY DIALOGUE SLIDE
+      if (slide.type === "roleplay") {
+        const linesHtml = slide.lines
+          .map((line, idx) => {
+            const hiddenClass = roleplayStepCount !== null && idx >= roleplayStepCount ? "hidden-step" : "";
+            return `
+              <div class="dialogue-line ${line.speakerClass} ${hiddenClass}" data-line-idx="${idx}">
+                <div class="dialogue-left">
+                  <span class="speaker-badge">${line.role}</span>
+                  <div class="dialogue-text-group">
+                    <span class="thai">${line.thai}</span>
+                    <span class="romanization">${line.romanization}</span>
+                    <span class="meaning">“${line.meaning}”</span>
+                  </div>
+                </div>
+                ${renderListenButton(line.speakText || line.thai)}
+              </div>
+            `;
+          })
+          .join("");
+
+        return `
+          <div class="slide-header" style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:10px;">
+            <div>
+              <div class="slide-eyebrow">${slide.eyebrow}</div>
+              <h1 class="slide-title" style="font-size:2.1rem;">${slide.title}</h1>
+              <p class="slide-subtitle" style="font-size:1.05rem;">${slide.subtitle}</p>
+            </div>
+            <div class="reveal-toolbar" style="margin-bottom:0;">
+              <button type="button" class="secondary-btn" id="stepRoleplayBtn">Step Line-by-Line</button>
+              <button type="button" class="secondary-btn" id="showAllRoleplayBtn">Show All Lines</button>
+            </div>
+          </div>
+          <div class="dialogue-container">${linesHtml}</div>
+          <div class="note-banner" style="margin-top:8px; padding:10px 20px;">
+            <div class="note-banner-text">🙏 <strong>Politeness reminder:</strong> ${slide.politenessReminder}</div>
+            ${renderListenButton("ครับ ค่ะ คะ")}
+          </div>
+        `;
+      }
+
+      // 7. "YOUR TURN" FREE PRACTICE SLIDE
+      if (slide.type === "yourturn") {
+        const menuHtml = slide.menuItems
+          .map(m => `
+            <div class="menu-chip">
+              <div>
+                <div class="thai">${m.thai}</div>
+                <div class="romanization">${m.romanization}</div>
+                <div class="meaning">${m.meaning}</div>
+              </div>
+              ${renderListenButton(m.speakText || m.thai)}
+            </div>
+          `)
+          .join("");
+
+        const stepsHtml = slide.steps
+          .map(s => `
+            <div class="step-item">
+              <div class="step-num">${s.num}</div>
+              <div>
+                <div style="font-family:'Montserrat',sans-serif; font-weight:700; font-size:1.15rem; color:var(--navy);">${s.title}</div>
+                <div class="romanization" style="font-size:1.05rem; margin-top:3px;">${s.hint}</div>
+              </div>
+            </div>
+          `)
+          .join("");
+
+        return `
+          <div class="slide-header">
+            <div class="slide-eyebrow">${slide.eyebrow}</div>
+            <h1 class="slide-title">${slide.title}</h1>
+            <p class="slide-subtitle">${slide.subtitle}</p>
+          </div>
+          <div class="your-turn-grid">
+            <div class="menu-board">
+              <div class="menu-board-title">
+                <span>${slide.boardTitle || "📋 Reference Board"}</span>
+                <span style="font-size:0.9rem; color:var(--teal); font-weight:600;">${slide.boardSub || "Try them all!"}</span>
+              </div>
+              <div class="menu-section-grid">${menuHtml}</div>
+            </div>
+            <div class="step-checklist">${stepsHtml}</div>
+          </div>
+        `;
+      }
+
+      // 8. RECAP SLIDE WITH ALL NEW WORDS
+      if (slide.type === "recap") {
+        const colsHtml = slide.groups
+          .map(group => {
+            const pillsHtml = group.items
+              .map(item => `
+                <div class="recap-pill">
+                  <div>
+                    <div class="thai">${item.thai}</div>
+                    <div class="romanization">${item.romanization}</div>
+                    <div class="meaning">${item.meaning}</div>
+                  </div>
+                  ${renderListenButton(item.speakText || item.thai)}
+                </div>
+              `)
+              .join("");
+
+            return `
+              <div class="recap-col ${group.singleCol ? "single-col" : ""}">
+                <div class="recap-col-title">${group.title}</div>
+                <div class="recap-items">${pillsHtml}</div>
+              </div>
+            `;
+          })
+          .join("");
+
+        return `
+          <div class="slide-header" style="margin-bottom:10px;">
+            <div class="slide-eyebrow">${slide.eyebrow}</div>
+            <h1 class="slide-title" style="font-size:2.05rem;">${slide.title}</h1>
+          </div>
+          <div class="recap-columns">${colsHtml}</div>
+        `;
+      }
+
+      // 9. HOMEWORK SLIDE
+      if (slide.type === "homework") {
+        const cardsHtml = slide.cards
+          .map(c => `
+            <div class="vocab-card" style="padding:28px 32px;">
+              <div class="vocab-card-top">
+                <div class="vocab-emoji">${c.emoji}</div>
+                ${renderListenButton(c.speakText || c.thai)}
+              </div>
+              <div style="margin-top:14px;">
+                <h2 style="font-family:'Montserrat',sans-serif; font-size:1.55rem; color:var(--navy); margin-bottom:8px;">${c.title}</h2>
+                <div class="thai" style="font-size:2.1rem;">${c.thai}</div>
+                <div class="romanization" style="font-size:1.15rem; margin-bottom:10px;">${c.romanization}</div>
+                <p class="meaning" style="font-size:1.15rem; line-height:1.5;">${c.meaning}</p>
+              </div>
+            </div>
+          `)
+          .join("");
+
+        return `
+          <div class="slide-header">
+            <div class="slide-eyebrow">${slide.eyebrow}</div>
+            <h1 class="slide-title">${slide.title}</h1>
+            <p class="slide-subtitle">${slide.subtitle}</p>
+          </div>
+          <div class="note-banner" style="margin-top:0; margin-bottom:18px;">
+            <div class="note-banner-text">📌 <strong>Homework:</strong> ${slide.mainAssignment}</div>
+          </div>
+          <div class="vocab-grid cols-2">${cardsHtml}</div>
+        `;
+      }
+
+      return "";
+    }
+
+    function renderCurrentSlide(withFade = true) {
+      const slide = SLIDES[currentSlideIndex];
+      roleplayStepCount = null;
+
+      const updateDOM = () => {
+        slideViewport.innerHTML = buildSlideHTML(slide);
+        attachSlideInteractions();
+
+        const progressPercent = ((currentSlideIndex + 1) / SLIDES.length) * 100;
+        progressFill.style.width = `${progressPercent}%`;
+        slideCounter.textContent = `${currentSlideIndex + 1} / ${SLIDES.length}`;
+
+        prevBtn.disabled = currentSlideIndex === 0;
+        nextBtn.disabled = currentSlideIndex === SLIDES.length - 1;
+
+        teacherNotesBody.textContent = slide.notes || "No speaker notes for this slide.";
+      };
+
+      if (withFade) {
+        slideViewport.classList.add("fading");
+        setTimeout(() => {
+          updateDOM();
+          slideViewport.classList.remove("fading");
+        }, 160);
+      } else {
+        updateDOM();
+      }
+    }
+
+    function attachSlideInteractions() {
+      // Listen buttons
+      slideViewport.querySelectorAll(".listen-btn").forEach(btn => {
+        btn.addEventListener("click", e => {
+          e.stopPropagation();
+          const phrase = btn.getAttribute("data-speak");
+          if (phrase) speakThai(phrase, btn);
+        });
+      });
+
+      // Reveal cards
+      slideViewport.querySelectorAll(".reveal-card").forEach(card => {
+        card.addEventListener("click", () => {
+          card.classList.toggle("revealed");
+        });
+        card.addEventListener("keydown", e => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            e.stopPropagation();
+            card.classList.toggle("revealed");
+          }
+        });
+      });
+
+      const revealAllBtn = document.getElementById("revealAllBtn");
+      const hideAllBtn = document.getElementById("hideAllBtn");
+      if (revealAllBtn) {
+        revealAllBtn.addEventListener("click", () => {
+          slideViewport.querySelectorAll(".reveal-card").forEach(c => c.classList.add("revealed"));
+        });
+      }
+      if (hideAllBtn) {
+        hideAllBtn.addEventListener("click", () => {
+          slideViewport.querySelectorAll(".reveal-card").forEach(c => c.classList.remove("revealed"));
+        });
+      }
+
+      // Role-play line-by-line stepping
+      const stepRoleplayBtn = document.getElementById("stepRoleplayBtn");
+      const showAllRoleplayBtn = document.getElementById("showAllRoleplayBtn");
+      if (stepRoleplayBtn) {
+        stepRoleplayBtn.addEventListener("click", () => {
+          const lines = slideViewport.querySelectorAll(".dialogue-line");
+          if (roleplayStepCount === null || roleplayStepCount >= lines.length) {
+            roleplayStepCount = 1;
+          } else {
+            roleplayStepCount += 1;
+          }
+          lines.forEach((lineEl, idx) => {
+            lineEl.classList.toggle("hidden-step", idx >= roleplayStepCount);
+          });
+          stepRoleplayBtn.textContent =
+            roleplayStepCount < lines.length
+              ? `Next Line (${roleplayStepCount}/${lines.length})`
+              : "Restart Step-by-Step";
+        });
+      }
+      if (showAllRoleplayBtn) {
+        showAllRoleplayBtn.addEventListener("click", () => {
+          roleplayStepCount = null;
+          slideViewport.querySelectorAll(".dialogue-line").forEach(lineEl => {
+            lineEl.classList.remove("hidden-step");
+          });
+          if (stepRoleplayBtn) stepRoleplayBtn.textContent = "Step Line-by-Line";
+        });
+      }
+    }
+
+    /* ==========================================================================
+       4. NAVIGATION, KEYBOARD SHORTCUTS, TOUCH SWIPE & 16:9 SCALING
+       ========================================================================== */
+    function goToSlide(index) {
+      if (index < 0 || index >= SLIDES.length || index === currentSlideIndex) return;
+      if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+      currentSlideIndex = index;
+      renderCurrentSlide(true);
+    }
+
+    function nextSlide() {
+      goToSlide(currentSlideIndex + 1);
+    }
+
+    function prevSlide() {
+      goToSlide(currentSlideIndex - 1);
+    }
+
+    function toggleRomanization() {
+      romanizationVisible = !romanizationVisible;
+      document.body.classList.toggle("hide-romanization", !romanizationVisible);
+      document.getElementById("romStateText").textContent = romanizationVisible ? "ON" : "OFF";
+      document.getElementById("toggleRomBtn").classList.toggle("active", !romanizationVisible);
+    }
+
+    function toggleTeacherNotes() {
+      notesVisible = !notesVisible;
+      document.body.classList.toggle("show-notes", notesVisible);
+      document.getElementById("toggleNotesBtn").classList.toggle("active", notesVisible);
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    prevBtn.addEventListener("click", prevSlide);
+    nextBtn.addEventListener("click", nextSlide);
+    document.getElementById("toggleRomBtn").addEventListener("click", toggleRomanization);
+    document.getElementById("toggleNotesBtn").addEventListener("click", toggleTeacherNotes);
+    document.getElementById("fullscreenBtn").addEventListener("click", toggleFullscreen);
+
+    window.addEventListener("keydown", e => {
+      if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) return;
+
+      const key = e.key;
+      if (key === "ArrowRight" || key === "PageDown") {
+        e.preventDefault();
+        nextSlide();
+      } else if (key === "ArrowLeft" || key === "PageUp") {
+        e.preventDefault();
+        prevSlide();
+      } else if (key === " ") {
+        if (document.activeElement && document.activeElement.tagName === "BUTTON") return;
+        e.preventDefault();
+        nextSlide();
+      } else if (key === "t" || key === "T") {
+        e.preventDefault();
+        toggleRomanization();
+      } else if (key === "n" || key === "N") {
+        e.preventDefault();
+        toggleTeacherNotes();
+      } else if (key === "f" || key === "F") {
+        e.preventDefault();
+        toggleFullscreen();
+      }
+    });
+
+    let touchStartX = 0;
+    let touchStartY = 0;
+    window.addEventListener("touchstart", e => {
+      if (e.changedTouches && e.changedTouches.length > 0) {
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+      }
+    }, { passive: true });
+
+    window.addEventListener("touchend", e => {
+      if (e.changedTouches && e.changedTouches.length > 0) {
+        const dx = e.changedTouches[0].screenX - touchStartX;
+        const dy = e.changedTouches[0].screenY - touchStartY;
+        if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.4) {
+          if (dx < 0) nextSlide();
+          else prevSlide();
+        }
+      }
+    }, { passive: true });
+
+    function updateStageScale() {
+      const stageWidth = 1600;
+      const stageHeight = 900;
+      const scaleX = window.innerWidth / stageWidth;
+      const scaleY = window.innerHeight / stageHeight;
+      const scale = Math.min(scaleX, scaleY);
+      document.documentElement.style.setProperty("--stage-scale", scale.toFixed(4));
+    }
+
+    window.addEventListener("resize", updateStageScale);
+    updateStageScale();
+    renderCurrentSlide(false);
+  </script>
+</body>
+</html>

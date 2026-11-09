@@ -191,198 +191,312 @@ window.SPEAKO_DATA = {
         {
           number: 1,
           title: "Greetings and Polite Words",
+          lessonGoal: "Greet people politely and use essential Thai courtesy words from day one.",
           goal: "Help the student greet people politely and use basic courtesy in Thai.",
           whatToTeach: [
-            "สวัสดี (sà-wàt-dii — hello)",
+            "สวัสดี (sà-wàt-dii — hello / goodbye)",
             "ขอบคุณ (khàwp-khun — thank you)",
             "ขอโทษ (khǎw-thôot — sorry / excuse me)",
-            "ไม่เป็นไร (mâi bpen rai — it’s okay)",
-            "ครับ / ค่ะ (khráp / khâ — polite endings)",
-            "Yes / no basic politeness in daily interaction"
+            "ไม่เป็นไร (mâi bpen rai — it’s okay / no problem)",
+            "ครับ / ค่ะ / คะ (khráp / khâ / khá — polite endings)",
+            "ใช่ / ไม่ใช่ (châi / mâi châi — yes / no) & ได้ / ไม่ได้ (dâai / mâi dâai — can / cannot)"
           ],
-          grammarFocus: ["Basic polite particles", "Simple greeting patterns"],
-          vocabulary: ["Hello", "thank you", "sorry", "okay", "polite", "goodbye"],
+          grammarFocus: [
+            "Polite particles: ครับ (khráp) for men, ค่ะ (khâ) for statements & คะ (khá) for questions for women",
+            "Simple greeting and courtesy patterns: สวัสดีครับ/ค่ะ, ขอบคุณมากครับ/ค่ะ",
+            "Asking how someone is: สบายดีไหมครับ/คะ (sà-baai-dii mái khráp/khá)"
+          ],
+          vocabulary: [
+            "สวัสดี (sà-wàt-dii — hello)",
+            "ขอบคุณ (khàwp-khun — thank you)",
+            "ขอโทษ (khǎw-thôot — excuse me / sorry)",
+            "ไม่เป็นไร (mâi bpen rai — no problem)",
+            "สบายดี (sà-baai-dii — doing well)",
+            "ใช่ / ไม่ใช่ (châi / mâi châi — yes / no)",
+            "ได้ / ไม่ได้ (dâai / mâi dâai — can / cannot)"
+          ],
           speakingPractice: [
-            "Repeat greetings with correct tone and pronunciation.",
-            "Practice polite conversation openings and endings.",
-            "Use short greeting role plays."
+            "Repeat greetings with accurate tone and polite particles (ครับ / ค่ะ / คะ).",
+            "Role-play greeting a café staff member and thanking them politely.",
+            "Role-play apologizing when bumping into someone and replying ไม่เป็นไร."
           ],
           homework: [
-            "Practice saying greetings aloud 10 times.",
-            "Record a short greeting to review pronunciation."
+            "Practice saying all greetings and polite endings aloud 10 times.",
+            "Use สวัสดีครับ/ค่ะ and ขอบคุณครับ/ค่ะ in 3 real-life interactions."
           ],
-          slideDeckUrl: null
+          slideDeckUrl: "lessons/lesson1.html"
         },
         {
           number: 2,
           title: "Self-Introduction",
+          lessonGoal: "Introduce yourself with your name, country, and polite questions in Thai.",
           goal: "Help the student introduce themselves in Thai.",
           whatToTeach: [
-            "My name is… (ผม/ฉันชื่อ...)",
-            "I am from… (ผม/ฉันมาจาก...)",
-            "I am…",
-            "Nice to meet you (ยินดีที่ได้รู้จัก)",
-            "Asking someone’s name (คุณชื่ออะไร)",
-            "Asking where someone is from (คุณมาจากประเทศอะไร)"
+            "ผม/ฉันชื่อ... (phǒm/chǎn chûue... — My name is…)",
+            "ผม/ฉันมาจาก... (phǒm/chǎn maa jàak... — I am from…)",
+            "ยินดีที่ได้รู้จักครับ/ค่ะ (yin-dii thîi dâai rúu-jàk — Nice to meet you)",
+            "คุณชื่ออะไรครับ/คะ (khun chûue à-rai — What is your name?)",
+            "คุณมาจากประเทศอะไรครับ/คะ (khun maa jàak bprà-thêet à-rai — Which country are you from?)",
+            "พูดภาษาไทยได้นิดหน่อย (phûut phaa-sǎa thai dâai nít-nàwy — I can speak a little Thai)"
           ],
-          grammarFocus: ["Basic self-introduction sentence structure", "Polite question and answer patterns"],
-          vocabulary: ["Name", "country", "city", "from", "meet", "friend"],
+          grammarFocus: [
+            "First-person pronouns: ผม (phǒm — male) and ฉัน (chǎn — female)",
+            "Self-introduction structure: Subject + ชื่อ (name) / มาจาก (come from) + Noun",
+            "Polite question and answer patterns with อะไร (à-rai — what) and ไหม (mái — yes/no)"
+          ],
+          vocabulary: [
+            "ผม / ฉัน (phǒm / chǎn — I)",
+            "คุณ (khun — you)",
+            "ชื่อ (chûue — name)",
+            "มาจาก (maa jàak — come from)",
+            "ประเทศ (bprà-thêet — country)",
+            "คนไทย / คนต่างชาติ (Thai person / foreigner)",
+            "ยินดีที่ได้รู้จัก (nice to meet you)"
+          ],
           speakingPractice: [
-            "Introduce yourself with your name and country.",
-            "Ask and answer a partner’s name.",
-            "Practice a full short introduction."
+            "Introduce yourself naturally with your name, country, and city.",
+            "Ask and answer a partner’s name and nationality.",
+            "Role-play meeting a new Thai friend at a café or coworking space."
           ],
           homework: [
-            "Write 3 self-introduction sentences.",
-            "Practice the introduction aloud."
+            "Write and practice your 4-sentence Thai self-introduction aloud.",
+            "Introduce yourself in Thai to at least one person this week."
           ],
           slideDeckUrl: "lessons/speako-lesson-2.html"
         },
         {
           number: 3,
           title: "Numbers, Time, and Basic Questions",
+          lessonGoal: "Use Thai numbers, tell time, and ask essential everyday questions.",
           goal: "Help the student understand and use numbers, time, and simple question patterns.",
           whatToTeach: [
-            "Numbers in Thai (0–100+)",
-            "What time is it? (กี่โมงแล้ว)",
-            "How much? (เท่าไหร่)",
-            "Where? (ที่ไหน)",
-            "Who? (ใคร)",
-            "Basic counting for daily life"
+            "Numbers in Thai 0–100+ (ศูนย์, หนึ่ง, สอง, สาม... สิบ, ยี่สิบ, ร้อย)",
+            "กี่โมงแล้วครับ/คะ (gìi moong láew — What time is it?)",
+            "เท่าไหร่ครับ/คะ (thâo-rài — How much is it?)",
+            "ที่ไหนครับ/คะ (thîi-nǎi — Where?)",
+            "อะไร / ใคร / กี่อัน (à-rai / khrai / gìi an — What / Who / How many?)",
+            "Basic counting and classifiers for daily life"
           ],
-          grammarFocus: ["Question words", "Simple answer patterns"],
-          vocabulary: ["Numbers", "time", "price", "hour", "minute", "morning", "afternoon", "night"],
+          grammarFocus: [
+            "Number building rules: 11 = สิบเอ็ด (sìp-èt), 20 = ยี่สิบ (yîi-sìp), tens + units",
+            "Question word placement at the end of Thai sentences (อยู่ที่ไหน, เท่าไหร่, กี่โมง)",
+            "Counting items with Noun + Number + Classifier (เช่น สองอัน — sǎawng an)"
+          ],
+          vocabulary: [
+            "หนึ่ง–สิบ (1–10)",
+            "ยี่สิบ / ร้อย (20 / 100)",
+            "บาท (bàat — Thai baht)",
+            "กี่โมง (gìi moong — what time)",
+            "นาที (naa-thii — minute)",
+            "เท่าไหร่ (thâo-rài — how much)",
+            "ที่ไหน (thîi-nǎi — where)",
+            "วันนี้ / พรุ่งนี้ (today / tomorrow)"
+          ],
           speakingPractice: [
-            "Count numbers aloud.",
-            "Ask and answer the time.",
-            "Practice basic question and answer exchanges."
+            "Count numbers 1–100 aloud with clear tones.",
+            "Ask and answer the time and daily schedules.",
+            "Practice rapid question-and-answer drills using เท่าไหร่, ที่ไหน, and กี่โมง."
           ],
           homework: [
-            "Practice numbers from 1 to 20.",
-            "Write 5 simple question-and-answer pairs."
+            "Practice counting from 1 to 100 in Thai.",
+            "Write 5 simple question-and-answer pairs using เท่าไหร่, ที่ไหน, and กี่โมง."
           ],
           slideDeckUrl: "lessons/lesson-3-numbers-time-questions.html"
         },
         {
           number: 4,
           title: "Ordering Food and Drinks",
+          lessonGoal: "Order food and drinks politely, customize spice levels, and ask for the bill.",
           goal: "Help the student order food politely in a restaurant or cafe.",
           whatToTeach: [
-            "Food and drink vocabulary",
-            "I would like… (ขอ... / เอา...)",
-            "May I have…",
-            "Spicy / not spicy (เผ็ด / ไม่เผ็ด)",
-            "Delicious (อร่อย)",
-            "More / less",
-            "Rice, noodles, water, coffee, tea"
+            "ขอ...หน่อยครับ/ค่ะ (khǎaw ... nàwy — May I have..., please?)",
+            "เอา...ครับ/ค่ะ (ao ... — I’ll take / I’d like...)",
+            "เผ็ด / ไม่เผ็ด / เผ็ดนิดหน่อย (phèt / mâi phèt / phèt nít-nàwy — spicy / not spicy / a little spicy)",
+            "อร่อยมาก (à-ràwy mâak — very delicious)",
+            "ข้าว, ก๋วยเตี๋ยว, น้ำเปล่า, กาแฟ, ชาไทย (rice, noodles, water, coffee, Thai tea)",
+            "เก็บเงินด้วยครับ/ค่ะ / เช็คบิลด้วยครับ/ค่ะ (check/bill, please)"
           ],
-          grammarFocus: ["Polite request patterns", "Basic food-ordering sentences"],
-          vocabulary: ["Food", "drink", "menu", "restaurant", "spicy", "delicious", "water"],
+          grammarFocus: [
+            "Polite food & drink request patterns: ขอ + Item + หน่อยครับ/ค่ะ and เอา + Item + ครับ/ค่ะ",
+            "Customizing orders: ไม่ใส่พริก (no chili), ไม่หวาน (not sweet), เย็น / ร้อน (iced / hot)",
+            "Ordering quantities with classifiers: น้ำเปล่าหนึ่งขวด (1 bottle of water), กาแฟเย็นหนึ่งแก้ว (1 iced coffee)"
+          ],
+          vocabulary: [
+            "ขอ...หน่อย (khǎaw...nàwy — may I have)",
+            "เอา (ao — take / want)",
+            "เมนู (mee-nuu — menu)",
+            "ข้าวผัด / ผัดไทย (fried rice / Pad Thai)",
+            "น้ำเปล่า / กาแฟ (water / coffee)",
+            "เผ็ด / ไม่เผ็ด (spicy / not spicy)",
+            "อร่อย (à-ràwy — delicious)",
+            "เช็คบิล (chék-bin — bill please)"
+          ],
           speakingPractice: [
-            "Order food in a role play.",
-            "Ask for drinks and menu items.",
-            "Practice simple restaurant conversation."
+            "Order a full meal and drink in a restaurant role-play.",
+            "Customize spice and sweetness levels politely.",
+            "Ask for the menu, extra water, and the bill."
           ],
           homework: [
-            "Learn 10 food and drink words.",
-            "Practice one full ordering dialogue."
+            "Learn 10 food and drink words from the slide deck.",
+            "Practice ordering your favorite Thai dish and drink aloud."
           ],
-          slideDeckUrl: null
+          slideDeckUrl: "lessons/speako-lesson-4-food-and-drinks.html"
         },
         {
           number: 5,
           title: "Directions and Transportation",
+          lessonGoal: "Ask where places are, understand directions, and ride taxis, BTS, and MRT in Thai.",
           goal: "Help the student ask for and understand directions in Thai.",
           whatToTeach: [
-            "Go straight (ตรงไป)",
-            "Turn left (เลี้ยวซ้าย)",
-            "Turn right (เลี้ยวขวา)",
-            "Near / far (ใกล้ / ไกล)",
-            "Where is…? (...อยู่ที่ไหน)",
-            "Taxi, bus, train, street, road, hotel, market"
+            "ไปไหน (bpai nǎi — where are you going?) & ...อยู่ที่ไหน (... yùu thîi-nǎi — where is ...?)",
+            "ตรงไป (dtrong bpai — go straight), เลี้ยวซ้าย (líao sáai — turn left), เลี้ยวขวา (líao khwǎa — turn right)",
+            "ใกล้ / ไกล (glâi / glai — near / far) & ที่นี่ / ที่นั่น (thîi-nîi / thîi-nân — here / there)",
+            "ตลาดอยู่ที่ไหนครับ/คะ (Where is the market?) & ไปตลาดยังไงครับ/คะ (How do I get to the market?)",
+            "ใช้เวลากี่นาทีครับ/คะ (How many minutes does it take?) & หยุดที่นี่ครับ/ค่ะ (Stop here, please)",
+            "แท็กซี่ (taxi), รถเมล์ (bus), รถไฟ (train), รถไฟฟ้า (BTS), รถไฟใต้ดิน (MRT), โรงแรม (hotel), ตลาด (market)"
           ],
-          grammarFocus: ["Direction question patterns", "Basic location expressions"],
-          vocabulary: ["Direction", "street", "left", "right", "straight", "near", "far", "taxi", "map"],
+          grammarFocus: [
+            "Location pattern: [Place] + อยู่ที่ไหนครับ/คะ (Where is [Place]?)",
+            "How-to-go pattern: ไป + [Place] + ยังไงครับ/คะ (How do I get to [Place]?)",
+            "Sequencing directions: ตรงไปแล้วเลี้ยวซ้าย (Go straight, then turn left) & taxi commands: ไปโรงแรมครับ/ค่ะ, หยุดที่นี่ครับ/ค่ะ"
+          ],
+          vocabulary: [
+            "ไปไหน (bpai nǎi — where going?)",
+            "...อยู่ที่ไหน (... yùu thîi-nǎi — where is...?)",
+            "ตรงไป (dtrong bpai — go straight)",
+            "เลี้ยวซ้าย / เลี้ยวขวา (turn left / turn right)",
+            "ใกล้ / ไกล (glâi / glai — near / far)",
+            "ที่นี่ / ที่นั่น (thîi-nîi / thîi-nân — here / there)",
+            "ถนน / ซอย (thà-nǒn / saawy — road / soi)",
+            "ตลาด / โรงแรม / แผนที่ (market / hotel / map)",
+            "แท็กซี่ / รถเมล์ / รถไฟ / รถไฟฟ้า / รถไฟใต้ดิน (taxi / bus / train / BTS / MRT)",
+            "หยุดที่นี่ (yùt thîi-nîi — stop here)"
+          ],
           speakingPractice: [
-            "Ask for directions to common places.",
-            "Give simple directions.",
-            "Practice transport-related dialogue."
+            "Role-play 1: Ask a local on the street where the market is and whether it is far.",
+            "Role-play 2: Tell a taxi driver your destination, ask how many minutes it takes, and ask to stop here.",
+            "Give and follow step-by-step directions using ตรงไป, เลี้ยวซ้าย, and เลี้ยวขวา."
           ],
           homework: [
-            "Memorize direction words.",
-            "Practice asking how to get to 3 places."
+            "Memorize the direction words.",
+            "Practice asking how to get to 3 places (for example the market, the hotel, the train station)."
           ],
-          slideDeckUrl: null
+          slideDeckUrl: "lessons/lesson5.html"
         },
         {
           number: 6,
           title: "Shopping and Prices",
+          lessonGoal: "Ask prices, point out items, bargain politely at markets, and pay by cash or card.",
           goal: "Help the student buy things and ask prices in Thai.",
           whatToTeach: [
-            "How much? (อันนี้เท่าไหร่)",
-            "Expensive / cheap (แพง / ถูก)",
-            "This one / That one (อันนี้ / อันนั้น)",
-            "I want this (เอาอันนี้)",
-            "Market, shop, price, money"
+            "อันนี้เท่าไหร่ครับ/คะ (an-níi thâo-rài — How much is this one?)",
+            "เอาอันนี้ครับ/ค่ะ (ao an-níi — I’ll take this one) & ขอดูหน่อยครับ/ค่ะ (khǎaw duu nàwy — Can I take a look?)",
+            "มี...ไหมครับ/คะ (mii ... mái — Do you have ...?) & ไม่เอา (mâi ao — no thanks / I don’t want it)",
+            "แพงไปครับ/ค่ะ (phaaeng bpai — That’s too expensive) & ลดหน่อยได้ไหมครับ/คะ (lót nàwy dâai mái — Can you give a small discount?)",
+            "ถูกกว่านี้ได้ไหมครับ/คะ (thùuk gwàa níi dâai mái — Can it be cheaper?)",
+            "ทั้งหมดเท่าไหร่ครับ/คะ (tháng-mòt thâo-rài — How much in total?) & จ่ายด้วยบัตรได้ไหมครับ/คะ (Can I pay by card?)"
           ],
-          grammarFocus: ["Asking about price", "Simple shopping expressions"],
-          vocabulary: ["Buy", "sell", "price", "money", "market", "shop", "expensive", "cheap"],
+          grammarFocus: [
+            "Demonstrative pronouns: อันนี้ (an-níi — this one) and อันนั้น (an-nán — that one)",
+            "Polite bargaining patterns: ลดหน่อยได้ไหมครับ/คะ & ถูกกว่านี้ได้ไหมครับ/คะ (normal at markets, not in malls or fixed-price shops)",
+            "Payment & availability questions: มี + [Item] + ไหมครับ/คะ and จ่ายด้วย + [เงินสด / บัตร] + ได้ไหมครับ/คะ"
+          ],
+          vocabulary: [
+            "ซื้อ / ขาย (súue / khǎai — buy / sell)",
+            "ร้าน / ตลาด (ráan / dtà-làat — shop / market)",
+            "เงิน / เงินสด / บัตร (ngern / ngern-sòt / bàt — money / cash / card)",
+            "จ่าย / ราคา (jàai / raa-khaa — pay / price)",
+            "แพง / ถูก (phaaeng / thùuk — expensive / cheap)",
+            "อันนี้ / อันนั้น (an-níi / an-nán — this one / that one)",
+            "ลด / ทอนเงิน (lót / thaawn ngern — discount / change)",
+            "ได้ / ไม่ได้ / ไม่เอา (can / cannot / no thanks)",
+            "ทั้งหมด (tháng-mòt — total / all)"
+          ],
           speakingPractice: [
-            "Role-play shopping at a market.",
-            "Ask the price of items.",
-            "Practice choosing items and paying politely."
+            "Practice hearing and saying real Thai prices: 80 baht (แปดสิบบาท), 120 baht (หนึ่งร้อยยี่สิบบาท), 200 baht (สองร้อยบาท).",
+            "Role-play 1 (Market): Ask to look at an item, ask the price, bargain politely from 80 to 70 baht, and buy it.",
+            "Role-play 2 (Paying): Ask for the total price and ask if you can pay by credit card."
           ],
           homework: [
-            "Practice shopping phrases.",
-            "Write 5 price-related questions."
+            "Practice saying 5 prices in Thai.",
+            "Write a short shopping dialogue and read it aloud."
           ],
-          slideDeckUrl: null
+          slideDeckUrl: "lessons/lesson6.html"
         },
         {
           number: 7,
           title: "Daily Needs and Common Situations",
+          lessonGoal: "Handle real-life needs, communication breakdowns, and emergencies calmly in Thai.",
           goal: "Help the student handle simple real-life situations in Thai.",
           whatToTeach: [
-            "Help (ช่วยด้วย)",
-            "I don’t understand (ไม่เข้าใจ)",
-            "Please speak slowly (พูดช้าๆ ได้ไหม)",
-            "Bathroom (ห้องน้ำ)",
-            "Phone (โทรศัพท์)",
-            "I want… / I need…"
+            "ช่วยหน่อยได้ไหมครับ/คะ (chûai nàwy dâai mái — Can you help me, please?) & ช่วยด้วย (chûai dûai — help!)",
+            "พูดช้าๆ ได้ไหมครับ/คะ (phûut cháa-cháa dâai mái — Can you speak slowly?) & พูดอีกทีได้ไหมครับ/คะ (Can you say that again?)",
+            "ไม่เข้าใจ (mâi khâo-jai — I don’t understand) & แปลว่าอะไรครับ/คะ (bplaa wâa à-rai — What does that mean?)",
+            "ห้องน้ำอยู่ที่ไหนครับ/คะ (hâawng-náam yùu thîi-nǎi — Where is the bathroom?)",
+            "มีไวไฟไหมครับ/คะ (mii wai-fai mái — Do you have Wi-Fi?) & รหัสอะไรครับ/คะ (rá-hàt à-rai — What is the password?)",
+            "ไม่สบายครับ/ค่ะ (mâi sà-baai — I don’t feel well) & ต้องไปโรงพยาบาลครับ/ค่ะ (I need to go to the hospital)"
           ],
-          grammarFocus: ["Request patterns", "Basic survival communication"],
-          vocabulary: ["Help", "understand", "slow", "bathroom", "need", "want", "phone", "problem"],
+          grammarFocus: [
+            "Polite ability/request pattern: [Action] + ได้ไหมครับ/คะ (Can you [Action]?)",
+            "Expressing needs & wants: ต้องการ (dtâawng-gaan — need) and อยากได้ (yàak dâai — want to have)",
+            "Clarification & medical survival phrases: ไม่เข้าใจ, พูดช้าๆ ได้ไหม, ไม่สบาย, เจ็บ (jèp — hurt/pain)"
+          ],
+          vocabulary: [
+            "ช่วย / ช่วยด้วย (chûai / chûai dûai — help / help!)",
+            "เข้าใจ / ไม่เข้าใจ (khâo-jai / mâi khâo-jai — understand / don’t understand)",
+            "พูดช้าๆ / อีกที (phûut cháa-cháa / ìik-thii — speak slowly / one more time)",
+            "ต้องการ / อยากได้ (dtâawng-gaan / yàak dâai — need / want to have)",
+            "ห้องน้ำ (hâawng-náam — bathroom / toilet)",
+            "โทรศัพท์ / ไวไฟ / รหัส (thoo-rá-sàp / wai-fai / rá-hàt — phone / Wi-Fi / password)",
+            "แบตหมด / ปัญหา (bàaet mòt / bpan-hǎa — battery dead / problem)",
+            "ไม่สบาย / เจ็บ (mâi sà-baai / jèp — sick / hurt)",
+            "โรงพยาบาล / ร้านขายยา / ตำรวจ (hospital / pharmacy / police)"
+          ],
           speakingPractice: [
-            "Practice asking for help.",
-            "Use emergency and daily need phrases.",
-            "Role-play common survival situations."
+            "Role-play 1 (Asking for help): Ask where the bathroom is, ask someone to speak slowly, and follow directions.",
+            "Role-play 2 (At a pharmacy): Explain that you don’t feel well (ไม่สบาย) and need medicine (ต้องการยา).",
+            "Practice asking for Wi-Fi and passwords at a café and handling communication breakdowns."
           ],
           homework: [
-            "Learn 10 survival phrases.",
-            "Practice saying them naturally."
+            "Memorize 10 survival phrases.",
+            "Practice saying them aloud until they feel natural."
           ],
-          slideDeckUrl: null
+          slideDeckUrl: "lessons/lesson7.html"
         },
         {
           number: 8,
           title: "Review and Role Play",
+          lessonGoal: "Combine all 7 lessons into realistic Thai conversations across a full day in Thailand.",
           goal: "Help the student use all the course language in realistic conversations.",
           whatToTeach: [
-            "Review greetings, introductions, numbers, food, directions, shopping, and daily needs.",
-            "Combine all the lesson language into real-life conversation."
+            "Comprehensive review of Lessons 1–7: greetings, self-introduction, numbers & time, ordering food, directions & transport, shopping & bargaining, and daily needs/survival.",
+            "Phrase Builder review: ขอ/เอา..., ...อยู่ที่ไหน, ...เท่าไหร่, ...ได้ไหม across multiple real-life situations.",
+            "4-Part 'A Day in Thailand' Simulation: Morning at a Café, Afternoon in a Taxi, Evening at a Night Market, and Solving a Surprise Problem."
           ],
-          grammarFocus: ["Review of all basic patterns", "Review of polite requests and question forms"],
-          vocabulary: ["All key vocabulary from the course"],
+          grammarFocus: [
+            "Combining core patterns: ขอ + [item] + หน่อย, [place] + อยู่ที่ไหน, [item] + เท่าไหร่, and [action] + ได้ไหม",
+            "Natural conversation flow: Opening politely (ขอโทษครับ/ค่ะ) -> Asking/Ordering -> Follow-up question -> Closing politely (ขอบคุณครับ/ค่ะ)",
+            "Consistent politeness particles: ครับ (khráp) for men; ค่ะ (khâ) for statements and คะ (khá) for questions for women"
+          ],
+          vocabulary: [
+            "All essential vocabulary from Lessons 1–7",
+            "Greetings & Introductions (สวัสดี, ชื่อ, มาจาก, ยินดีที่ได้รู้จัก)",
+            "Numbers, Time & Prices (เท่าไหร่, กี่โมง, บาท, ทั้งหมด)",
+            "Food & Café (ขอ...หน่อย, เอา..., ไม่เผ็ด, เช็คบิล, ไวไฟ)",
+            "Directions & Transport (อยู่ที่ไหน, ตรงไป, เลี้ยวซ้าย/ขวา, หยุดที่นี่)",
+            "Shopping & Survival (ลดหน่อยได้ไหม, ช่วยหน่อยได้ไหม, พูดช้าๆ ได้ไหม, ห้องน้ำ)"
+          ],
           speakingPractice: [
-            "Role-play a full day in Thailand.",
-            "Practice greeting, ordering food, asking directions, and shopping.",
-            "Final conversation practice with feedback."
+            "Scene 1 (Morning at a Café): Greet staff, introduce yourself, order iced coffee & fried rice (not spicy), ask for Wi-Fi, and ask for the bill.",
+            "Scene 2 (Afternoon in a Taxi): Tell the driver to go to the market, ask how many minutes it takes, give directions, and ask to stop here.",
+            "Scene 3 (Evening at a Night Market): Ask the price, bargain politely, buy items, and pay.",
+            "Scene 4 (Surprise Problem) + 3-Minute Free-Talk Challenge with personalized teacher feedback."
           ],
           homework: [
-            "Review all notes from the course.",
-            "Prepare a final speaking practice conversation."
+            "Keep using your Thai every day: greet people, order food, ask prices, and make small talk!",
+            "Review any phrases from Lessons 1–8 using the interactive slide decks and audio buttons."
           ],
-          slideDeckUrl: null
+          slideDeckUrl: "lessons/lesson8.html"
         }
       ]
     },

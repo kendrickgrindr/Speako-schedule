@@ -153,11 +153,29 @@ function getLessonCountdown(dateStr, timeSlot) {
   return { label: `Starts in ${mins} min`, state: "future" };
 }
 
-function getLessonGoalText(courseId, lessonNum) {
+function getLessonObj(courseId, lessonNum) {
   const course = getCourse(courseId);
   const lessons = course?.lessons || [];
-  const found = lessons.find((l) => Number(l.number) === Number(lessonNum)) || lessons[0];
+  return lessons.find((l) => Number(l.number) === Number(lessonNum)) || lessons[0] || null;
+}
+
+function getLessonGoalText(courseId, lessonNum) {
+  const found = getLessonObj(courseId, lessonNum);
   return found?.lessonGoal || found?.goal || "";
+}
+
+function syncModalLessonSelect(courseSelectId, lessonSelectId) {
+  const cEl = document.getElementById(courseSelectId);
+  const lEl = document.getElementById(lessonSelectId);
+  if (!cEl || !lEl) return;
+  const course = getCourse(cEl.value);
+  const currentVal = Number(lEl.value) || 1;
+  lEl.innerHTML = (course?.lessons || [])
+    .map(
+      (l) =>
+        `<option value="${l.number}" ${l.number === currentVal ? "selected" : ""}>Lesson ${l.number}: ${esc(l.title)}</option>`
+    )
+    .join("");
 }
 
 // =========================================================
@@ -578,6 +596,7 @@ function renderStudentSchedule(main) {
 
   const cd = nextClass ? getLessonCountdown(nextClass.date_str, nextClass.time_slot) : null;
   const isUrgentOrLive = cd && (cd.state === "soon" || cd.state === "live");
+  const nextLessonObj = nextClass ? getLessonObj(nextClass.course_id, nextClass.lesson_number) : null;
   const lessonGoal = nextClass ? getLessonGoalText(nextClass.course_id, nextClass.lesson_number) : "";
   const totalCourseLessons = 8;
   const currentLessonNum = nextClass ? Math.min(totalCourseLessons, Math.max(1, Number(nextClass.lesson_number) || 1)) : 1;
@@ -647,6 +666,11 @@ function renderStudentSchedule(main) {
 
           <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:22px;align-items:center;">
             <a href="${esc(nextClass.meeting_link)}" target="_blank" rel="noopener" class="btn ${isUrgentOrLive ? "btn-primary btn-join-active" : "btn-white"}">Join ↗</a>
+            ${
+              nextLessonObj?.slideDeckUrl
+                ? `<button class="btn btn-outline" onclick="openSlideDeck('${esc(nextLessonObj.slideDeckUrl)}','Lesson ${nextClass.lesson_number}: ${esc(nextClass.lesson_title)}')">Slides ↗</button>`
+                : ""
+            }
             <button class="btn btn-outline" onclick="openStudentLessonDetail('${esc(nextClass.course_id)}', ${nextClass.lesson_number})">Details</button>
           </div>
         </div>
@@ -727,6 +751,7 @@ function renderStudentSchedule(main) {
             .map((b) => {
               const db = parseDateBadge(b.date_str);
               const isConfirming = STATE.confirmCancelBookingId === b.id;
+              const bkLesson = getLessonObj(b.course_id, b.lesson_number);
               return `
               <div class="list-row">
                 <div style="display:flex;align-items:center;gap:16px;">
@@ -756,6 +781,11 @@ function renderStudentSchedule(main) {
                     : `
                   <div class="upcoming-actions">
                     <a href="${esc(b.meeting_link)}" target="_blank" rel="noopener" class="btn btn-primary btn-sm">Join</a>
+                    ${
+                      bkLesson?.slideDeckUrl
+                        ? `<button class="btn btn-outline btn-sm" onclick="openSlideDeck('${esc(bkLesson.slideDeckUrl)}','Lesson ${b.lesson_number}: ${esc(b.lesson_title)}')">Slides</button>`
+                        : ""
+                    }
                     <button class="btn btn-outline btn-sm" onclick="openStudentLessonDetail('${esc(b.course_id)}', ${b.lesson_number})">Details</button>
                     <button type="button" class="link-cancel" onclick="STATE.confirmCancelBookingId='${esc(b.id)}';renderCurrentPortal(false)">Cancel</button>
                   </div>
@@ -795,6 +825,7 @@ function renderStudentSchedule(main) {
           ${past
             .map((b) => {
               const db = parseDateBadge(b.date_str);
+              const bkLesson = getLessonObj(b.course_id, b.lesson_number);
               return `
               <div class="list-row">
                 <div style="display:flex;align-items:center;gap:16px;">
@@ -817,7 +848,14 @@ function renderStudentSchedule(main) {
                     }
                   </div>
                 </div>
-                <button class="btn btn-outline btn-sm" onclick="openStudentLessonDetail('${esc(b.course_id)}', ${b.lesson_number})">Details</button>
+                <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                  ${
+                    bkLesson?.slideDeckUrl
+                      ? `<button class="btn btn-outline btn-sm" onclick="openSlideDeck('${esc(bkLesson.slideDeckUrl)}','Lesson ${b.lesson_number}: ${esc(b.lesson_title)}')">Slides</button>`
+                      : ""
+                  }
+                  <button class="btn btn-outline btn-sm" onclick="openStudentLessonDetail('${esc(b.course_id)}', ${b.lesson_number})">Details</button>
+                </div>
               </div>
             `;
             })
@@ -1218,9 +1256,16 @@ function renderStudentLessons(main) {
                 .join("")}
             </div>
 
-            <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;">
-              <span style="font-size:12.5px;color:var(--muted);">${esc(practicePreview)}</span>
-              <span style="font-size:13px;font-weight:700;color:var(--teal-dark);white-space:nowrap;">View Details →</span>
+            <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+              <span style="font-size:12.5px;color:var(--muted);flex:1;min-width:160px;">${esc(practicePreview)}</span>
+              <div style="display:flex;align-items:center;gap:8px;">
+                ${
+                  hasSlide
+                    ? `<button type="button" class="btn btn-primary btn-sm" onclick="event.stopPropagation();openSlideDeck('${esc(l.slideDeckUrl)}','Lesson ${l.number}: ${esc(l.title)}')">Launch Slides ↗</button>`
+                    : ""
+                }
+                <span style="font-size:13px;font-weight:700;color:var(--teal-dark);white-space:nowrap;">Details →</span>
+              </div>
             </div>
           </div>
         `;
@@ -1481,6 +1526,7 @@ function renderTeacherSchedule(main) {
 
 function renderManagedBookingRow(b) {
   const db = parseDateBadge(b.date_str);
+  const bkLesson = getLessonObj(b.course_id, b.lesson_number);
   return `
     <div class="list-row">
       <div style="display:flex;align-items:center;gap:16px;">
@@ -1503,6 +1549,11 @@ function renderManagedBookingRow(b) {
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        ${
+          bkLesson?.slideDeckUrl
+            ? `<button class="btn btn-outline btn-sm" onclick="openSlideDeck('${esc(bkLesson.slideDeckUrl)}','Lesson ${b.lesson_number}: ${esc(b.lesson_title)}')">Slides ↗</button>`
+            : ""
+        }
         <button class="btn btn-ghost btn-sm" onclick="openEditScheduleModal('${esc(b.id)}')">Edit</button>
         ${
           b.status === "confirmed"
@@ -1550,7 +1601,7 @@ function openEditScheduleModal(bookingId) {
         <div class="grid-2">
           <div>
             <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:5px;">Course</label>
-            <select id="edit-bk-course" class="input-clean">
+            <select id="edit-bk-course" class="input-clean" onchange="syncModalLessonSelect('edit-bk-course','edit-bk-lesson')">
               <option value="thai" ${b.course_id === "thai" ? "selected" : ""}>🇹🇭 Basic Thai</option>
               <option value="english" ${b.course_id === "english" ? "selected" : ""}>🇬🇧 Basic English</option>
             </select>
@@ -1696,7 +1747,7 @@ function openAssignClassModal(preselectedStudentId = "") {
         <div class="grid-2">
           <div>
             <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:5px;">Course</label>
-            <select id="assign-course" class="input-clean">
+            <select id="assign-course" class="input-clean" onchange="syncModalLessonSelect('assign-course','assign-lesson')">
               <option value="thai">🇹🇭 Basic Thai</option>
               <option value="english">🇬🇧 Basic English</option>
             </select>
@@ -1704,7 +1755,9 @@ function openAssignClassModal(preselectedStudentId = "") {
           <div>
             <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:5px;">Lesson Number (1–8)</label>
             <select id="assign-lesson" class="input-clean">
-              ${[1, 2, 3, 4, 5, 6, 7, 8].map((n) => `<option value="${n}">Lesson ${n}</option>`).join("")}
+              ${(getCourse("thai")?.lessons || [])
+                .map((l) => `<option value="${l.number}">Lesson ${l.number}: ${esc(l.title)}</option>`)
+                .join("")}
             </select>
           </div>
         </div>

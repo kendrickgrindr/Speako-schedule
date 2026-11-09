@@ -115,6 +115,73 @@ const PREP_ITEMS = [
     "Find a quiet place",
 ]
 
+export interface CurriculumLesson {
+    number: number
+    title: string
+    goal: string
+    highlights: string[]
+    slideDeckUrl: string
+}
+
+export const THAI_LESSONS_1_TO_8: CurriculumLesson[] = [
+    {
+        number: 1,
+        title: "Greetings and Polite Words",
+        goal: "Greet people politely and use essential Thai courtesy words from day one.",
+        highlights: ["สวัสดี (sà-wàt-dii)", "ขอบคุณ (khàwp-khun)", "ขอโทษ / ไม่เป็นไร", "ครับ / ค่ะ / คะ"],
+        slideDeckUrl: "lessons/lesson1.html",
+    },
+    {
+        number: 2,
+        title: "Self-Introduction",
+        goal: "Introduce yourself with your name, country, and polite questions in Thai.",
+        highlights: ["ผม/ฉันชื่อ...", "ผม/ฉันมาจาก...", "ยินดีที่ได้รู้จัก", "คุณชื่ออะไร"],
+        slideDeckUrl: "lessons/speako-lesson-2.html",
+    },
+    {
+        number: 3,
+        title: "Numbers, Time, and Basic Questions",
+        goal: "Use Thai numbers, tell time, and ask essential everyday questions.",
+        highlights: ["Numbers 0–100+", "กี่โมงแล้ว (What time?)", "เท่าไหร่ (How much?)", "ที่ไหน (Where?)"],
+        slideDeckUrl: "lessons/lesson-3-numbers-time-questions.html",
+    },
+    {
+        number: 4,
+        title: "Ordering Food and Drinks",
+        goal: "Order food and drinks politely, customize spice levels, and ask for the bill.",
+        highlights: ["ขอ...หน่อย / เอา...", "เผ็ด / ไม่เผ็ด", "อร่อยมาก", "เช็คบิลด้วยครับ/ค่ะ"],
+        slideDeckUrl: "lessons/speako-lesson-4-food-and-drinks.html",
+    },
+    {
+        number: 5,
+        title: "Directions and Transportation",
+        goal: "Ask where places are, understand directions, and ride taxis, BTS, and MRT in Thai.",
+        highlights: ["...อยู่ที่ไหน", "ตรงไป / เลี้ยวซ้าย / เลี้ยวขวา", "ใกล้ / ไกล", "หยุดที่นี่ครับ/ค่ะ"],
+        slideDeckUrl: "lessons/lesson5.html",
+    },
+    {
+        number: 6,
+        title: "Shopping and Prices",
+        goal: "Ask prices, point out items, bargain politely at markets, and pay by cash or card.",
+        highlights: ["อันนี้เท่าไหร่", "ลดหน่อยได้ไหม", "ถูกกว่านี้ได้ไหม", "จ่ายด้วยบัตรได้ไหม"],
+        slideDeckUrl: "lessons/lesson6.html",
+    },
+    {
+        number: 7,
+        title: "Daily Needs and Common Situations",
+        goal: "Handle real-life needs, communication breakdowns, and emergencies calmly in Thai.",
+        highlights: ["ช่วยหน่อยได้ไหม", "พูดช้าๆ ได้ไหม", "ห้องน้ำอยู่ที่ไหน", "มีไวไฟไหม / ไม่สบาย"],
+        slideDeckUrl: "lessons/lesson7.html",
+    },
+    {
+        number: 8,
+        title: "Review and Role Play",
+        goal: "Combine all 7 lessons into realistic Thai conversations across a full day in Thailand.",
+        highlights: ["Morning at a Café", "Afternoon in a Taxi", "Night Market Bargaining", "Surprise Problem & Free-Talk"],
+        slideDeckUrl: "lessons/lesson8.html",
+    },
+]
+
 export function formatSpeakoDateTime(dateStr: string, timeStr: string): string {
     const dt = new Date(`${dateStr}T${timeStr || "00:00"}:00+07:00`)
     if (isNaN(dt.getTime())) return `${dateStr}, ${timeStr}`
@@ -706,6 +773,36 @@ export default function StudentPortal({
                         </div>
                     </div>
                 </>
+            ) : activeTab === "lessons" ? (
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 }}>
+                    {THAI_LESSONS_1_TO_8.map((l) => (
+                        <div key={l.number} className="sp-card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", gap: 12 }}>
+                            <div>
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
+                                    <span className="sp-badge-role">Lesson {l.number} of 8</span>
+                                    <span style={{ fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 999, background: "#EEF2FF", color: "#3730A3" }}>
+                                        ✦ Interactive Slide Deck + Audio
+                                    </span>
+                                </div>
+                                <h3 className="sp-h3" style={{ fontSize: 18, color: "#0B2A5B" }}>{l.title}</h3>
+                                <p style={{ fontSize: 13.5, color: "#64748B", margin: "6px 0 0" }}>{l.goal}</p>
+                                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 12 }}>
+                                    {l.highlights.map((h) => (
+                                        <span key={h} style={{ fontSize: 12, padding: "4px 10px", borderRadius: 999, background: "#F7F8FA", color: "#1F2937" }}>
+                                            {h}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 12, borderTop: "1px solid rgba(11, 42, 91, 0.08)" }}>
+                                <a href={l.slideDeckUrl} target="_blank" rel="noopener noreferrer" className="sp-btn sp-btn-primary" style={{ padding: "8px 14px", fontSize: 13 }}>
+                                    Launch Slides ↗
+                                </a>
+                                <span style={{ fontSize: 12.5, fontWeight: 700, color: "#0B7F7C" }}>Lesson {l.number}</span>
+                            </div>
+                        </div>
+                    ))}
+                </div>
             ) : (
                 <div className="sp-card">
                     <h2 className="sp-h2" style={{ fontSize: 20, color: "#0B2A5B", textTransform: "capitalize" }}>
