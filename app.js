@@ -1256,16 +1256,9 @@ function renderStudentLessons(main) {
                 .join("")}
             </div>
 
-            <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
-              <span style="font-size:12.5px;color:var(--muted);flex:1;min-width:160px;">${esc(practicePreview)}</span>
-              <div style="display:flex;align-items:center;gap:8px;">
-                ${
-                  hasSlide
-                    ? `<button type="button" class="btn btn-primary btn-sm" onclick="event.stopPropagation();openSlideDeck('${esc(l.slideDeckUrl)}','Lesson ${l.number}: ${esc(l.title)}')">Launch Slides ↗</button>`
-                    : ""
-                }
-                <span style="font-size:13px;font-weight:700;color:var(--teal-dark);white-space:nowrap;">Details →</span>
-              </div>
+            <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;">
+              <span style="font-size:12.5px;color:var(--muted);">${esc(practicePreview)}</span>
+              <span style="font-size:13px;font-weight:700;color:var(--teal-dark);white-space:nowrap;">View Details →</span>
             </div>
           </div>
         `;
