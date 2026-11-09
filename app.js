@@ -56,7 +56,109 @@ const STATE = {
   adminRoleFilter: "all",
   adminSearch: "",
   adminShowTrash: false,
+
+  // Student Portal UI states (in-memory only, no localStorage)
+  prepChecklist: { 0: false, 1: false, 2: false },
+  confirmCancelBookingId: "",
+
+  // Interactive Thai Survival Kit state (in-memory only)
+  skSituationId: "",
+  skMode: "cards", // 'cards' | 'phrases' | 'quiz' | 'result'
+  skQuizQuestions: [],
+  skQuizIdx: 0,
+  skQuizScore: 0,
+  skQuizSelected: "",
+  skFailedAudio: {},
 };
+
+const PREP_CHECKLIST_ITEMS = [
+  "Test your mic and camera",
+  "Have a notebook ready",
+  "Find a quiet place",
+];
+
+const SURVIVAL_AUDIO_BASE = "/audio/";
+const SURVIVAL_KIT_DATA = {
+  "ordering-food": {
+    id: "ordering-food",
+    title: "Ordering food",
+    icon: "🍜",
+    phrases: [
+      { thai: "ขอเมนูหน่อยครับ/ค่ะ", romanization: "khǒr mee-nuu nòi khrap/kha", meaning: "Can I have the menu, please?", audioUrl: `${SURVIVAL_AUDIO_BASE}ordering-food-1.mp3` },
+      { thai: "เอาอันนี้ครับ/ค่ะ", romanization: "ao an níi khrap/kha", meaning: "I'll have this one.", audioUrl: `${SURVIVAL_AUDIO_BASE}ordering-food-2.mp3` },
+      { thai: "ไม่เผ็ดนะครับ/คะ", romanization: "mâi phèt ná khrap/kha", meaning: "Not spicy, please.", audioUrl: `${SURVIVAL_AUDIO_BASE}ordering-food-3.mp3` },
+      { thai: "ขอน้ำเปล่าหนึ่งขวดครับ/ค่ะ", romanization: "khǒr náam plàao nùeng khùat khrap/kha", meaning: "One bottle of water, please.", audioUrl: `${SURVIVAL_AUDIO_BASE}ordering-food-4.mp3` },
+      { thai: "เช็คบิลด้วยครับ/ค่ะ", romanization: "chék bin dûai khrap/kha", meaning: "The bill, please.", audioUrl: `${SURVIVAL_AUDIO_BASE}ordering-food-5.mp3` },
+    ],
+  },
+  "taking-a-taxi": {
+    id: "taking-a-taxi",
+    title: "Taking a taxi",
+    icon: "🚕",
+    phrases: [
+      { thai: "ไปสนามบินได้ไหมครับ/คะ", romanization: "pai sà-nǎam-bin dâi mǎi khrap/kha", meaning: "Can you go to the airport?", audioUrl: `${SURVIVAL_AUDIO_BASE}taking-a-taxi-1.mp3` },
+      { thai: "เปิดมิเตอร์ด้วยครับ/ค่ะ", romanization: "pòet mí-dtôe dûai khrap/kha", meaning: "Please use the meter.", audioUrl: `${SURVIVAL_AUDIO_BASE}taking-a-taxi-2.mp3` },
+      { thai: "เลี้ยวซ้ายตรงนี้ครับ/ค่ะ", romanization: "líao sáai dtrong níi khrap/kha", meaning: "Turn left here.", audioUrl: `${SURVIVAL_AUDIO_BASE}taking-a-taxi-3.mp3` },
+      { thai: "จอดตรงนี้ครับ/ค่ะ", romanization: "jòt dtrong níi khrap/kha", meaning: "Stop here, please.", audioUrl: `${SURVIVAL_AUDIO_BASE}taking-a-taxi-4.mp3` },
+      { thai: "เท่าไหร่ครับ/คะ", romanization: "thâo-rài khrap/kha", meaning: "How much is it?", audioUrl: `${SURVIVAL_AUDIO_BASE}taking-a-taxi-5.mp3` },
+    ],
+  },
+  "meeting-parents": {
+    id: "meeting-parents",
+    title: "Meeting a friend’s parents",
+    icon: "🙏",
+    phrases: [
+      { thai: "สวัสดีครับ/ค่ะ", romanization: "sà-wàt-dii khrap/kha", meaning: "Hello (polite greeting).", audioUrl: `${SURVIVAL_AUDIO_BASE}meeting-parents-1.mp3` },
+      { thai: "ยินดีที่ได้รู้จักครับ/ค่ะ", romanization: "yin-dii thîi dâi rúu-jàk khrap/kha", meaning: "Nice to meet you.", audioUrl: `${SURVIVAL_AUDIO_BASE}meeting-parents-2.mp3` },
+      { thai: "ขอบคุณที่เชิญมานะครับ/คะ", romanization: "khòp-khun thîi choen maa ná khrap/kha", meaning: "Thank you for inviting me.", audioUrl: `${SURVIVAL_AUDIO_BASE}meeting-parents-3.mp3` },
+      { thai: "อาหารอร่อยมากครับ/ค่ะ", romanization: "aa-hǎan à-ròi mâak khrap/kha", meaning: "The food is delicious.", audioUrl: `${SURVIVAL_AUDIO_BASE}meeting-parents-4.mp3` },
+      { thai: "ขอตัวก่อนนะครับ/คะ", romanization: "khǒr dtua gòn ná khrap/kha", meaning: "Please excuse me, I have to go.", audioUrl: `${SURVIVAL_AUDIO_BASE}meeting-parents-5.mp3` },
+    ],
+  },
+  "shopping-market": {
+    id: "shopping-market",
+    title: "Shopping at a market",
+    icon: "🛍️",
+    phrases: [
+      { thai: "อันนี้เท่าไหร่ครับ/คะ", romanization: "an níi thâo-rài khrap/kha", meaning: "How much is this?", audioUrl: `${SURVIVAL_AUDIO_BASE}shopping-market-1.mp3` },
+      { thai: "ขอดูหน่อยได้ไหมครับ/คะ", romanization: "khǒr duu nòi dâi mǎi khrap/kha", meaning: "Can I take a look?", audioUrl: `${SURVIVAL_AUDIO_BASE}shopping-market-2.mp3` },
+      { thai: "แพงไปหน่อยครับ/ค่ะ", romanization: "phaeng pai nòi khrap/kha", meaning: "It's a bit expensive.", audioUrl: `${SURVIVAL_AUDIO_BASE}shopping-market-3.mp3` },
+      { thai: "ลดได้ไหมครับ/คะ", romanization: "lót dâi mǎi khrap/kha", meaning: "Can you give me a discount?", audioUrl: `${SURVIVAL_AUDIO_BASE}shopping-market-4.mp3` },
+      { thai: "เอาสองอันครับ/ค่ะ", romanization: "ao sǒng an khrap/kha", meaning: "I'll take two.", audioUrl: `${SURVIVAL_AUDIO_BASE}shopping-market-5.mp3` },
+    ],
+  },
+};
+
+function formatConsistentDateTime(dateStr, timeSlot) {
+  const dt = new Date(`${dateStr}T${timeSlot || "00:00"}:00+07:00`);
+  if (isNaN(dt.getTime())) return `${dateStr}, ${timeSlot}`;
+  const wk = dt.toLocaleDateString("en-GB", { weekday: "short", timeZone: "Asia/Bangkok" });
+  const day = dt.toLocaleDateString("en-GB", { day: "2-digit", timeZone: "Asia/Bangkok" });
+  const mon = dt.toLocaleDateString("en-GB", { month: "short", timeZone: "Asia/Bangkok" });
+  return `${wk} ${day} ${mon}, ${timeSlot}`;
+}
+
+function getLessonCountdown(dateStr, timeSlot) {
+  const targetMs = new Date(`${dateStr}T${timeSlot || "00:00"}:00+07:00`).getTime();
+  if (isNaN(targetMs)) return { label: "", state: "future" };
+  const diffMin = Math.floor((targetMs - Date.now()) / 60000);
+  if (diffMin <= 0 && diffMin > -60) return { label: "In progress", state: "live" };
+  if (diffMin <= -60) return { label: "Completed", state: "past" };
+  if (diffMin < 15) return { label: "Starts soon", state: "soon" };
+  const days = Math.floor(diffMin / 1440);
+  const hours = Math.floor((diffMin % 1440) / 60);
+  const mins = diffMin % 60;
+  if (days > 0) return { label: `Starts in ${days} day${days > 1 ? "s" : ""} ${hours} hr`, state: "future" };
+  if (hours > 0) return { label: `Starts in ${hours} hr ${mins} min`, state: "future" };
+  return { label: `Starts in ${mins} min`, state: "future" };
+}
+
+function getLessonGoalText(courseId, lessonNum) {
+  const course = getCourse(courseId);
+  const lessons = course?.lessons || [];
+  const found = lessons.find((l) => Number(l.number) === Number(lessonNum)) || lessons[0];
+  return found?.lessonGoal || found?.goal || "";
+}
 
 // =========================================================
 // UTILITIES & API CLIENT
@@ -308,7 +410,7 @@ function switchTab(tabName) {
   renderCurrentPortal(true);
 }
 
-function renderCurrentPortal(withFade = true) {
+function renderCurrentPortal(withFade = false) {
   const main = document.getElementById("app-main");
   if (!main) return;
 
@@ -319,20 +421,10 @@ function renderCurrentPortal(withFade = true) {
     else renderLoginGateway();
   };
 
-  if (!withFade) {
-    paint();
-    main.classList.add("view-fade-in");
-    return;
-  }
-
-  main.classList.remove("view-fade-in");
-  main.classList.add("view-fade-out");
-  setTimeout(() => {
-    paint();
-    main.classList.remove("view-fade-out");
-    main.classList.add("view-fade-in");
+  paint();
+  if (withFade) {
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }, 190);
+  }
 }
 
 async function signOut() {
@@ -346,70 +438,76 @@ async function signOut() {
 
 // =========================================================
 // 1. PRIVATE LOGIN & SIGN-UP GATEWAY (/index.html)
-//    No public account names or 1-click logins shown.
-//    Each user signs in privately with their own credentials.
+//    + INTERACTIVE THAI SURVIVAL KIT (No signup required)
 // =========================================================
 function renderLoginGateway() {
   const main = document.getElementById("app-main");
   if (!main) return;
 
   main.innerHTML = `
-    <div style="max-width:460px;width:100%;margin:0 auto;" class="anim-up">
-      <div style="text-align:center;margin-bottom:26px;">
-        <img src="Speako logo.png" alt="Speako" style="width:52px;height:52px;object-fit:contain;margin-bottom:10px;" />
-        <h1 style="font-size:30px;">Speako Private Portal</h1>
-        <p style="font-size:14.5px;color:var(--muted);margin-top:6px;">
-          Sign in to your private account to view your 1-on-1 schedule, lessons, and class credits.
-        </p>
+    <div style="max-width:740px;width:100%;margin:0 auto;">
+      <div style="max-width:460px;width:100%;margin:0 auto;" class="anim-up">
+        <div style="text-align:center;margin-bottom:24px;">
+          <img src="Speako logo.png" alt="Speako" style="width:52px;height:52px;object-fit:contain;margin-bottom:10px;" />
+          <h1 style="font-size:clamp(26px,5vw,32px);">Speako Private Portal</h1>
+          <p style="font-size:14.5px;color:var(--muted);margin-top:6px;">
+            Sign in to your private account to view your 1-on-1 schedule, lessons, and class credits.
+          </p>
+        </div>
+
+        <div class="card" style="padding:28px 22px;">
+          <div class="segmented-nav" style="width:100%;margin-bottom:22px;">
+            <button class="seg-btn ${STATE.authMode === "signin" ? "active" : ""}" style="flex:1;" onclick="STATE.authMode='signin';renderLoginGateway()">Sign In</button>
+            <button class="seg-btn ${STATE.authMode === "signup" ? "active" : ""}" style="flex:1;" onclick="STATE.authMode='signup';renderLoginGateway()">Sign Up</button>
+          </div>
+
+          ${
+            STATE.authMode === "signin"
+              ? `
+            <form onsubmit="handleSignIn(event)" style="display:flex;flex-direction:column;gap:15px;">
+              <div>
+                <label style="font-size:12.5px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;">Email Address</label>
+                <input id="login-email" type="email" class="input-clean" placeholder="you@example.com" autocomplete="email" required />
+              </div>
+              <div>
+                <label style="font-size:12.5px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;">Password</label>
+                <input id="login-password" type="password" class="input-clean" placeholder="••••••••" autocomplete="current-password" required />
+              </div>
+              <button type="submit" class="btn btn-primary btn-lg" style="width:100%;margin-top:6px;">Sign In</button>
+            </form>
+          `
+              : `
+            <form onsubmit="handleSignUp(event)" style="display:flex;flex-direction:column;gap:13px;">
+              <div>
+                <label style="font-size:12.5px;font-weight:600;color:var(--muted);display:block;margin-bottom:5px;">Your Name</label>
+                <input id="signup-name" type="text" class="input-clean" placeholder="e.g. Sarah Jenkins" required />
+              </div>
+              <div>
+                <label style="font-size:12.5px;font-weight:600;color:var(--muted);display:block;margin-bottom:5px;">Email Address</label>
+                <input id="signup-email" type="email" class="input-clean" placeholder="sarah@example.com" autocomplete="email" required />
+              </div>
+              <div>
+                <label style="font-size:12.5px;font-weight:600;color:var(--muted);display:block;margin-bottom:5px;">WhatsApp / Phone (Optional)</label>
+                <input id="signup-phone" type="text" class="input-clean" placeholder="+66 8X XXX XXXX" />
+              </div>
+              <div>
+                <label style="font-size:12.5px;font-weight:600;color:var(--muted);display:block;margin-bottom:5px;">Password (min 6 characters)</label>
+                <input id="signup-password" type="password" class="input-clean" placeholder="Create a private password" autocomplete="new-password" required minlength="6" />
+              </div>
+              <button type="submit" class="btn btn-primary btn-lg" style="width:100%;margin-top:4px;">Create Private Account</button>
+            </form>
+          `
+          }
+
+          <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--line);text-align:center;font-size:12.5px;color:var(--muted);">
+            🔒 Your account and 1-on-1 class schedule are strictly private.
+          </div>
+        </div>
       </div>
 
-      <div class="card" style="padding:32px;">
-        <div class="segmented-nav" style="width:100%;margin-bottom:24px;">
-          <button class="seg-btn ${STATE.authMode === "signin" ? "active" : ""}" style="flex:1;" onclick="STATE.authMode='signin';renderLoginGateway()">Sign In</button>
-          <button class="seg-btn ${STATE.authMode === "signup" ? "active" : ""}" style="flex:1;" onclick="STATE.authMode='signup';renderLoginGateway()">Create Student Account</button>
-        </div>
-
-        ${
-          STATE.authMode === "signin"
-            ? `
-          <form onsubmit="handleSignIn(event)" style="display:flex;flex-direction:column;gap:15px;">
-            <div>
-              <label style="font-size:12.5px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;">Email Address</label>
-              <input id="login-email" type="email" class="input-clean" placeholder="you@example.com" autocomplete="email" required />
-            </div>
-            <div>
-              <label style="font-size:12.5px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;">Password</label>
-              <input id="login-password" type="password" class="input-clean" placeholder="••••••••" autocomplete="current-password" required />
-            </div>
-            <button type="submit" class="btn btn-primary btn-lg" style="width:100%;margin-top:6px;">Sign In</button>
-          </form>
-        `
-            : `
-          <form onsubmit="handleSignUp(event)" style="display:flex;flex-direction:column;gap:13px;">
-            <div>
-              <label style="font-size:12.5px;font-weight:600;color:var(--muted);display:block;margin-bottom:5px;">Your Name</label>
-              <input id="signup-name" type="text" class="input-clean" placeholder="e.g. Sarah Jenkins" required />
-            </div>
-            <div>
-              <label style="font-size:12.5px;font-weight:600;color:var(--muted);display:block;margin-bottom:5px;">Email Address</label>
-              <input id="signup-email" type="email" class="input-clean" placeholder="sarah@example.com" autocomplete="email" required />
-            </div>
-            <div>
-              <label style="font-size:12.5px;font-weight:600;color:var(--muted);display:block;margin-bottom:5px;">WhatsApp / Phone (Optional)</label>
-              <input id="signup-phone" type="text" class="input-clean" placeholder="+66 8X XXX XXXX" />
-            </div>
-            <div>
-              <label style="font-size:12.5px;font-weight:600;color:var(--muted);display:block;margin-bottom:5px;">Password (min 6 characters)</label>
-              <input id="signup-password" type="password" class="input-clean" placeholder="Create a private password" autocomplete="new-password" required minlength="6" />
-            </div>
-            <button type="submit" class="btn btn-primary btn-lg" style="width:100%;margin-top:4px;">Create Private Account</button>
-          </form>
-        `
-        }
-
-        <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--line);text-align:center;font-size:12.5px;color:var(--muted);">
-          🔒 Your account and 1-on-1 class schedule are strictly private.
-        </div>
+      <!-- Interactive Thai Survival Kit (First-time visitors, no signup needed) -->
+      <div id="survival-kit-mount" style="margin-top:32px;">
+        ${renderThaiSurvivalKitSection()}
       </div>
     </div>
   `;
@@ -478,6 +576,14 @@ function renderStudentSchedule(main) {
     availability: {},
   };
 
+  const cd = nextClass ? getLessonCountdown(nextClass.date_str, nextClass.time_slot) : null;
+  const isUrgentOrLive = cd && (cd.state === "soon" || cd.state === "live");
+  const lessonGoal = nextClass ? getLessonGoalText(nextClass.course_id, nextClass.lesson_number) : "";
+  const totalCourseLessons = 8;
+  const currentLessonNum = nextClass ? Math.min(totalCourseLessons, Math.max(1, Number(nextClass.lesson_number) || 1)) : 1;
+  const progressRatio = (currentLessonNum / totalCourseLessons).toFixed(2);
+  const hasEmptyCredit = (u.thai_credits || 0) <= 0 || (u.english_credits || 0) <= 0;
+
   main.innerHTML = `
     <div class="page-hero">
       <div>
@@ -485,7 +591,7 @@ function renderStudentSchedule(main) {
         <h1 style="margin-top:8px;">Hi, ${esc(u.name.split(" ")[0])}.</h1>
         <p>Your private 1-on-1 schedule, timetable, and class credits.</p>
       </div>
-      <div style="display:flex;gap:10px;">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
         <button class="btn btn-ghost" onclick="switchTab('credits')">Credits</button>
         <button class="btn btn-primary" onclick="switchTab('book')">+ Book</button>
       </div>
@@ -498,20 +604,50 @@ function renderStudentSchedule(main) {
           ? `
         <div class="card next-class-card">
           <div>
-            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
-              <span class="pill-tag dark"><span class="live-dot"></span> Next Class</span>
-              <span style="font-size:13px;color:rgba(255,255,255,0.8);">${esc(nextClass.date_str)} · ${esc(nextClass.time_slot)}</span>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+              <span class="pill-tag dark"><span class="live-dot"></span> Next Class · ${esc(formatConsistentDateTime(nextClass.date_str, nextClass.time_slot))}</span>
+              ${
+                cd && cd.label
+                  ? `<span id="next-class-countdown" class="np-countdown ${cd.state === "soon" ? "soon" : cd.state === "live" ? "live" : ""}">${esc(cd.label)}</span>`
+                  : ""
+              }
             </div>
             <h2 style="font-size:26px;margin-top:16px;">Lesson ${nextClass.lesson_number}: ${esc(nextClass.lesson_title)}</h2>
-            <p style="color:rgba(255,255,255,0.78);font-size:14.5px;margin-top:6px;">
+            ${lessonGoal ? `<p class="np-goal">${esc(lessonGoal)}</p>` : ""}
+            <p style="color:rgba(255,255,255,0.78);font-size:14px;margin-top:8px;">
               ${esc(nextClass.course_title)} · Teacher: <strong>${esc(nextClass.teacher_name)}</strong>
             </p>
+
+            <!-- Course Progress Bar -->
+            <div class="np-progress">
+              <div class="np-progress-label">
+                <span>Lesson ${currentLessonNum} of ${totalCourseLessons}</span>
+                <span>${Math.round((currentLessonNum / totalCourseLessons) * 100)}%</span>
+              </div>
+              <div class="np-progress-track">
+                <div class="np-progress-fill" style="--p:${progressRatio};"></div>
+              </div>
+            </div>
+
+            <!-- 3-Item Prep Checklist -->
+            <ul class="np-checklist">
+              ${PREP_CHECKLIST_ITEMS.map((item, idx) => {
+                const done = !!STATE.prepChecklist[idx];
+                return `
+                  <li>
+                    <button type="button" class="np-check ${done ? "done" : ""}" onclick="togglePrepChecklist(${idx})">
+                      <span class="box">${done ? `<span>✓</span>` : ""}</span>
+                      <span class="label">${esc(item)}</span>
+                    </button>
+                  </li>
+                `;
+              }).join("")}
+            </ul>
           </div>
 
-          <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:24px;align-items:center;">
-            <a href="${esc(nextClass.meeting_link)}" target="_blank" rel="noopener" class="btn btn-white">Join ↗</a>
-            <button class="btn btn-glass" onclick="openStudentLessonDetail('${esc(nextClass.course_id)}', ${nextClass.lesson_number})">Details</button>
-            <button class="btn btn-glass" style="color:#FFD2CE;" onclick="studentCancelBooking('${esc(nextClass.id)}')">Cancel</button>
+          <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:22px;align-items:center;">
+            <a href="${esc(nextClass.meeting_link)}" target="_blank" rel="noopener" class="btn ${isUrgentOrLive ? "btn-primary btn-join-active" : "btn-white"}">Join ↗</a>
+            <button class="btn btn-outline" onclick="openStudentLessonDetail('${esc(nextClass.course_id)}', ${nextClass.lesson_number})">Details</button>
           </div>
         </div>
       `
@@ -525,50 +661,62 @@ function renderStudentSchedule(main) {
             </p>
           </div>
           <div style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;">
-            <button class="btn btn-white" onclick="switchTab('book')">Book →</button>
-            <button class="btn btn-glass" onclick="switchTab('lessons')">Lessons</button>
+            <button class="btn btn-primary" onclick="switchTab('book')">Book →</button>
+            <button class="btn btn-outline" onclick="switchTab('lessons')">Lessons</button>
           </div>
         </div>
       `
       }
 
-      <!-- Right Column: Credits Remaining Summary -->
-      <div class="card" style="display:flex;flex-direction:column;justify-content:space-between;">
-        <div>
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <span style="font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);">Credits</span>
-            <button class="btn btn-ghost btn-sm" onclick="switchTab('credits')">+ Top Up</button>
+      <!-- Right Column: Empty-Credit Banner + Credits Summary -->
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        ${
+          hasEmptyCredit
+            ? `
+          <div class="credit-banner">
+            <span><span class="dot"></span>You have no credits left. Top up to book your next lesson.</span>
+            <button class="btn btn-primary btn-sm" onclick="switchTab('credits')">Top Up</button>
           </div>
-          <div class="grid-2" style="margin-top:16px;gap:12px;">
-            <div style="padding:16px;border-radius:16px;background:rgba(255,255,255,0.55);">
-              <div style="font-size:12px;font-weight:600;color:var(--muted);">🇹🇭 Thai</div>
-              <div style="font-size:32px;font-weight:800;font-family:var(--font-display);margin-top:4px;color:var(--navy);">${u.thai_credits}</div>
-              <div style="font-size:11.5px;color:var(--muted);">remaining</div>
+        `
+            : ""
+        }
+        <div class="card" style="flex:1;display:flex;flex-direction:column;justify-content:space-between;">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);">Credits</span>
+              <button class="btn btn-ghost btn-sm" onclick="switchTab('credits')">+ Top Up</button>
             </div>
-            <div style="padding:16px;border-radius:16px;background:rgba(255,255,255,0.55);">
-              <div style="font-size:12px;font-weight:600;color:var(--muted);">🇬🇧 English</div>
-              <div style="font-size:32px;font-weight:800;font-family:var(--font-display);margin-top:4px;color:var(--teal-dark);">${u.english_credits}</div>
-              <div style="font-size:11.5px;color:var(--muted);">remaining</div>
+            <div class="grid-2" style="margin-top:16px;gap:12px;">
+              <div style="padding:16px;border-radius:16px;background:rgba(255,255,255,0.55);">
+                <div style="font-size:12px;font-weight:600;color:var(--muted);">🇹🇭 Thai</div>
+                <div style="font-size:32px;font-weight:800;font-family:var(--font-display);margin-top:4px;color:var(--navy);">${u.thai_credits}</div>
+                <div style="font-size:11.5px;color:var(--muted);">remaining</div>
+              </div>
+              <div style="padding:16px;border-radius:16px;background:rgba(255,255,255,0.55);">
+                <div style="font-size:12px;font-weight:600;color:var(--muted);">🇬🇧 English</div>
+                <div style="font-size:32px;font-weight:800;font-family:var(--font-display);margin-top:4px;color:var(--teal-dark);">${u.english_credits}</div>
+                <div style="font-size:11.5px;color:var(--muted);">remaining</div>
+              </div>
             </div>
           </div>
-        </div>
-        <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;font-size:13px;">
-          <div style="display:flex;align-items:center;gap:10px;">
-            <div class="avatar-circle has-photo" style="width:32px;height:32px;">
-              <img src="${esc(teacher.avatar || "portrait.png")}" alt="${esc(teacher.name)}" />
+          <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;font-size:13px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="avatar-circle has-photo" style="width:32px;height:32px;">
+                <img src="${esc(teacher.avatar || "portrait.png")}" alt="${esc(teacher.name)}" />
+              </div>
+              <span style="color:var(--muted);">Teacher: <strong style="color:var(--ink);">${esc(teacher.name)}</strong></span>
             </div>
-            <span style="color:var(--muted);">Teacher: <strong style="color:var(--ink);">${esc(teacher.name)}</strong></span>
+            <span class="pill-tag">1-on-1</span>
           </div>
-          <span class="pill-tag">1-on-1</span>
         </div>
       </div>
     </div>
 
     <!-- Upcoming Bookings List -->
     <div style="margin-bottom:36px;" class="anim-up">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
         <h3 style="font-size:20px;">Upcoming (${upcoming.length})</h3>
-        <span style="font-size:13px;color:var(--muted);">Cancelling refunds 1 credit automatically</span>
+        <span class="tz-note">Bangkok time (UTC+7)</span>
       </div>
       ${
         upcoming.length === 0
@@ -578,6 +726,7 @@ function renderStudentSchedule(main) {
           ${upcoming
             .map((b) => {
               const db = parseDateBadge(b.date_str);
+              const isConfirming = STATE.confirmCancelBookingId === b.id;
               return `
               <div class="list-row">
                 <div style="display:flex;align-items:center;gap:16px;">
@@ -591,15 +740,27 @@ function renderStudentSchedule(main) {
                       <strong style="font-size:15.5px;">Lesson ${b.lesson_number}: ${esc(b.lesson_title)}</strong>
                     </div>
                     <div style="font-size:13px;color:var(--muted);margin-top:4px;">
-                      ${esc(db.dow)}, ${esc(b.date_str)} · <strong>${esc(b.time_slot)}</strong> · ${esc(b.teacher_name)}
+                      <strong>${esc(formatConsistentDateTime(b.date_str, b.time_slot))}</strong> · ${esc(b.teacher_name)}
                     </div>
                   </div>
                 </div>
-                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                  <button class="btn btn-ghost btn-sm" onclick="openStudentLessonDetail('${esc(b.course_id)}', ${b.lesson_number})">Details</button>
-                  <a href="${esc(b.meeting_link)}" target="_blank" class="btn btn-primary btn-sm">Join ↗</a>
-                  <button class="btn btn-ghost btn-sm" style="color:var(--red);" onclick="studentCancelBooking('${esc(b.id)}')">Cancel</button>
-                </div>
+                ${
+                  isConfirming
+                    ? `
+                  <div class="cancel-confirm">
+                    <span>Cancel this lesson? You’ll get 1 credit back.</span>
+                    <button class="btn btn-primary btn-sm" style="background:var(--coral);border-color:transparent;" onclick="studentCancelBooking('${esc(b.id)}')">Yes, cancel</button>
+                    <button class="btn btn-outline btn-sm" onclick="STATE.confirmCancelBookingId='';renderCurrentPortal(false)">Keep</button>
+                  </div>
+                `
+                    : `
+                  <div class="upcoming-actions">
+                    <a href="${esc(b.meeting_link)}" target="_blank" rel="noopener" class="btn btn-primary btn-sm">Join</a>
+                    <button class="btn btn-outline btn-sm" onclick="openStudentLessonDetail('${esc(b.course_id)}', ${b.lesson_number})">Details</button>
+                    <button type="button" class="link-cancel" onclick="STATE.confirmCancelBookingId='${esc(b.id)}';renderCurrentPortal(false)">Cancel</button>
+                  </div>
+                `
+                }
               </div>
             `;
             })
@@ -616,7 +777,7 @@ function renderStudentSchedule(main) {
           <h3 style="font-size:20px;">My Weekly Timetable &amp; ${esc(teacher.name)}'s Open Slots</h3>
           <p style="font-size:13.5px;color:var(--muted);">Click any teal <strong>+ Open</strong> slot to book your private 1-on-1 lesson at that time.</p>
         </div>
-        <div style="display:flex;gap:12px;font-size:12.5px;align-items:center;">
+        <div style="display:flex;gap:12px;font-size:12.5px;align-items:center;flex-wrap:wrap;">
           <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--navy);margin-right:5px;"></span>My Booked Class</span>
           <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--teal);margin-right:5px;"></span>Open Slot</span>
         </div>
@@ -642,12 +803,12 @@ function renderStudentSchedule(main) {
                     <span class="d">${esc(db.d)}</span>
                   </div>
                   <div>
-                    <div style="display:flex;align-items:center;gap:8px;">
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                       <strong style="font-size:15px;">Lesson ${b.lesson_number}: ${esc(b.lesson_title)}</strong>
                       <span class="pill-tag ${b.status === "completed" ? "" : "red"}">${esc(b.status)}</span>
                     </div>
                     <div style="font-size:13px;color:var(--muted);margin-top:3px;">
-                      ${esc(b.date_str)} · ${esc(b.time_slot)} · Teacher: ${esc(b.teacher_name)}
+                      ${esc(formatConsistentDateTime(b.date_str, b.time_slot))} · Teacher: ${esc(b.teacher_name)}
                     </div>
                     ${
                       b.teacher_feedback
@@ -656,7 +817,7 @@ function renderStudentSchedule(main) {
                     }
                   </div>
                 </div>
-                <button class="btn btn-ghost btn-sm" onclick="openStudentLessonDetail('${esc(b.course_id)}', ${b.lesson_number})">Review Lesson</button>
+                <button class="btn btn-outline btn-sm" onclick="openStudentLessonDetail('${esc(b.course_id)}', ${b.lesson_number})">Details</button>
               </div>
             `;
             })
@@ -669,13 +830,18 @@ function renderStudentSchedule(main) {
   `;
 }
 
+function togglePrepChecklist(idx) {
+  STATE.prepChecklist[idx] = !STATE.prepChecklist[idx];
+  renderCurrentPortal(false);
+}
+
 function renderStudentWeeklyTimetable(teacher) {
   const days = getUpcomingDays(7, 0);
   const avail = teacher.availability || {};
   const hours = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "19:00", "20:00"];
 
   let html = `<div class="timetable-wrap"><div class="tt-grid">`;
-  html += `<div class="tt-cell tt-head">GMT+7</div>`;
+  html += `<div class="tt-cell tt-head">UTC+7</div>`;
   for (const d of days) {
     html += `<div class="tt-cell tt-head"><span>${esc(d.dow)}</span><strong>${esc(d.monthShort)} ${d.dom}</strong></div>`;
   }
@@ -712,8 +878,8 @@ function jumpToBookSlot(dateStr, timeSlot) {
 }
 
 async function studentCancelBooking(bookingId) {
-  if (!confirm("Cancel this upcoming class? 1 lesson credit will be automatically refunded to your balance.")) return;
   try {
+    STATE.confirmCancelBookingId = "";
     await api("/api/booking/update", { booking_id: bookingId, action: "cancel" });
     await refreshState();
     renderCurrentPortal(false);
@@ -2282,4 +2448,297 @@ async function markAllAlertsRead() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", initPortal);
+// =========================================================
+// INTERACTIVE THAI SURVIVAL KIT (No signup required)
+// =========================================================
+const SK_AUDIO_CACHE = {};
+
+function renderThaiSurvivalKitSection() {
+  const situations = Object.values(SURVIVAL_KIT_DATA);
+  const current = SURVIVAL_KIT_DATA[STATE.skSituationId] || null;
+
+  if (!current || STATE.skMode === "cards") {
+    return `
+      <div class="card" style="padding:26px 20px;">
+        <div style="text-align:center;margin-bottom:18px;">
+          <span class="pill-tag">🇹🇭 Free Interactive Guide · No Signup Required</span>
+          <h2 style="font-size:clamp(22px,4.5vw,28px);margin-top:8px;color:var(--navy);">Thai Survival Kit</h2>
+          <p style="font-size:14px;color:var(--muted);margin-top:4px;">
+            Pick a real-life situation in Thailand to hear &amp; practice 5 essential polite phrases.
+          </p>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px;">
+          ${situations
+            .map(
+              (s) => `
+            <button type="button" class="choice-card" style="min-height:108px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:16px 12px;" onclick="skSelectSituation('${esc(s.id)}')">
+              <span style="font-size:30px;line-height:1;">${s.icon}</span>
+              <strong style="font-size:14px;color:var(--navy);">${esc(s.title)}</strong>
+            </button>
+          `
+            )
+            .join("")}
+        </div>
+      </div>
+    `;
+  }
+
+  if (STATE.skMode === "phrases") {
+    return `
+      <div class="card" style="padding:26px 20px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
+          <div>
+            <span class="pill-tag">${current.icon} ${esc(current.title)}</span>
+            <h2 style="font-size:22px;margin-top:6px;color:var(--navy);">5 Essential Phrases</h2>
+          </div>
+          <button type="button" class="btn btn-outline btn-sm" onclick="skReset()">← All situations</button>
+        </div>
+        <div style="display:grid;gap:12px;">
+          ${current.phrases
+            .map((p, idx) => {
+              const key = `${current.id}-${idx}`;
+              const hideAudio = !!STATE.skFailedAudio[key];
+              return `
+              <div style="padding:16px;border-radius:18px;background:rgba(255,255,255,0.82);border:1px solid var(--line);animation:viewFadeIn 0.36s var(--spring) ${idx * 80}ms backwards;">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+                  <div>
+                    <div style="font-size:20px;font-weight:700;color:var(--navy);">${esc(p.thai)}</div>
+                    <div style="font-size:14px;font-weight:600;color:var(--teal-dark);margin-top:2px;">“${esc(p.romanization)}”</div>
+                    <div style="font-size:14px;color:var(--ink);margin-top:4px;">${esc(p.meaning)}</div>
+                  </div>
+                  ${
+                    hideAudio
+                      ? ""
+                      : `
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                      <button type="button" class="btn btn-primary btn-sm" onmouseenter="skPreloadAudio('${esc(p.audioUrl)}','${key}')" onclick="skPlayAudio('${esc(p.audioUrl)}','${esc(p.thai)}',1,'${key}')">▶ Play</button>
+                      <button type="button" class="btn btn-outline btn-sm" onmouseenter="skPreloadAudio('${esc(p.audioUrl)}','${key}')" onclick="skPlayAudio('${esc(p.audioUrl)}','${esc(p.thai)}',0.7,'${key}')">🐢 Slow (0.7x)</button>
+                    </div>
+                  `
+                  }
+                </div>
+              </div>
+            `;
+            })
+            .join("")}
+        </div>
+        <div style="margin-top:20px;text-align:center;">
+          <button type="button" class="btn btn-primary btn-lg" style="width:100%;max-width:320px;" onclick="skStartPractice()">Practice These Phrases →</button>
+        </div>
+      </div>
+    `;
+  }
+
+  if (STATE.skMode === "quiz") {
+    const q = STATE.skQuizQuestions[STATE.skQuizIdx];
+    return `
+      <div class="card" style="padding:26px 20px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <span class="pill-tag">Practice ${STATE.skQuizIdx + 1} of ${STATE.skQuizQuestions.length}</span>
+          <span style="font-size:13px;font-weight:600;color:var(--muted);">Score: ${STATE.skQuizScore}/${STATE.skQuizQuestions.length}</span>
+        </div>
+        <h3 style="font-size:22px;color:var(--navy);">${esc(q.phrase.thai)}</h3>
+        <p style="font-size:14.5px;color:var(--teal-dark);font-weight:600;margin-top:4px;">“${esc(q.phrase.romanization)}”</p>
+        <p style="font-size:13.5px;color:var(--muted);margin-top:10px;">Tap the correct English meaning:</p>
+        <div style="display:grid;gap:10px;margin-top:14px;">
+          ${q.options
+            .map(
+              (opt) => `
+            <button type="button" class="btn btn-outline" style="justify-content:flex-start;text-align:left;width:100%;" onclick="skAnswerQuiz('${esc(opt)}')">
+              ${esc(opt)}
+            </button>
+          `
+            )
+            .join("")}
+        </div>
+      </div>
+    `;
+  }
+
+  // Result card
+  return `
+    <div class="card next-class-card" style="padding:28px 22px;text-align:center;">
+      <span class="pill-tag dark" style="margin:0 auto 12px;">Practice Score: ${STATE.skQuizScore} / ${STATE.skQuizQuestions.length}</span>
+      <h2 style="font-size:clamp(22px,4.5vw,28px);color:#fff;">You’re ready for ${esc(current.title.toLowerCase())}... almost.</h2>
+      <p style="color:rgba(255,255,255,0.86);font-size:14.5px;max-width:520px;margin:10px auto 0;">
+        In Thai, 5 tones completely change the meaning of these words — and most beginners get tones wrong without live feedback.
+      </p>
+      <div style="display:flex;justify-content:center;flex-wrap:wrap;gap:12px;margin-top:22px;">
+        <button type="button" class="btn btn-primary btn-lg" onclick="STATE.authMode='signup';renderLoginGateway();window.scrollTo({top:0,behavior:'smooth'})">Book a free trial lesson</button>
+        <button type="button" class="btn btn-outline btn-lg" onclick="skReset()">Try another situation</button>
+      </div>
+    </div>
+  `;
+}
+
+function refreshSurvivalKitMount() {
+  const mount = document.getElementById("survival-kit-mount");
+  if (mount) mount.innerHTML = renderThaiSurvivalKitSection();
+}
+
+function skSelectSituation(id) {
+  STATE.skSituationId = id;
+  STATE.skMode = "phrases";
+  refreshSurvivalKitMount();
+}
+
+function skReset() {
+  STATE.skMode = "cards";
+  STATE.skSituationId = "";
+  refreshSurvivalKitMount();
+}
+
+function skPreloadAudio(url, key) {
+  if (SK_AUDIO_CACHE[url] || STATE.skFailedAudio[key]) return;
+  try {
+    const audio = new Audio();
+    audio.preload = "auto";
+    audio.src = url;
+    SK_AUDIO_CACHE[url] = audio;
+  } catch (_) {}
+}
+
+function skPlayAudio(url, thaiText, rate, key) {
+  try {
+    const audio = SK_AUDIO_CACHE[url] || new Audio(url);
+    SK_AUDIO_CACHE[url] = audio;
+    audio.currentTime = 0;
+    audio.playbackRate = rate || 1.0;
+    const playPromise = audio.play();
+    if (playPromise && typeof playPromise.catch === "function") {
+      playPromise.catch(() => {
+        // Fallback to native Thai speech synthesis if MP3 file is not uploaded yet,
+        // or hide buttons if speech synthesis is also unavailable
+        if ("speechSynthesis" in window && thaiText) {
+          window.speechSynthesis.cancel();
+          const utter = new SpeechSynthesisUtterance(thaiText.replace("/ค่ะ", "").replace("/คะ", ""));
+          utter.lang = "th-TH";
+          utter.rate = rate || 1.0;
+          window.speechSynthesis.speak(utter);
+        } else {
+          STATE.skFailedAudio[key] = true;
+          refreshSurvivalKitMount();
+        }
+      });
+    }
+  } catch (_) {
+    STATE.skFailedAudio[key] = true;
+    refreshSurvivalKitMount();
+  }
+}
+
+function skStartPractice() {
+  const current = SURVIVAL_KIT_DATA[STATE.skSituationId];
+  if (!current) return;
+  const shuffled = [...current.phrases].sort(() => Math.random() - 0.5);
+  const picked = shuffled.slice(0, 2);
+  STATE.skQuizQuestions = picked.map((p) => {
+    const distractors = current.phrases
+      .filter((x) => x.meaning !== p.meaning)
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 2)
+      .map((x) => x.meaning);
+    const options = [p.meaning, ...distractors].sort(() => Math.random() - 0.5);
+    return { phrase: p, options };
+  });
+  STATE.skQuizIdx = 0;
+  STATE.skQuizScore = 0;
+  STATE.skMode = "quiz";
+  refreshSurvivalKitMount();
+}
+
+function skAnswerQuiz(selectedMeaning) {
+  const q = STATE.skQuizQuestions[STATE.skQuizIdx];
+  if (q && selectedMeaning === q.phrase.meaning) {
+    STATE.skQuizScore += 1;
+  }
+  if (STATE.skQuizIdx + 1 < STATE.skQuizQuestions.length) {
+    STATE.skQuizIdx += 1;
+  } else {
+    STATE.skMode = "result";
+  }
+  refreshSurvivalKitMount();
+}
+
+// =========================================================
+// LIVING BACKGROUND, FLOATING AVATAR MASCOT & COUNTDOWN TICKER
+// =========================================================
+const MASCOT_QUOTES = [
+  { th: "สวัสดีครับ! (sà-wàt-dii khráp)", en: "Tap me for a quick Thai tip!" },
+  { th: "ไม่เป็นไร (mâi bpen rai)", en: "No worries — practice step by step!" },
+  { th: "ขอบคุณครับ (khòp-khun khráp)", en: "Ready for your 1-on-1 lesson?" },
+  { th: "เก่งมาก! (gèng mâak!)", en: "You're doing great!" },
+];
+
+function initBackgroundAndMascot() {
+  if (!document.querySelector(".bg-motion")) {
+    const bg = document.createElement("div");
+    bg.className = "bg-motion";
+    bg.setAttribute("aria-hidden", "true");
+    bg.innerHTML = `
+      <div class="bg-blob b1"></div>
+      <div class="bg-blob b2"></div>
+      <div class="bg-blob b3"></div>
+      <div class="bg-face f1"><img src="mascot/smile.jpg" alt="" /></div>
+      <div class="bg-face f2"><img src="mascot/wink.jpg" alt="" /></div>
+      <div class="bg-face f3"><img src="mascot/laugh.jpg" alt="" /></div>
+    `;
+    document.body.prepend(bg);
+  }
+
+  if (!document.querySelector(".mascot-buddy")) {
+    const buddy = document.createElement("div");
+    buddy.className = "mascot-buddy";
+    buddy.innerHTML = `
+      <button type="button" class="mascot-face" aria-label="Kendrick Mascot Tip" onclick="cycleMascotTip(true)">
+        <img src="mascot/smile.jpg" class="on" alt="Kendrick Smile" />
+        <img src="mascot/wink.jpg" alt="Kendrick Wink" />
+        <img src="mascot/laugh.jpg" alt="Kendrick Laugh" />
+      </button>
+      <div id="mascot-bubble" class="mascot-bubble">
+        <span>สวัสดีครับ!</span>
+        <small>Tap Kendrick for a Thai tip</small>
+      </div>
+    `;
+    document.body.appendChild(buddy);
+    setTimeout(() => cycleMascotTip(false), 1800);
+    setInterval(() => cycleMascotTip(false), 12000);
+  }
+
+  // Update Next Class countdown every 60 seconds
+  setInterval(() => {
+    if (STATE.portal === "student" && STATE.tab === "schedule") {
+      const el = document.getElementById("next-class-countdown");
+      const upcoming = STATE.bookings.filter((b) => b.status === "confirmed");
+      const nextClass = upcoming[0];
+      if (el && nextClass) {
+        const cd = getLessonCountdown(nextClass.date_str, nextClass.time_slot);
+        el.textContent = cd.label;
+        el.className = `np-countdown ${cd.state === "soon" ? "soon" : cd.state === "live" ? "live" : ""}`;
+      }
+    }
+  }, 60000);
+}
+
+let mascotIdx = 0;
+let mascotBubbleTimer = null;
+function cycleMascotTip(showBubble = true) {
+  const imgs = document.querySelectorAll(".mascot-face img");
+  if (imgs.length) {
+    mascotIdx = (mascotIdx + 1) % imgs.length;
+    imgs.forEach((im, i) => im.classList.toggle("on", i === mascotIdx));
+  }
+  const bubble = document.getElementById("mascot-bubble");
+  if (bubble && showBubble) {
+    const q = MASCOT_QUOTES[Math.floor(Math.random() * MASCOT_QUOTES.length)];
+    bubble.innerHTML = `<span>${esc(q.th)}</span><small>${esc(q.en)}</small>`;
+    bubble.classList.add("show");
+    clearTimeout(mascotBubbleTimer);
+    mascotBubbleTimer = setTimeout(() => bubble.classList.remove("show"), 4500);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  initBackgroundAndMascot();
+  initPortal();
+});

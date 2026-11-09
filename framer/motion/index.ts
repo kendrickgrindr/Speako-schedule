@@ -1,0 +1,26 @@
+/**
+ * Speako motion system — re-exports every motion primitive.
+ * import { HeroReveal, LiftCard } from "./motion"
+ */
+export { useReducedMotion } from "./useReducedMotion"
+export { default as HeroReveal } from "./HeroReveal"
+export { default as ToneWave } from "./ToneWave"
+export { default as RevealOnScroll } from "./RevealOnScroll"
+export { default as LiftCard } from "./LiftCard"
+export { default as CountUp } from "./CountUp"
+export { default as PressButton } from "./PressButton"
+export { default as ProgressBar } from "./ProgressBar"
+export { default as GradientBackdrop } from "./GradientBackdrop"
+export { default as StartsSoonBadge } from "./StartsSoonBadge"
+export type { HeroRevealProps } from "./HeroReveal"
+export type { ToneWaveProps } from "./ToneWave"
+export type { RevealOnScrollProps } from "./RevealOnScroll"
+export type { LiftCardProps } from "./LiftCard"
+export type { CountUpProps } from "./CountUp"
+export type { PressButtonProps } from "./PressButton"
+export type { ProgressBarProps } from "./ProgressBar"
+export type { GradientBackdropProps } from "./GradientBackdrop"
+export type { StartsSoonBadgeProps } from "./StartsSoonBadge"
+
+export { default as SurvivalKitPhrases } from "./SurvivalKitPhrases"
+export type { SurvivalKitPhrasesProps } from "./SurvivalKitPhrases"
