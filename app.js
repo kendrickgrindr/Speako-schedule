@@ -235,10 +235,49 @@ function parseDateBadge(dateStr) {
   };
 }
 
+function encodeUserHeader(u) {
+  if (!u || !u.id) return "";
+  try {
+    const raw = JSON.stringify({
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      phone: u.phone || "",
+      role: u.role || "student",
+      timezone: u.timezone || "Thailand (GMT+7)",
+      thai_credits: u.thai_credits || 0,
+      english_credits: u.english_credits || 0,
+      avatar: u.avatar || "ST",
+    });
+    return btoa(unescape(encodeURIComponent(raw)))
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=+$/, "");
+  } catch (_) {
+    return "";
+  }
+}
+
 async function api(path, body = null) {
   const headers = { Accept: "application/json" };
-  if (STATE.token) {
-    headers["Authorization"] = `Bearer ${STATE.token}`;
+  const tok = STATE.token || localStorage.getItem("speako_token") || "";
+  if (tok) {
+    STATE.token = tok;
+    headers["Authorization"] = `Bearer ${tok}`;
+  }
+  const vault = localStorage.getItem("speako_vault_v3") || "";
+  if (vault) {
+    headers["X-Speako-Vault"] = vault;
+  }
+  let cachedUser = STATE.user;
+  if (!cachedUser) {
+    try {
+      cachedUser = JSON.parse(localStorage.getItem("speako_user_cache") || "null");
+    } catch (_) {}
+  }
+  const userHdr = encodeUserHeader(cachedUser);
+  if (userHdr) {
+    headers["X-Speako-User"] = userHdr;
   }
   const opts = { method: body ? "POST" : "GET", headers };
   if (body) {
@@ -247,8 +286,14 @@ async function api(path, body = null) {
   }
   const res = await fetch(path, opts);
   const data = await res.json().catch(() => ({}));
+  if (data && data.vault) {
+    localStorage.setItem("speako_vault_v3", data.vault);
+  }
+  if (data && data.user) {
+    localStorage.setItem("speako_user_cache", JSON.stringify(data.user));
+  }
   if (!res.ok) {
-    if (res.status === 401 && STATE.portal !== "login") {
+    if (res.status === 401 && STATE.portal !== "login" && path === "/api/state") {
       localStorage.removeItem("speako_token");
       window.location.href = "index.html";
     }
@@ -450,6 +495,7 @@ async function signOut() {
     await api("/api/logout", {});
   } catch (_) {}
   localStorage.removeItem("speako_token");
+  localStorage.removeItem("speako_user_cache");
   STATE.token = "";
   window.location.href = "index.html";
 }
@@ -1107,8 +1153,11 @@ function renderStudentBooking(main) {
           creditsForCourse <= 0
             ? `
           <div style="padding:18px;border-radius:18px;background:#FFF8EB;border:1px solid rgba(255,149,0,0.25);">
-            <div style="font-weight:700;font-size:14px;color:#9A5B00;margin-bottom:10px;">
-              You have 0 ${STATE.bookCourseId === "thai" ? "Thai" : "English"} credits. Select a package below to include with your booking:
+            <div style="font-weight:700;font-size:14px;color:#9A5B00;margin-bottom:6px;">
+              You currently have 0 ${STATE.bookCourseId === "thai" ? "Thai" : "English"} credits.
+            </div>
+            <div style="font-size:13px;color:var(--muted);margin-bottom:12px;">
+              You can book your class slot right now! Optionally select a package below — Kendrick will receive an email to continue with fees &amp; payment and add the credits to your account.
             </div>
             <div style="display:flex;flex-direction:column;gap:8px;">
               ${pkgsForCourse
@@ -1163,7 +1212,7 @@ function renderStudentBooking(main) {
             </div>
             <div style="display:flex;justify-content:space-between;">
               <span style="color:var(--muted);">Your Credits</span>
-              <strong>${creditsForCourse} available</strong>
+              <strong>${creditsForCourse > 0 ? `${creditsForCourse} available` : "0 (Admin will grant after payment)"}</strong>
             </div>
           </div>
         </div>
@@ -1201,8 +1250,12 @@ async function submitStudentBooking() {
         </p>
         <div style="margin:20px 0;padding:16px;border-radius:16px;background:var(--bg);font-size:14px;">
           <div><strong>Date:</strong> ${esc(res.booking.date_str)} at <strong>${esc(res.booking.time_slot)}</strong></div>
-          <div style="margin-top:6px;font-size:12.5px;color:var(--muted);">
-            Your teacher has been notified by email.
+          <div style="margin-top:8px;font-size:13px;color:var(--ink);">
+            ${
+              res.pending_payment
+                ? `<strong>Next Step (Fees &amp; Credits):</strong> An email has been sent to <strong>${esc(res.booking.teacher_name)}</strong> to follow up with you regarding fees &amp; payment, and then grant your lesson credits.`
+                : `Your teacher has been notified by email and 1 lesson credit has been applied.`
+            }
           </div>
         </div>
         <button class="btn btn-primary btn-lg" style="width:100%;" onclick="closeModal();switchTab('schedule')">View My Schedule</button>
@@ -1311,13 +1364,13 @@ function openStudentLessonDetail(courseId, lessonNum) {
         </div>
 
         <div class="grid-2" style="gap:12px;">
-          <div style="padding:16px;border-radius:16px;background:var(--bg);">
+          <div style="padding:16px;border-radius:16px;background:var(--bg);min-width:0;">
             <div style="font-size:12px;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Key Vocabulary</div>
             <div style="display:flex;flex-wrap:wrap;gap:6px;">
-              ${vocabulary.map((v) => `<span class="pill-tag">${esc(v)}</span>`).join("")}
+              ${vocabulary.map((v) => `<span class="pill-tag vocab-pill">${esc(v)}</span>`).join("")}
             </div>
           </div>
-          <div style="padding:16px;border-radius:16px;background:var(--bg);">
+          <div style="padding:16px;border-radius:16px;background:var(--bg);min-width:0;">
             <div style="font-size:12px;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Grammar &amp; Sentence Focus</div>
             <ul style="padding-left:18px;font-size:13.5px;display:flex;flex-direction:column;gap:4px;">
               ${grammarFocus.map((g) => `<li>${esc(g)}</li>`).join("")}
@@ -1358,7 +1411,7 @@ function renderStudentCredits(main) {
       <div>
         <span class="pill-tag">Accounting &amp; Packages</span>
         <h1 style="margin-top:8px;">Credits, Packages &amp; Receipts</h1>
-        <p>Top up your private lesson credits and view your personal invoice history.</p>
+        <p>Select a lesson package below — Kendrick will receive an email to arrange fees &amp; payment and add the credits to your account.</p>
       </div>
       <div class="segmented-nav">
         <button class="seg-btn ${STATE.pricingCourse === "thai" ? "active" : ""}" onclick="STATE.pricingCourse='thai';renderCurrentPortal(false)">🇹🇭 Thai Packages</button>
@@ -1413,7 +1466,7 @@ function renderStudentCredits(main) {
 
     <!-- Invoices & Receipts -->
     <div class="anim-up">
-      <h3 style="font-size:20px;margin-bottom:14px;">My Private Invoices &amp; Receipts (${STATE.transactions.length})</h3>
+      <h3 style="font-size:20px;margin-bottom:14px;">My Private Invoices &amp; Package Requests (${STATE.transactions.length})</h3>
       ${
         STATE.transactions.length === 0
           ? `<div class="card" style="text-align:center;color:var(--muted);padding:32px;">No package transactions yet.</div>`
@@ -1424,9 +1477,13 @@ function renderStudentCredits(main) {
               (tx) => `
             <div class="list-row">
               <div>
-                <div style="display:flex;align-items:center;gap:8px;">
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                   <strong>${esc(tx.package_title)}</strong>
-                  <span class="pill-tag">+${tx.lessons_added} credits</span>
+                  ${
+                    tx.status === "pending_payment"
+                      ? `<span class="pill-tag amber">⏳ Pending Payment · +${tx.lessons_added} credits on approval</span>`
+                      : `<span class="pill-tag">✓ Paid · +${tx.lessons_added} credits</span>`
+                  }
                   <span class="pill-tag gray">${esc(tx.invoice_no)}</span>
                 </div>
                 <div style="font-size:13px;color:var(--muted);margin-top:4px;">
@@ -1450,10 +1507,32 @@ function renderStudentCredits(main) {
 
 async function studentPurchasePackage(packageId) {
   try {
-    const res = await api("/api/purchase", { package_id: packageId, payment_method: "PromptPay QR / Card" });
+    const res = await api("/api/purchase", { package_id: packageId, payment_method: "Pending Admin Payment" });
     await refreshState();
     renderCurrentPortal(false);
-    showToast(`Added ${res.transaction.package_title} (+${res.transaction.lessons_added} credits)!`);
+    const tx = res.transaction || {};
+    STATE.bookCourseId = tx.course_type || STATE.pricingCourse || "thai";
+    STATE.bookSelectedPackageId = packageId;
+    openModal(`
+      <div style="text-align:center;padding:12px 6px;">
+        <div class="apple-check-circle">✓</div>
+        <span class="pill-tag">Booking Request Emailed to Kendrick</span>
+        <h2 style="font-size:25px;margin-top:10px;">${esc(tx.package_title || "Package Requested")}</h2>
+        <p style="color:var(--muted);font-size:14.5px;margin-top:8px;">
+          We have sent an email notification to <strong>Kendrick</strong> regarding your booking for
+          <strong>${esc(tx.package_title)}</strong> (<strong>฿${Number(tx.amount_thb || 0).toLocaleString()} THB</strong>).
+        </p>
+        <div style="margin:18px 0;padding:16px;border-radius:16px;background:var(--bg);font-size:13.5px;color:var(--ink);text-align:left;">
+          <div><strong>1. Fees &amp; Payment:</strong> Kendrick will contact you shortly to arrange payment.</div>
+          <div style="margin-top:6px;"><strong>2. Credits Added by Admin:</strong> Once confirmed, Kendrick will add <strong>+${tx.lessons_added || 1} lesson credit${(tx.lessons_added || 1) > 1 ? "s" : ""}</strong> to your account.</div>
+          <div style="margin-top:6px;"><strong>3. Schedule Your Class:</strong> You can also pick your preferred class date &amp; time right now!</div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-ghost btn-lg" style="flex:1;" onclick="closeModal()">Done</button>
+          <button class="btn btn-primary btn-lg" style="flex:2;" onclick="closeModal();switchTab('book')">Pick Class Date &amp; Time →</button>
+        </div>
+      </div>
+    `);
   } catch (err) {
     showToast(err.message);
   }
@@ -2403,13 +2482,19 @@ async function adminRemoveTeacher(teacherId) {
 
 // ---------------- ADMIN: INVOICES & REVENUE ----------------
 function renderAdminInvoices(main) {
-  const totalRevenue = STATE.transactions.reduce((sum, tx) => sum + Number(tx.amount_thb || 0), 0);
+  const paidRevenue = STATE.transactions
+    .filter((tx) => tx.status !== "pending_payment")
+    .reduce((sum, tx) => sum + Number(tx.amount_thb || 0), 0);
+  const pendingCount = STATE.transactions.filter((tx) => tx.status === "pending_payment").length;
   main.innerHTML = `
     <div class="page-hero">
       <div>
         <span class="pill-tag">Accounting Ledger</span>
-        <h1 style="margin-top:8px;">Revenue &amp; Student Invoices</h1>
-        <p>Total recorded package sales: <strong>฿${totalRevenue.toLocaleString()} THB</strong> across ${STATE.transactions.length} invoices.</p>
+        <h1 style="margin-top:8px;">Revenue &amp; Student Package Requests</h1>
+        <p>
+          Confirmed revenue: <strong>฿${paidRevenue.toLocaleString()} THB</strong> ·
+          Pending payment requests: <strong>${pendingCount}</strong>
+        </p>
       </div>
     </div>
 
@@ -2420,18 +2505,30 @@ function renderAdminInvoices(main) {
           : STATE.transactions
               .map(
                 (tx) => `
-          <div class="list-row">
+          <div class="list-row" style="flex-wrap:wrap;">
             <div>
-              <div style="display:flex;align-items:center;gap:8px;">
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                 <strong>${esc(tx.student_name)}</strong>
                 <span class="pill-tag">${esc(tx.package_title)}</span>
+                ${
+                  tx.status === "pending_payment"
+                    ? `<span class="pill-tag amber">⏳ Pending Payment (+${tx.lessons_added} credits)</span>`
+                    : `<span class="pill-tag">✓ Paid (+${tx.lessons_added} credits)</span>`
+                }
                 <span class="pill-tag gray">${esc(tx.invoice_no)}</span>
               </div>
               <div style="font-size:13px;color:var(--muted);margin-top:3px;">
                 ${esc(tx.student_email)} · ${esc(tx.created_at)} · ${esc(tx.payment_method)}
               </div>
             </div>
-            <strong style="font-size:16px;">฿${Number(tx.amount_thb).toLocaleString()}</strong>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <strong style="font-size:16px;">฿${Number(tx.amount_thb).toLocaleString()}</strong>
+              ${
+                tx.status === "pending_payment"
+                  ? `<button class="btn btn-primary btn-sm" onclick="adminApproveTransaction('${esc(tx.id)}')">Approve &amp; Grant +${tx.lessons_added} Credits</button>`
+                  : ""
+              }
+            </div>
           </div>
         `
               )
@@ -2439,6 +2536,17 @@ function renderAdminInvoices(main) {
       }
     </div>
   `;
+}
+
+async function adminApproveTransaction(txId) {
+  try {
+    await api("/api/admin/user/update", { action: "approve_transaction", transaction_id: txId });
+    await refreshState();
+    renderCurrentPortal(false);
+    showToast("Payment approved and credits added to student account!");
+  } catch (err) {
+    showToast(err.message);
+  }
 }
 
 // ---------------- ADMIN: EMAIL & BOOKING ALERTS INBOX ----------------
@@ -2707,7 +2815,8 @@ function skAnswerQuiz(selectedMeaning) {
 }
 
 // =========================================================
-// LIVING BACKGROUND, FLOATING AVATAR MASCOT & COUNTDOWN TICKER
+// LIVING BACKGROUND (BUFFER-STYLE FLOATING THAI LETTERS
+// THAT FOLLOW CURSOR SLOWLY), MASCOT & COUNTDOWN TICKER
 // =========================================================
 const MASCOT_QUOTES = [
   { th: "สวัสดีครับ! (sà-wàt-dii khráp)", en: "Tap me for a quick Thai tip!" },
@@ -2716,20 +2825,49 @@ const MASCOT_QUOTES = [
   { th: "เก่งมาก! (gèng mâak!)", en: "You're doing great!" },
 ];
 
+const THAI_FLOAT_LETTERS = [
+  { ch: "ก", sub: "gaw", x: 7, y: 14, color: "#0B2A5B", bg: "#EEF4FF", pull: 1.05 },
+  { ch: "ข", sub: "khǎw", x: 24, y: 12, color: "#14A3A0", bg: "#EBFBFA", pull: 0.9 },
+  { ch: "ค", sub: "khaw", x: 6, y: 34, color: "#E15B48", bg: "#FFF1EE", pull: 1.15 },
+  { ch: "ง", sub: "ngaw", x: 21, y: 46, color: "#D97706", bg: "#FFF8EB", pull: 1.2 },
+  { ch: "จ", sub: "jaw", x: 10, y: 58, color: "#2563EB", bg: "#EFF6FF", pull: 1.0 },
+  { ch: "ช", sub: "chaw", x: 18, y: 66, color: "#0D9488", bg: "#F0FDFA", pull: 1.1 },
+  { ch: "ด", sub: "daw", x: 4, y: 82, color: "#16A34A", bg: "#F0FDF4", pull: 0.85 },
+  { ch: "ต", sub: "dtaw", x: 21, y: 83, color: "#DB2777", bg: "#FDF2F8", pull: 0.95 },
+  { ch: "ถ", sub: "thǎw", x: 40, y: 88, color: "#0B2A5B", bg: "#F1F5F9", pull: 0.9 },
+  { ch: "ท", sub: "thaw", x: 56, y: 88, color: "#2563EB", bg: "#EFF6FF", pull: 0.95 },
+  { ch: "น", sub: "naw", x: 76, y: 11, color: "#0284C7", bg: "#F0F9FF", pull: 0.9 },
+  { ch: "บ", sub: "baw", x: 82, y: 34, color: "#475569", bg: "#F8FAFC", pull: 1.05 },
+  { ch: "ป", sub: "bpaw", x: 92, y: 33, color: "#E11D48", bg: "#FFF1F2", pull: 0.95 },
+  { ch: "พ", sub: "phaw", x: 81, y: 58, color: "#0B2A5B", bg: "#F1F5F9", pull: 1.15 },
+  { ch: "ม", sub: "maw", x: 95, y: 58, color: "#0D9488", bg: "#F0FDFA", pull: 0.9 },
+  { ch: "ส", sub: "sǎw", x: 88, y: 71, color: "#2563EB", bg: "#EFF6FF", pull: 1.1 },
+  { ch: "อ", sub: "aw", x: 92, y: 87, color: "#EA580C", bg: "#FFF7ED", pull: 0.85 },
+];
+
 function initBackgroundAndMascot() {
   if (!document.querySelector(".bg-motion")) {
     const bg = document.createElement("div");
     bg.className = "bg-motion";
     bg.setAttribute("aria-hidden", "true");
     bg.innerHTML = `
+      <div class="bg-grid"></div>
       <div class="bg-blob b1"></div>
       <div class="bg-blob b2"></div>
       <div class="bg-blob b3"></div>
-      <div class="bg-face f1"><img src="mascot/smile.jpg" alt="" /></div>
-      <div class="bg-face f2"><img src="mascot/wink.jpg" alt="" /></div>
-      <div class="bg-face f3"><img src="mascot/laugh.jpg" alt="" /></div>
+      <div class="thai-float-layer" id="thai-float-layer">
+        ${THAI_FLOAT_LETTERS.map(
+          (item, i) => `
+          <div class="thai-float-tile" data-idx="${i}" style="left:${item.x}%;top:${item.y}%;--tile-color:${item.color};--tile-bg:${item.bg};">
+            <span class="thai-char">${item.ch}</span>
+            <span class="thai-sub">${item.sub}</span>
+          </div>
+        `
+        ).join("")}
+      </div>
     `;
     document.body.prepend(bg);
+    initThaiLettersCursorFollow();
   }
 
   if (!document.querySelector(".mascot-buddy")) {
@@ -2764,6 +2902,78 @@ function initBackgroundAndMascot() {
       }
     }
   }, 60000);
+}
+
+function initThaiLettersCursorFollow() {
+  const tiles = Array.from(document.querySelectorAll(".thai-float-tile"));
+  if (!tiles.length) return;
+
+  const state = tiles.map((el, i) => ({
+    el,
+    cfg: THAI_FLOAT_LETTERS[i] || THAI_FLOAT_LETTERS[0],
+    cx: 0,
+    cy: 0,
+    phase: i * 0.85,
+  }));
+
+  let pointerActive = false;
+  let mouseX = window.innerWidth * 0.5;
+  let mouseY = window.innerHeight * 0.5;
+
+  window.addEventListener(
+    "pointermove",
+    (e) => {
+      pointerActive = true;
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    },
+    { passive: true }
+  );
+
+  document.addEventListener("mouseleave", () => {
+    pointerActive = false;
+  });
+
+  function tick(now) {
+    const t = (now || 0) * 0.0012;
+    const vw = window.innerWidth || 1280;
+    const vh = window.innerHeight || 800;
+
+    for (let i = 0; i < state.length; i++) {
+      const s = state[i];
+      const homeX = (s.cfg.x / 100) * vw;
+      const homeY = (s.cfg.y / 100) * vh;
+
+      // Gentle ambient float before & during cursor movement
+      const bobX = Math.sin(t + s.phase) * 5.5;
+      const bobY = Math.cos(t * 0.9 + s.phase) * 6.5;
+
+      let targetX = bobX;
+      let targetY = bobY;
+
+      if (pointerActive) {
+        const dx = mouseX - homeX;
+        const dy = mouseY - homeY;
+        const dist = Math.hypot(dx, dy) || 1;
+        // Smooth attraction toward cursor (like buffer.com hero tiles):
+        // closer tiles pull in more strongly + a gentle global drift toward the cursor
+        const proximity = Math.max(0.18, 1 - Math.min(dist / 900, 0.82));
+        const maxPull = 95 * (s.cfg.pull || 1) * proximity;
+        const pullRatio = Math.min(0.26 * (s.cfg.pull || 1), maxPull / dist);
+        targetX += dx * pullRatio;
+        targetY += dy * pullRatio;
+      }
+
+      // Slow, silky interpolation so letters follow the cursor gracefully
+      s.cx += (targetX - s.cx) * 0.032;
+      s.cy += (targetY - s.cy) * 0.032;
+
+      s.el.style.transform = `translate3d(${s.cx.toFixed(2)}px, ${s.cy.toFixed(2)}px, 0)`;
+    }
+    requestAnimationFrame(tick);
+  }
+
+  requestAnimationFrame(tick);
 }
 
 let mascotIdx = 0;

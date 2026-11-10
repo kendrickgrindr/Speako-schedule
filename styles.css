@@ -422,13 +422,13 @@ a {
 
 .grid-2 {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 22px;
 }
 
 .grid-3 {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 22px;
 }
 
@@ -609,6 +609,21 @@ a {
 .pill-tag.red {
   background: rgba(255, 69, 58, 0.14);
   color: var(--red);
+}
+.pill-tag.amber {
+  background: rgba(245, 158, 11, 0.16);
+  color: #9A5B00;
+}
+.pill-tag.vocab-pill {
+  white-space: normal;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.45;
+  padding: 6px 12px;
+  border-radius: 12px;
+  display: inline-block;
+  text-align: left;
 }
 
 .live-dot {
@@ -1296,48 +1311,111 @@ img, video, iframe { max-width: 100%; }
 /* ---------- Taps: crisp press feedback, never blur ---------- */
 .btn:active, .seg-btn:active, .account-pill:active { filter: none; }
 
-/* ---------- Living background: drifting colour blobs ---------- */
+/* ---------- Living background: Buffer-style grid + floating Thai letters ---------- */
 .bg-motion {
   position: fixed;
   inset: 0;
   z-index: -1;
   overflow: hidden;
   pointer-events: none;
+  background: #F8FAFC;
+}
+.bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(15, 23, 42, 0.042) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(15, 23, 42, 0.042) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 92% 88% at 50% 50%, #000 58%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 92% 88% at 50% 50%, #000 58%, transparent 100%);
 }
 .bg-blob {
   position: absolute;
   width: 62vmax;
   height: 62vmax;
   border-radius: 50%;
-  opacity: 0.55;
+  opacity: 0.42;
   will-change: transform;
 }
-.bg-blob.b1 { top: -22vmax; left: -18vmax; background: radial-gradient(circle, rgba(15,166,163,0.30) 0%, transparent 62%); animation: blobDrift1 26s ease-in-out infinite alternate; }
-.bg-blob.b2 { top: -16vmax; right: -22vmax; background: radial-gradient(circle, rgba(11,42,91,0.20) 0%, transparent 62%); animation: blobDrift2 32s ease-in-out infinite alternate; }
-.bg-blob.b3 { bottom: -26vmax; left: 10vmax; background: radial-gradient(circle, rgba(244,124,107,0.18) 0%, transparent 62%); animation: blobDrift3 38s ease-in-out infinite alternate; }
+.bg-blob.b1 { top: -22vmax; left: -18vmax; background: radial-gradient(circle, rgba(15,166,163,0.24) 0%, transparent 62%); animation: blobDrift1 26s ease-in-out infinite alternate; }
+.bg-blob.b2 { top: -16vmax; right: -22vmax; background: radial-gradient(circle, rgba(11,42,91,0.16) 0%, transparent 62%); animation: blobDrift2 32s ease-in-out infinite alternate; }
+.bg-blob.b3 { bottom: -26vmax; left: 10vmax; background: radial-gradient(circle, rgba(244,124,107,0.16) 0%, transparent 62%); animation: blobDrift3 38s ease-in-out infinite alternate; }
 @keyframes blobDrift1 { to { transform: translate(18vw, 22vh) scale(1.12); } }
 @keyframes blobDrift2 { to { transform: translate(-20vw, 26vh) scale(0.92); } }
 @keyframes blobDrift3 { to { transform: translate(14vw, -24vh) scale(1.08); } }
 
-/* Floating Kendrick faces drifting behind the glass */
-.bg-face {
+/* Floating Thai Letter Tiles (Buffer.com hero style, slowly follow cursor) */
+.thai-float-layer {
   position: absolute;
-  width: var(--s, 120px);
-  height: var(--s, 120px);
-  border-radius: 50%;
-  overflow: hidden;
-  opacity: 0.22;
-  border: 3px solid rgba(255, 255, 255, 0.9);
-  box-shadow: 0 18px 40px rgba(11, 42, 91, 0.12);
-  will-change: transform;
+  inset: 0;
+  pointer-events: none;
 }
-.bg-face img { width: 100%; height: 100%; object-fit: cover; object-position: center 35%; display: block; }
-.bg-face.f1 { --s: 150px; top: 18%; left: 4%; animation: faceFloat1 18s ease-in-out infinite alternate; }
-.bg-face.f2 { --s: 110px; top: 58%; right: 5%; animation: faceFloat2 22s ease-in-out infinite alternate; }
-.bg-face.f3 { --s: 90px; bottom: 6%; left: 38%; animation: faceFloat3 20s ease-in-out infinite alternate; }
-@keyframes faceFloat1 { 0% { transform: translate(0, 0) rotate(-6deg); } 100% { transform: translate(6vw, 10vh) rotate(8deg); } }
-@keyframes faceFloat2 { 0% { transform: translate(0, 0) rotate(6deg); } 100% { transform: translate(-8vw, -12vh) rotate(-8deg); } }
-@keyframes faceFloat3 { 0% { transform: translate(0, 0) rotate(0deg); } 100% { transform: translate(10vw, -8vh) rotate(10deg); } }
+.thai-float-tile {
+  position: absolute;
+  width: 56px;
+  height: 56px;
+  margin-left: -28px;
+  margin-top: -28px;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(15, 23, 42, 0.07);
+  box-shadow:
+    0 10px 26px rgba(11, 42, 91, 0.07),
+    0 2px 6px rgba(11, 42, 91, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  will-change: transform;
+  user-select: none;
+}
+.thai-float-tile::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border-radius: 11px;
+  background: var(--tile-bg, #F1F5F9);
+  opacity: 0.65;
+  z-index: 0;
+}
+.thai-float-tile .thai-char {
+  position: relative;
+  z-index: 1;
+  font-family: "Noto Sans Thai", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 23px;
+  font-weight: 800;
+  line-height: 1.05;
+  color: var(--tile-color, var(--navy));
+}
+.thai-float-tile .thai-sub {
+  position: relative;
+  z-index: 1;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  opacity: 0.85;
+  line-height: 1;
+}
+@media (max-width: 768px) {
+  .thai-float-tile {
+    width: 44px;
+    height: 44px;
+    margin-left: -22px;
+    margin-top: -22px;
+    border-radius: 12px;
+    opacity: 0.72;
+  }
+  .thai-float-tile .thai-char {
+    font-size: 18px;
+  }
+  .thai-float-tile .thai-sub {
+    font-size: 8px;
+  }
+}
 
 /* Foreground mascot buddy with rotating Thai phrase bubble */
 .mascot-buddy {
