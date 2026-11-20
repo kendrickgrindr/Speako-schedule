@@ -544,7 +544,11 @@ async function signOut() {
 // 1. PRIVATE LOGIN & SIGN-UP GATEWAY (/index.html)
 //    + INTERACTIVE THAI SURVIVAL KIT (No signup required)
 // =========================================================
+const GOOGLE_CLIENT_ID = "79359271791-9vlm6a8gmtbbv5vpa17frd568le3srfl.apps.googleusercontent.com";
 let _hasRenderedLogin = false;
+let _gsiInitialized = false;
+let _gsiPollTimer = 0;
+
 function renderLoginGateway() {
   const main = document.getElementById("app-main");
   if (!main) return;
@@ -563,10 +567,16 @@ function renderLoginGateway() {
         </div>
 
         <div class="card" style="padding:26px 22px;">
-          <div class="segmented-nav" style="width:100%;margin-bottom:20px;">
+          <div class="segmented-nav" style="width:100%;margin-bottom:18px;">
             <button class="seg-btn ${STATE.authMode === "signin" ? "active" : ""}" style="flex:1;" onclick="STATE.authMode='signin';renderLoginGateway()">Sign In</button>
             <button class="seg-btn ${STATE.authMode === "signup" ? "active" : ""}" style="flex:1;" onclick="STATE.authMode='signup';renderLoginGateway()">Sign Up</button>
           </div>
+
+          <div id="google-signin-slot" class="google-signin-slot">
+            <div class="google-signin-loading">Loading Google Sign-In…</div>
+          </div>
+
+          <div class="auth-divider"><span>or continue with email</span></div>
 
           ${
             STATE.authMode === "signin"
@@ -614,6 +624,68 @@ function renderLoginGateway() {
       </div>
     </div>
   `;
+
+  mountGoogleSignInButton();
+}
+
+function mountGoogleSignInButton(attempt = 0) {
+  if (_gsiPollTimer) {
+    clearTimeout(_gsiPollTimer);
+    _gsiPollTimer = 0;
+  }
+  const slot = document.getElementById("google-signin-slot");
+  if (!slot) return;
+
+  if (window.google?.accounts?.id) {
+    if (!_gsiInitialized) {
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleCredentialResponse,
+        ux_mode: "popup",
+      });
+      _gsiInitialized = true;
+    }
+    const slotWidth = Math.min(380, Math.max(240, Math.floor((slot.getBoundingClientRect().width || 360) - 8)));
+    slot.innerHTML = "";
+    window.google.accounts.id.renderButton(slot, {
+      type: "standard",
+      theme: "outline",
+      size: "large",
+      shape: "pill",
+      text: STATE.authMode === "signup" ? "signup_with" : "continue_with",
+      logo_alignment: "left",
+      locale: "en",
+      width: slotWidth,
+    });
+    return;
+  }
+
+  if (attempt < 45) {
+    _gsiPollTimer = setTimeout(() => mountGoogleSignInButton(attempt + 1), 150);
+  } else {
+    slot.innerHTML = `<div class="google-signin-loading">Google Sign-In unavailable — use email below</div>`;
+  }
+}
+
+async function handleGoogleCredentialResponse(resp) {
+  if (!resp || !resp.credential) {
+    showToast("Could not verify your Google account. Please try again.");
+    return;
+  }
+  const qpCourse = new URLSearchParams(window.location.search).get("course");
+  const course = qpCourse && qpCourse.toLowerCase() === "english" ? "english" : "thai";
+  try {
+    const res = await api("/api/auth/google", { credential: resp.credential });
+    localStorage.setItem("speako_token", res.token);
+    STATE.token = res.token;
+    if (res.is_new) {
+      window.location.href = `student.html?tab=book&course=${course}`;
+    } else {
+      window.location.href = PORTAL_PAGES[res.user?.role] || "student.html";
+    }
+  } catch (err) {
+    showToast(err.message || "Could not sign in with Google.");
+  }
 }
 
 async function handleSignIn(e) {
