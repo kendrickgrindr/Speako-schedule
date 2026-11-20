@@ -744,9 +744,30 @@ class SpeakoHandler(SimpleHTTPRequestHandler):
         if roles and me["role"] not in roles:
             raise ApiError(403, "You don't have access to this action.")
 
-    # ---------------- GET ----------------
+    # ---------------- SCHEDULE SUBPATH SUPPORT ----------------
+    def _normalize_schedule_path(self, redirect_missing_slash=True):
+        parsed = urllib.parse.urlsplit(self.path)
+        if parsed.path == "/schedule":
+            if redirect_missing_slash:
+                target = "/schedule/" + (f"?{parsed.query}" if parsed.query else "")
+                self.send_response(302)
+                self.send_header("Location", target)
+                self.send_header("Content-Length", "0")
+                self.end_headers()
+                return None
+            new_path = "/"
+        elif parsed.path.startswith("/schedule/"):
+            new_path = parsed.path[len("/schedule"):] or "/"
+        else:
+            return parsed.path
+        self.path = urllib.parse.urlunsplit(("", "", new_path, parsed.query, ""))
+        return new_path
+
+    # ---------------- GET / HEAD ----------------
     def do_GET(self):
-        path = urllib.parse.urlparse(self.path).path
+        path = self._normalize_schedule_path(redirect_missing_slash=True)
+        if path is None:
+            return
         if path.startswith("/api/"):
             return self.dispatch(path, {}, "GET")
         # Never serve the database or server source as static files
@@ -755,8 +776,17 @@ class SpeakoHandler(SimpleHTTPRequestHandler):
             return
         return super().do_GET()
 
+    def do_HEAD(self):
+        path = self._normalize_schedule_path(redirect_missing_slash=True)
+        if path is None:
+            return
+        if path.endswith((".db", ".py", ".jsonl")) or "/." in path:
+            self.send_error(404)
+            return
+        return super().do_HEAD()
+
     def do_POST(self):
-        path = urllib.parse.urlparse(self.path).path
+        path = self._normalize_schedule_path(redirect_missing_slash=False)
         try:
             data = self.read_json()
         except ApiError as e:
@@ -853,11 +883,12 @@ class SpeakoHandler(SimpleHTTPRequestHandler):
             raise ApiError(409, "An account with this email already exists. Please sign in.")
         uid = "student-" + uuid.uuid4().hex[:8]
         ts = now_iso()
+        goal = (data.get("learning_goal") or "").strip()[:300]
         cur.execute("""
-            INSERT INTO users (id, name, email, password_hash, phone, role, timezone, avatar, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, 'student', ?, ?, ?, ?)
+            INSERT INTO users (id, name, email, password_hash, phone, role, timezone, learning_goal, avatar, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, 'student', ?, ?, ?, ?, ?)
         """, (uid, name, email, hash_pw(password), (data.get("phone") or "").strip(),
-              data.get("timezone") or "Thailand (GMT+7)", initials(name), now_str(), ts))
+              data.get("timezone") or "Thailand (GMT+7)", goal, initials(name), now_str(), ts))
         u = cur.execute("SELECT * FROM users WHERE id = ?", (uid,)).fetchone()
         add_notification(cur, "signup", f"New student account: {name}", f"{name} ({email}) created a student account.", u)
         return {"token": self.new_session(cur, uid), "user": pub_user(u)}

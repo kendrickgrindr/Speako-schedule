@@ -7,6 +7,8 @@
  *   - /admin.html   -> Main Admin Control Center (all accounts, credits/packages, trash/recover, all schedules, teachers, email alerts)
  */
 
+const PORTAL_BASE = window.location.pathname.startsWith("/schedule") ? "/schedule" : "";
+
 const PORTAL_PAGES = {
   student: "student.html",
   teacher: "teacher.html",
@@ -77,7 +79,7 @@ const PREP_CHECKLIST_ITEMS = [
   "Find a quiet place",
 ];
 
-const SURVIVAL_AUDIO_BASE = "/audio/";
+const SURVIVAL_AUDIO_BASE = `${PORTAL_BASE}/audio/`;
 const SURVIVAL_KIT_DATA = {
   "ordering-food": {
     id: "ordering-food",
@@ -284,7 +286,8 @@ async function api(path, body = null) {
     headers["Content-Type"] = "application/json";
     opts.body = JSON.stringify(body);
   }
-  const res = await fetch(path, opts);
+  const url = path.startsWith("/") ? `${PORTAL_BASE}${path}` : path;
+  const res = await fetch(url, opts);
   const data = await res.json().catch(() => ({}));
   if (data && data.vault) {
     localStorage.setItem("speako_vault_v3", data.vault);
@@ -359,6 +362,26 @@ function openSlideDeck(url, title) {
 // INITIALIZATION & STRICT ROLE GUARD
 // =========================================================
 async function initPortal() {
+  const params = new URLSearchParams(window.location.search);
+  const qMode = params.get("mode");
+  const qCourse = params.get("course");
+  const qTab = params.get("tab");
+  const qPkg = params.get("pkg");
+  if (qMode === "signup" || qMode === "signin") STATE.authMode = qMode;
+  if (qCourse === "thai" || qCourse === "english") {
+    STATE.bookCourseId = qCourse;
+    STATE.pricingCourse = qCourse;
+    STATE.curriculumCourse = qCourse;
+  }
+  if (qPkg) STATE.bookSelectedPackageId = qPkg;
+
+  const officialLink = document.querySelector('a[href*="speakolanguages.com"]');
+  if (officialLink && PORTAL_BASE) {
+    officialLink.setAttribute("href", "/");
+    officialLink.removeAttribute("target");
+    officialLink.removeAttribute("rel");
+  }
+
   const days = getUpcomingDays(7, 0);
   STATE.bookSelectedDate = days[1]?.dateStr || days[0].dateStr;
 
@@ -367,7 +390,8 @@ async function initPortal() {
       try {
         const { user } = await api("/api/me");
         if (user && PORTAL_PAGES[user.role]) {
-          window.location.href = PORTAL_PAGES[user.role];
+          const suffix = qTab && user.role === "student" ? `?tab=${encodeURIComponent(qTab)}${qCourse ? `&course=${encodeURIComponent(qCourse)}` : ""}` : "";
+          window.location.href = `${PORTAL_PAGES[user.role]}${suffix}`;
           return;
         }
       } catch (_) {
@@ -405,7 +429,18 @@ async function initPortal() {
     teacher: "schedule",
     admin: "accounts",
   };
-  STATE.tab = defaultTabs[STATE.portal] || "schedule";
+  const allowedTabs = {
+    student: ["schedule", "book", "lessons", "credits"],
+    teacher: ["schedule", "availability", "students", "slides"],
+    admin: ["accounts", "schedules", "teachers", "invoices", "alerts"],
+  };
+  STATE.tab =
+    qTab && (allowedTabs[STATE.portal] || []).includes(qTab)
+      ? qTab
+      : defaultTabs[STATE.portal] || "schedule";
+  document.querySelectorAll(".seg-btn").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.tab === STATE.tab);
+  });
   updateTopNavbar();
   renderCurrentPortal(false);
 }
@@ -473,9 +508,14 @@ function switchTab(tabName) {
   renderCurrentPortal(true);
 }
 
+let _hasRenderedPortal = false;
 function renderCurrentPortal(withFade = false) {
   const main = document.getElementById("app-main");
   if (!main) return;
+
+  const shouldAnimate = withFade || !_hasRenderedPortal;
+  _hasRenderedPortal = true;
+  main.classList.toggle("no-reanim", !shouldAnimate);
 
   const paint = () => {
     if (STATE.portal === "student") renderStudentPortal(main);
@@ -504,23 +544,26 @@ async function signOut() {
 // 1. PRIVATE LOGIN & SIGN-UP GATEWAY (/index.html)
 //    + INTERACTIVE THAI SURVIVAL KIT (No signup required)
 // =========================================================
+let _hasRenderedLogin = false;
 function renderLoginGateway() {
   const main = document.getElementById("app-main");
   if (!main) return;
+  main.classList.toggle("no-reanim", _hasRenderedLogin);
+  _hasRenderedLogin = true;
 
   main.innerHTML = `
     <div style="max-width:740px;width:100%;margin:0 auto;">
-      <div style="max-width:460px;width:100%;margin:0 auto;" class="anim-up">
-        <div style="text-align:center;margin-bottom:24px;">
+      <div style="max-width:440px;width:100%;margin:0 auto;" class="anim-up">
+        <div style="text-align:center;margin-bottom:22px;">
           <img src="Speako logo.png" alt="Speako" style="width:52px;height:52px;object-fit:contain;margin-bottom:10px;" />
-          <h1 style="font-size:clamp(26px,5vw,32px);">Speako Private Portal</h1>
+          <h1 style="font-size:clamp(26px,5vw,32px);">Speako Portal</h1>
           <p style="font-size:14.5px;color:var(--muted);margin-top:6px;">
-            Sign in to your private account to view your 1-on-1 schedule, lessons, and class credits.
+            Sign in or create a free account to pick your class time.
           </p>
         </div>
 
-        <div class="card" style="padding:28px 22px;">
-          <div class="segmented-nav" style="width:100%;margin-bottom:22px;">
+        <div class="card" style="padding:26px 22px;">
+          <div class="segmented-nav" style="width:100%;margin-bottom:20px;">
             <button class="seg-btn ${STATE.authMode === "signin" ? "active" : ""}" style="flex:1;" onclick="STATE.authMode='signin';renderLoginGateway()">Sign In</button>
             <button class="seg-btn ${STATE.authMode === "signup" ? "active" : ""}" style="flex:1;" onclick="STATE.authMode='signup';renderLoginGateway()">Sign Up</button>
           </div>
@@ -528,7 +571,7 @@ function renderLoginGateway() {
           ${
             STATE.authMode === "signin"
               ? `
-            <form onsubmit="handleSignIn(event)" style="display:flex;flex-direction:column;gap:15px;">
+            <form onsubmit="handleSignIn(event)" style="display:flex;flex-direction:column;gap:14px;">
               <div>
                 <label style="font-size:12.5px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;">Email Address</label>
                 <input id="login-email" type="email" class="input-clean" placeholder="you@example.com" autocomplete="email" required />
@@ -537,34 +580,30 @@ function renderLoginGateway() {
                 <label style="font-size:12.5px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;">Password</label>
                 <input id="login-password" type="password" class="input-clean" placeholder="••••••••" autocomplete="current-password" required />
               </div>
-              <button type="submit" class="btn btn-primary btn-lg" style="width:100%;margin-top:6px;">Sign In</button>
+              <button type="submit" class="btn btn-primary btn-lg" style="width:100%;margin-top:4px;">Sign In</button>
             </form>
           `
               : `
-            <form onsubmit="handleSignUp(event)" style="display:flex;flex-direction:column;gap:13px;">
+            <form onsubmit="handleSignUp(event)" style="display:flex;flex-direction:column;gap:14px;">
               <div>
-                <label style="font-size:12.5px;font-weight:600;color:var(--muted);display:block;margin-bottom:5px;">Your Name</label>
-                <input id="signup-name" type="text" class="input-clean" placeholder="e.g. Sarah Jenkins" required />
+                <label style="font-size:12.5px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;">Your Name</label>
+                <input id="signup-name" type="text" class="input-clean" placeholder="e.g. Sarah Jenkins" autocomplete="name" required />
               </div>
               <div>
-                <label style="font-size:12.5px;font-weight:600;color:var(--muted);display:block;margin-bottom:5px;">Email Address</label>
+                <label style="font-size:12.5px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;">Email Address</label>
                 <input id="signup-email" type="email" class="input-clean" placeholder="sarah@example.com" autocomplete="email" required />
               </div>
               <div>
-                <label style="font-size:12.5px;font-weight:600;color:var(--muted);display:block;margin-bottom:5px;">WhatsApp / Phone (Optional)</label>
-                <input id="signup-phone" type="text" class="input-clean" placeholder="+66 8X XXX XXXX" />
+                <label style="font-size:12.5px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;">Password (min 6 characters)</label>
+                <input id="signup-password" type="password" class="input-clean" placeholder="At least 6 characters" autocomplete="new-password" required minlength="6" />
               </div>
-              <div>
-                <label style="font-size:12.5px;font-weight:600;color:var(--muted);display:block;margin-bottom:5px;">Password (min 6 characters)</label>
-                <input id="signup-password" type="password" class="input-clean" placeholder="Create a private password" autocomplete="new-password" required minlength="6" />
-              </div>
-              <button type="submit" class="btn btn-primary btn-lg" style="width:100%;margin-top:4px;">Create Private Account</button>
+              <button type="submit" class="btn btn-primary btn-lg" style="width:100%;margin-top:4px;">Create Free Account</button>
             </form>
           `
           }
 
-          <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--line);text-align:center;font-size:12.5px;color:var(--muted);">
-            🔒 Your account and 1-on-1 class schedule are strictly private.
+          <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--line);text-align:center;font-size:12.5px;color:var(--muted);">
+            ✓ Zero commitment after your 1st free class · No card needed
           </div>
         </div>
       </div>
@@ -600,13 +639,14 @@ async function handleSignUp(e) {
   e.preventDefault();
   const name = document.getElementById("signup-name")?.value.trim();
   const email = document.getElementById("signup-email")?.value.trim();
-  const phone = document.getElementById("signup-phone")?.value.trim();
   const password = document.getElementById("signup-password")?.value;
+  const qpCourse = new URLSearchParams(window.location.search).get("course");
+  const course = qpCourse && qpCourse.toLowerCase() === "english" ? "english" : "thai";
   try {
-    const res = await api("/api/signup", { name, email, phone, password });
+    const res = await api("/api/signup", { name, email, password });
     localStorage.setItem("speako_token", res.token);
     STATE.token = res.token;
-    window.location.href = "student.html";
+    window.location.href = `student.html?tab=book&course=${course}`;
   } catch (err) {
     showToast(err.message);
   }
@@ -961,10 +1001,40 @@ function jumpToBookSlot(dateStr, timeSlot) {
   switchTab("book");
 }
 
+const PORTAL_WEB3FORMS_KEY = "80eb59e8-9b95-46ba-9c0d-8c84d49e4889";
+
+function dispatchEmailFallback(res) {
+  if (!res || res.email_sent || !res.email_payload) return;
+  const p = res.email_payload;
+  try {
+    fetch("https://api.web3forms.com/submit", {
+      method: "POST",
+      keepalive: true,
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({
+        access_key: PORTAL_WEB3FORMS_KEY,
+        from_name: "Speako Languages Portal",
+        botcheck: "",
+        ...p,
+      }),
+    }).catch(() => {});
+  } catch (_) {}
+}
+
+function selectBookingTimeSlot(slot) {
+  STATE.bookSelectedTime = slot;
+  document.querySelectorAll(".time-grid .time-pill").forEach((btn) => {
+    btn.classList.toggle("selected", btn.dataset.slot === slot);
+  });
+  const sumEl = document.getElementById("summary-selected-time");
+  if (sumEl) sumEl.textContent = `${slot} (1 hr · GMT+7)`;
+}
+
 async function studentCancelBooking(bookingId) {
   try {
     STATE.confirmCancelBookingId = "";
-    await api("/api/booking/update", { booking_id: bookingId, action: "cancel" });
+    const res = await api("/api/booking/update", { booking_id: bookingId, action: "cancel" });
+    dispatchEmailFallback(res);
     await refreshState();
     renderCurrentPortal(false);
     showToast("Class cancelled — 1 lesson credit refunded to your account.");
@@ -1137,7 +1207,7 @@ function renderStudentBooking(main) {
                 .map((slot) => {
                   const isSelected = STATE.bookSelectedTime === slot;
                   return `
-                  <button type="button" class="time-pill ${isSelected ? "selected" : ""}" onclick="STATE.bookSelectedTime='${slot}';renderCurrentPortal(false)">
+                  <button type="button" class="time-pill ${isSelected ? "selected" : ""}" data-slot="${slot}" onclick="selectBookingTimeSlot('${slot}')">
                     ${slot}
                   </button>
                 `;
@@ -1208,7 +1278,7 @@ function renderStudentBooking(main) {
             </div>
             <div style="display:flex;justify-content:space-between;">
               <span style="color:var(--muted);">Time</span>
-              <strong>${esc(STATE.bookSelectedTime)} (1 hr · GMT+7)</strong>
+              <strong id="summary-selected-time">${esc(STATE.bookSelectedTime)} (1 hr · GMT+7)</strong>
             </div>
             <div style="display:flex;justify-content:space-between;">
               <span style="color:var(--muted);">Your Credits</span>
@@ -1239,6 +1309,7 @@ async function submitStudentBooking() {
       package_id: STATE.bookSelectedPackageId || undefined,
       student_notes: STATE.bookNotes,
     });
+    dispatchEmailFallback(res);
     await refreshState();
     openModal(`
       <div style="text-align:center;padding:12px 6px;">
@@ -1437,6 +1508,21 @@ function renderStudentCredits(main) {
       </div>
     </div>
 
+    <!-- Weekly Offer Countdown & No-Commitment Reassurance -->
+    <div class="schedule-offer-banner anim-up">
+      <div>
+        <span class="pill-tag" style="background:rgba(244,124,107,.2);color:#ffb4a8;border:1px solid rgba(244,124,107,.42);">⚡ Weekly Trial Window Closes Sunday</span>
+        <h3 style="color:#fff;font-size:20px;margin-top:8px;">Free Trial Slots &amp; Bonus Notes Held Until Sunday</h3>
+        <p style="font-size:13.5px;color:#c9d6e8;margin-top:4px;">Zero sales pressure after your 1st free class — choose a package only if you love learning with Kendrick.</p>
+      </div>
+      <div class="schedule-offer-grid" role="timer" aria-label="Weekly offer countdown">
+        <div class="schedule-cd-box"><span class="schedule-cd-num" data-sched-cd="days">00</span><span class="schedule-cd-lbl">Days</span></div>
+        <div class="schedule-cd-box"><span class="schedule-cd-num" data-sched-cd="hours">00</span><span class="schedule-cd-lbl">Hours</span></div>
+        <div class="schedule-cd-box"><span class="schedule-cd-num" data-sched-cd="mins">00</span><span class="schedule-cd-lbl">Mins</span></div>
+        <div class="schedule-cd-box hot"><span class="schedule-cd-num" data-sched-cd="secs">00</span><span class="schedule-cd-lbl">Secs</span></div>
+      </div>
+    </div>
+
     <!-- Official Pricing Cards -->
     <div class="grid-3 anim-up" style="margin-bottom:40px;">
       ${pkgs
@@ -1508,6 +1594,7 @@ function renderStudentCredits(main) {
 async function studentPurchasePackage(packageId) {
   try {
     const res = await api("/api/purchase", { package_id: packageId, payment_method: "Pending Admin Payment" });
+    dispatchEmailFallback(res);
     await refreshState();
     renderCurrentPortal(false);
     const tx = res.transaction || {};
@@ -2005,6 +2092,25 @@ function renderAdminPortal(main) {
   else if (STATE.tab === "alerts") renderAdminAlerts(main);
 }
 
+async function downloadAdminClientBackup() {
+  try {
+    const data = await api("/api/admin/backup");
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const day = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `speako-client-backup-${day}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    showToast(`Exported backup (${data.counts?.users || 0} accounts, ${data.counts?.bookings || 0} bookings).`);
+  } catch (err) {
+    showToast(err.message || "Could not export backup.");
+  }
+}
+
 function renderAdminAccounts(main) {
   const activeUsers = STATE.users.filter((u) => !u.is_deleted);
   const trashedUsers = STATE.users.filter((u) => u.is_deleted);
@@ -2025,7 +2131,8 @@ function renderAdminAccounts(main) {
         <h1 style="margin-top:8px;">Accounts</h1>
         <p>Manage credits, packages, roles, and account recovery.</p>
       </div>
-      <div style="display:flex;gap:10px;">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn btn-ghost" onclick="downloadAdminClientBackup()">⬇ Export Backup (.json)</button>
         <button class="btn btn-ghost" onclick="STATE.adminShowTrash=!STATE.adminShowTrash;renderCurrentPortal(false)">
           Trash (${trashedUsers.length})
         </button>
@@ -2653,7 +2760,7 @@ function renderThaiSurvivalKitSection() {
               const key = `${current.id}-${idx}`;
               const hideAudio = !!STATE.skFailedAudio[key];
               return `
-              <div style="padding:16px;border-radius:18px;background:rgba(255,255,255,0.82);border:1px solid var(--line);animation:viewFadeIn 0.36s var(--spring) ${idx * 80}ms backwards;">
+              <div style="padding:16px;border-radius:18px;background:rgba(255,255,255,0.82);border:1px solid var(--line);">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
                   <div>
                     <div style="font-size:20px;font-weight:700;color:var(--navy);">${esc(p.thai)}</div>
@@ -2815,8 +2922,7 @@ function skAnswerQuiz(selectedMeaning) {
 }
 
 // =========================================================
-// LIVING BACKGROUND (BUFFER-STYLE FLOATING THAI LETTERS
-// THAT FOLLOW CURSOR SLOWLY), MASCOT & COUNTDOWN TICKER
+// STATIC BACKGROUND GRID, MASCOT & COUNTDOWN TICKERS
 // =========================================================
 const MASCOT_QUOTES = [
   { th: "สวัสดีครับ! (sà-wàt-dii khráp)", en: "Tap me for a quick Thai tip!" },
@@ -2825,50 +2931,40 @@ const MASCOT_QUOTES = [
   { th: "เก่งมาก! (gèng mâak!)", en: "You're doing great!" },
 ];
 
-const THAI_FLOAT_LETTERS = [
-  { ch: "ก", sub: "gaw", x: 7, y: 14, color: "#0B2A5B", bg: "#EEF4FF", pull: 1.05 },
-  { ch: "ข", sub: "khǎw", x: 24, y: 12, color: "#14A3A0", bg: "#EBFBFA", pull: 0.9 },
-  { ch: "ค", sub: "khaw", x: 6, y: 34, color: "#E15B48", bg: "#FFF1EE", pull: 1.15 },
-  { ch: "ง", sub: "ngaw", x: 21, y: 46, color: "#D97706", bg: "#FFF8EB", pull: 1.2 },
-  { ch: "จ", sub: "jaw", x: 10, y: 58, color: "#2563EB", bg: "#EFF6FF", pull: 1.0 },
-  { ch: "ช", sub: "chaw", x: 18, y: 66, color: "#0D9488", bg: "#F0FDFA", pull: 1.1 },
-  { ch: "ด", sub: "daw", x: 4, y: 82, color: "#16A34A", bg: "#F0FDF4", pull: 0.85 },
-  { ch: "ต", sub: "dtaw", x: 21, y: 83, color: "#DB2777", bg: "#FDF2F8", pull: 0.95 },
-  { ch: "ถ", sub: "thǎw", x: 40, y: 88, color: "#0B2A5B", bg: "#F1F5F9", pull: 0.9 },
-  { ch: "ท", sub: "thaw", x: 56, y: 88, color: "#2563EB", bg: "#EFF6FF", pull: 0.95 },
-  { ch: "น", sub: "naw", x: 76, y: 11, color: "#0284C7", bg: "#F0F9FF", pull: 0.9 },
-  { ch: "บ", sub: "baw", x: 82, y: 34, color: "#475569", bg: "#F8FAFC", pull: 1.05 },
-  { ch: "ป", sub: "bpaw", x: 92, y: 33, color: "#E11D48", bg: "#FFF1F2", pull: 0.95 },
-  { ch: "พ", sub: "phaw", x: 81, y: 58, color: "#0B2A5B", bg: "#F1F5F9", pull: 1.15 },
-  { ch: "ม", sub: "maw", x: 95, y: 58, color: "#0D9488", bg: "#F0FDFA", pull: 0.9 },
-  { ch: "ส", sub: "sǎw", x: 88, y: 71, color: "#2563EB", bg: "#EFF6FF", pull: 1.1 },
-  { ch: "อ", sub: "aw", x: 92, y: 87, color: "#EA580C", bg: "#FFF7ED", pull: 0.85 },
-];
+function updateScheduleWeeklyCountdowns() {
+  const days = document.querySelectorAll('[data-sched-cd="days"]');
+  if (!days.length) return;
+  const now = new Date();
+  const end = new Date(now);
+  const day = now.getDay();
+  end.setDate(now.getDate() + (day === 0 ? 0 : 7 - day));
+  end.setHours(23, 59, 59, 999);
+  const diff = Math.max(0, end - now);
+  const pad = (n) => String(n).padStart(2, "0");
+  const d = pad(Math.floor(diff / 86400000));
+  const h = pad(Math.floor((diff % 86400000) / 3600000));
+  const m = pad(Math.floor((diff % 3600000) / 60000));
+  const s = pad(Math.floor((diff % 60000) / 1000));
+  days.forEach((el) => { el.textContent = d; });
+  document.querySelectorAll('[data-sched-cd="hours"]').forEach((el) => { el.textContent = h; });
+  document.querySelectorAll('[data-sched-cd="mins"]').forEach((el) => { el.textContent = m; });
+  document.querySelectorAll('[data-sched-cd="secs"]').forEach((el) => { el.textContent = s; });
+}
 
 function initBackgroundAndMascot() {
-  if (!document.querySelector(".bg-motion")) {
-    const bg = document.createElement("div");
+  let bg = document.querySelector(".bg-motion");
+  if (!bg) {
+    bg = document.createElement("div");
     bg.className = "bg-motion";
     bg.setAttribute("aria-hidden", "true");
-    bg.innerHTML = `
-      <div class="bg-grid"></div>
-      <div class="bg-blob b1"></div>
-      <div class="bg-blob b2"></div>
-      <div class="bg-blob b3"></div>
-      <div class="thai-float-layer" id="thai-float-layer">
-        ${THAI_FLOAT_LETTERS.map(
-          (item, i) => `
-          <div class="thai-float-tile" data-idx="${i}" style="left:${item.x}%;top:${item.y}%;--tile-color:${item.color};--tile-bg:${item.bg};">
-            <span class="thai-char">${item.ch}</span>
-            <span class="thai-sub">${item.sub}</span>
-          </div>
-        `
-        ).join("")}
-      </div>
-    `;
+    bg.innerHTML = `<div class="bg-grid"></div>`;
     document.body.prepend(bg);
-    initThaiLettersCursorFollow();
   }
+
+  updateScheduleWeeklyCountdowns();
+  setInterval(() => {
+    if (!document.hidden) updateScheduleWeeklyCountdowns();
+  }, 1000);
 
   if (!document.querySelector(".mascot-buddy")) {
     const buddy = document.createElement("div");
@@ -2902,78 +2998,6 @@ function initBackgroundAndMascot() {
       }
     }
   }, 60000);
-}
-
-function initThaiLettersCursorFollow() {
-  const tiles = Array.from(document.querySelectorAll(".thai-float-tile"));
-  if (!tiles.length) return;
-
-  const state = tiles.map((el, i) => ({
-    el,
-    cfg: THAI_FLOAT_LETTERS[i] || THAI_FLOAT_LETTERS[0],
-    cx: 0,
-    cy: 0,
-    phase: i * 0.85,
-  }));
-
-  let pointerActive = false;
-  let mouseX = window.innerWidth * 0.5;
-  let mouseY = window.innerHeight * 0.5;
-
-  window.addEventListener(
-    "pointermove",
-    (e) => {
-      pointerActive = true;
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-    },
-    { passive: true }
-  );
-
-  document.addEventListener("mouseleave", () => {
-    pointerActive = false;
-  });
-
-  function tick(now) {
-    const t = (now || 0) * 0.0012;
-    const vw = window.innerWidth || 1280;
-    const vh = window.innerHeight || 800;
-
-    for (let i = 0; i < state.length; i++) {
-      const s = state[i];
-      const homeX = (s.cfg.x / 100) * vw;
-      const homeY = (s.cfg.y / 100) * vh;
-
-      // Gentle ambient float before & during cursor movement
-      const bobX = Math.sin(t + s.phase) * 5.5;
-      const bobY = Math.cos(t * 0.9 + s.phase) * 6.5;
-
-      let targetX = bobX;
-      let targetY = bobY;
-
-      if (pointerActive) {
-        const dx = mouseX - homeX;
-        const dy = mouseY - homeY;
-        const dist = Math.hypot(dx, dy) || 1;
-        // Smooth attraction toward cursor (like buffer.com hero tiles):
-        // closer tiles pull in more strongly + a gentle global drift toward the cursor
-        const proximity = Math.max(0.18, 1 - Math.min(dist / 900, 0.82));
-        const maxPull = 95 * (s.cfg.pull || 1) * proximity;
-        const pullRatio = Math.min(0.26 * (s.cfg.pull || 1), maxPull / dist);
-        targetX += dx * pullRatio;
-        targetY += dy * pullRatio;
-      }
-
-      // Slow, silky interpolation so letters follow the cursor gracefully
-      s.cx += (targetX - s.cx) * 0.032;
-      s.cy += (targetY - s.cy) * 0.032;
-
-      s.el.style.transform = `translate3d(${s.cx.toFixed(2)}px, ${s.cy.toFixed(2)}px, 0)`;
-    }
-    requestAnimationFrame(tick);
-  }
-
-  requestAnimationFrame(tick);
 }
 
 let mascotIdx = 0;
