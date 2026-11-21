@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#0B2A5B">
   <title>Speako — Lesson 1: Greetings and Polite Words</title>
 
+  <script src="../audio/speako-tts.js?v=20261122a"></script>
   <script>
     /*
      * EDIT YOUR LESSON HERE.
@@ -2014,9 +2015,7 @@
           activeListenButton.setAttribute("aria-pressed", "false");
           activeListenButton = null;
         }
-        if (synth) {
-          try { synth.cancel(); } catch (_) { /* Speech is optional. */ }
-        }
+        if (window.SPEAKO_TTS) window.SPEAKO_TTS.stop();
       }
 
       function goTo(index) {
@@ -2160,74 +2159,51 @@
        * Voice lists may arrive asynchronously after page load.
        */
       function refreshVoices() {
-        let availableVoices = [];
-        if (synth) {
-          try { availableVoices = synth.getVoices(); } catch (_) { /* Optional enhancement. */ }
-        }
-
-        const thaiVoices = availableVoices.filter(voice => /^th(?:[-_]|$)/i.test(voice.lang));
-        thaiVoice =
-          thaiVoices.find(voice => /^th[-_]th$/i.test(voice.lang) && voice.localService) ||
-          thaiVoices.find(voice => /^th[-_]th$/i.test(voice.lang)) ||
-          thaiVoices[0] ||
-          null;
+        const ready = !!(window.SPEAKO_TTS && window.SPEAKO_TTS.ready);
+        thaiVoice = ready ? { name: "Speako Neural Thai" } : null;
 
         stage.querySelectorAll(".listen").forEach(button => {
-          button.hidden = !thaiVoice;
+          button.hidden = !ready;
         });
 
-        voiceStatus.textContent = thaiVoice ? "Thai audio ready" : "Teacher-led audio";
-        voiceStatus.title = thaiVoice
-          ? `Thai voice: ${thaiVoice.name}`
-          : "Listen buttons appear only when your browser provides a Thai voice.";
-
-        if (!thaiVoice && activeUtterance) stopSpeech();
+        voiceStatus.textContent = ready ? "Neural Thai audio ready" : "Teacher-led audio";
+        voiceStatus.title = ready
+          ? "Native neural Thai pronunciation"
+          : "Thai audio unavailable.";
       }
 
       function speak(button) {
-        if (!synth) return;
+        if (!window.SPEAKO_TTS) return;
 
         if (activeListenButton === button) {
           stopSpeech();
           return;
         }
 
-        refreshVoices();
-        if (!thaiVoice) return;
-
         stopSpeech();
 
-        const utterance = new SpeechSynthesisUtterance(button.dataset.speak);
-        utterance.lang = "th-TH";
-        utterance.voice = thaiVoice;
-        utterance.rate = 0.85;
-        utterance.pitch = 1;
-        utterance.volume = 1;
-
-        activeUtterance = utterance;
+        const token = {};
+        activeUtterance = token;
         activeListenButton = button;
         button.classList.add("is-speaking");
         button.setAttribute("aria-pressed", "true");
 
         function finish() {
-          if (activeUtterance !== utterance) return;
+          if (activeUtterance !== token) return;
           button.classList.remove("is-speaking");
           button.setAttribute("aria-pressed", "false");
           activeUtterance = null;
           activeListenButton = null;
         }
 
-        utterance.onend = finish;
-        utterance.onerror = event => {
-          finish();
-          if (event.error !== "canceled" && event.error !== "interrupted") {
+        const ok = window.SPEAKO_TTS.play(button.dataset.speak, {
+          onEnd: finish,
+          onError: () => {
+            finish();
             announce("Thai audio could not play. Please follow your teacher’s pronunciation.");
           }
-        };
-
-        try {
-          synth.speak(utterance);
-        } catch (_) {
+        });
+        if (!ok) {
           finish();
           announce("Thai audio could not play. Please follow your teacher’s pronunciation.");
         }

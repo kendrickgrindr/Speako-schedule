@@ -332,7 +332,8 @@ body.has-voice .chip:hover{box-shadow:0 0 0 2px var(--coral)}
 </aside>
 <div id="toast"></div>
 
-<script>
+<script src="../audio/speako-tts.js?v=20261122a"></script>
+  <script>
 /* =====================================================================
    1. LESSON CONTENT — edit words here.
       Every Thai item: { th: Thai script, rom: romanization, en: meaning }
@@ -836,7 +837,7 @@ function go(i) {
   $('notes-slide').textContent = `Slide ${i + 1}`;
   $('notes-text').textContent = deck[i].notes || 'No notes for this slide.';
   history.replaceState(null, '', `#${i + 1}`);
-  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  if (window.SPEAKO_TTS) window.SPEAKO_TTS.stop();
 }
 
 /* "Next" first reveals pending role-play lines, then moves on */
@@ -879,28 +880,16 @@ function toggleFullscreen() {
 }
 const toggleNotes = () => $('notes').classList.toggle('open');
 
-/* --- Speech (Web Speech API, Thai voice only) --- */
-let thVoice = null;
-function pickVoice() {
-  if (!('speechSynthesis' in window)) return;
-  const voices = speechSynthesis.getVoices();
-  thVoice = voices.find(v => /^th([-_]|$)/i.test(v.lang)) || null;
-  document.body.classList.toggle('has-voice', !!thVoice);
-}
-if ('speechSynthesis' in window) {
-  pickVoice();
-  speechSynthesis.onvoiceschanged = pickVoice;
-  setTimeout(pickVoice, 600); setTimeout(pickVoice, 2000);
+/* --- Speech (Speako Neural Thai Audio) --- */
+if (window.SPEAKO_TTS && window.SPEAKO_TTS.ready) {
+  document.body.classList.add('has-voice');
 }
 function speak(text, btn) {
-  if (!thVoice) return;
-  /* For "ครับ/ค่ะ" or "ผม/ฉัน" options, read the first form; drop "..." */
-  const clean = text.replace(/ครับ\/ค่ะ|ครับ\/คะ/g, 'ครับ').replace(/ผม\/ฉัน/g, 'ผม').replace(/\.{3}|…/g, '').trim();
-  speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(clean);
-  u.lang = 'th-TH'; u.voice = thVoice; u.rate = 0.8;
-  if (btn) { btn.classList.add('speaking'); u.onend = u.onerror = () => btn.classList.remove('speaking'); }
-  speechSynthesis.speak(u);
+  if (!window.SPEAKO_TTS) return;
+  document.querySelectorAll('.listen.speaking').forEach(b => b.classList.remove('speaking'));
+  if (btn) btn.classList.add('speaking');
+  const clear = () => { if (btn) btn.classList.remove('speaking'); };
+  window.SPEAKO_TTS.play(text, { onEnd: clear, onError: clear });
 }
 
 /* --- Clicks: listen buttons, nav buttons, reveal cards --- */

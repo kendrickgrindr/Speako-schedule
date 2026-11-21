@@ -67,6 +67,7 @@
     <aside id="notes" aria-label="Teacher notes"></aside>
     <footer class="footer"><span>← → / Space · T romanization · N notes · F fullscreen</span><div class="nav"><span id="counter"></span><button id="prev" aria-label="Previous slide">←</button><button id="next" aria-label="Next slide">→</button></div></footer>
   </div>
+  <script src="../audio/speako-tts.js?v=20261122a"></script>
   <script>
     // EDIT LESSON CONTENT HERE. Each object below is one slide.
     // To personalize the student's country, edit the "yourCountry" entry.
@@ -134,9 +135,9 @@
       return "";
     }
     function render(animate=true){let s=slides[current],st=state[current]||(state[current]={});slideEl.innerHTML=content(s,st);slideEl.classList.remove("fade");if(animate){void slideEl.offsetWidth;slideEl.classList.add("fade")}counter.textContent=`${current+1} / ${slides.length}`;progress.style.width=`${(current+1)/slides.length*100}%`;prev.disabled=current===0;next.disabled=current===slides.length-1;notesEl.innerHTML=`<strong>Teacher notes</strong>${esc(s.notes||"")}`;notesEl.classList.toggle("open",notesVisible);deck.classList.toggle("roman-hidden",!romanVisible)}
-    function go(index){index=Math.max(0,Math.min(slides.length-1,index));if(index===current)return;if("speechSynthesis" in window)speechSynthesis.cancel();current=index;render()}
-    function voices(){if(!("speechSynthesis" in window))return;thaiVoice=speechSynthesis.getVoices().find(v=>v.lang.toLowerCase().startsWith("th"))||null;deck.classList.toggle("speech-ready",!!thaiVoice)}
-    function speak(text){if(!thaiVoice)return;speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(text);u.lang="th-TH";u.voice=thaiVoice;u.rate=.85;speechSynthesis.speak(u)}
+    function go(index){index=Math.max(0,Math.min(slides.length-1,index));if(index===current)return;if(window.SPEAKO_TTS)window.SPEAKO_TTS.stop();current=index;render()}
+    function voices(){thaiVoice=!!(window.SPEAKO_TTS&&window.SPEAKO_TTS.ready);deck.classList.toggle("speech-ready",thaiVoice)}
+    function speak(text){if(!window.SPEAKO_TTS)return;window.SPEAKO_TTS.play(text)}
     function scale(){deck.style.setProperty("--scale",Math.min(innerWidth/1600,innerHeight/900))}
     async function fullscreen(){try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen()}catch(e){console.warn("Fullscreen unavailable",e)}}
     slideEl.addEventListener("click",e=>{let b=e.target.closest("[data-speak]");if(b){e.stopPropagation();speak(b.dataset.speak);return}let r=e.target.closest("[data-reveal]");if(r){let st=state[current];st.revealed||=[];let n=Number(r.dataset.reveal);if(!st.revealed.includes(n))st.revealed.push(n);render(false);return}let a=e.target.closest("[data-action]")?.dataset.action;if(a==="reveal"){state[current].revealed=true;render(false)}else if(a==="nextLine"){state[current].lineCount=Math.min(slides[current].lines.length,(state[current].lineCount||1)+1);render(false)}});
@@ -144,7 +145,7 @@
     prev.addEventListener("click",()=>go(current-1));next.addEventListener("click",()=>go(current+1));
     document.addEventListener("keydown",e=>{let k=e.key.toLowerCase();if(e.key==="ArrowRight"||e.key==="PageDown"||e.key===" "){if(e.target.matches("button,[role=button]"))return;e.preventDefault();go(current+1)}else if(e.key==="ArrowLeft"||e.key==="PageUp"){e.preventDefault();go(current-1)}else if(k==="t"){romanVisible=!romanVisible;render(false)}else if(k==="n"){notesVisible=!notesVisible;render(false)}else if(k==="f")fullscreen()});
     let startX=0,startY=0;deck.addEventListener("touchstart",e=>{startX=e.changedTouches[0].screenX;startY=e.changedTouches[0].screenY},{passive:true});deck.addEventListener("touchend",e=>{let dx=e.changedTouches[0].screenX-startX,dy=e.changedTouches[0].screenY-startY;if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy))go(current+(dx<0?1:-1))},{passive:true});
-    addEventListener("resize",scale);if("speechSynthesis" in window){speechSynthesis.addEventListener?.("voiceschanged",voices);voices()}scale();render(false);
+    addEventListener("resize",scale);voices();scale();render(false);
   </script>
 </body>
 </html>

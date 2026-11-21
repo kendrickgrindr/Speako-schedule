@@ -1283,6 +1283,7 @@
     </main>
   </div>
 
+  <script src="../audio/speako-tts.js?v=20261122a"></script>
   <script>
     /* ==========================================================================
        1. SLIDE CONTENT DATA ARRAY (Edit all lesson text & notes here)
@@ -2029,75 +2030,17 @@
      * Hides all Listen buttons automatically if no Thai voice exists.
      */
     function detectThaiVoice() {
-      if (!("speechSynthesis" in window)) {
-        document.body.classList.add("no-thai-voice");
-        hasThaiVoice = false;
-        return;
-      }
-
-      const voices = window.speechSynthesis.getVoices() || [];
-      const found = voices.find(v => v.lang && v.lang.toLowerCase().startsWith("th"));
-
-      if (found) {
-        thaiVoice = found;
-        hasThaiVoice = true;
-        document.body.classList.remove("no-thai-voice");
-      } else if (voices.length > 0) {
-        thaiVoice = null;
-        hasThaiVoice = false;
-        document.body.classList.add("no-thai-voice");
-      }
+      hasThaiVoice = !!(window.SPEAKO_TTS && window.SPEAKO_TTS.ready);
+      document.body.classList.toggle("no-thai-voice", !hasThaiVoice);
     }
+    detectThaiVoice();
 
-    if ("speechSynthesis" in window) {
-      detectThaiVoice();
-      window.speechSynthesis.onvoiceschanged = detectThaiVoice;
-      setTimeout(() => {
-        const voices = window.speechSynthesis.getVoices() || [];
-        const found = voices.find(v => v.lang && v.lang.toLowerCase().startsWith("th"));
-        if (!found) {
-          document.body.classList.add("no-thai-voice");
-        } else {
-          thaiVoice = found;
-          hasThaiVoice = true;
-          document.body.classList.remove("no-thai-voice");
-        }
-      }, 900);
-    } else {
-      document.body.classList.add("no-thai-voice");
-    }
-
-    /**
-     * Speaks a Thai word or phrase using Web Speech API (lang "th-TH").
-     */
     function speakThai(rawText, btnElement) {
-      if (!("speechSynthesis" in window)) return;
-
-      window.speechSynthesis.cancel();
-
-      const cleaned = rawText
-        .replace(/ครับ\/ค่ะ/g, "ครับ")
-        .replace(/ครับ\/คะ/g, "ครับ")
-        .replace(/ผม\/ฉัน/g, "ฉัน")
-        .replace(/\.\.\./g, " ")
-        .replace(/·/g, " ")
-        .trim();
-
-      const utterance = new SpeechSynthesisUtterance(cleaned);
-      utterance.lang = "th-TH";
-      utterance.rate = 0.88;
-      if (thaiVoice) {
-        utterance.voice = thaiVoice;
-      }
-
+      if (!window.SPEAKO_TTS) return;
       document.querySelectorAll(".listen-btn.speaking").forEach(b => b.classList.remove("speaking"));
-      if (btnElement) {
-        btnElement.classList.add("speaking");
-        utterance.onend = () => btnElement.classList.remove("speaking");
-        utterance.onerror = () => btnElement.classList.remove("speaking");
-      }
-
-      window.speechSynthesis.speak(utterance);
+      if (btnElement) btnElement.classList.add("speaking");
+      const clear = () => { if (btnElement) btnElement.classList.remove("speaking"); };
+      window.SPEAKO_TTS.play(rawText, { onEnd: clear, onError: clear });
     }
 
     /**
@@ -2635,7 +2578,7 @@
        ========================================================================== */
     function goToSlide(index) {
       if (index < 0 || index >= SLIDES.length || index === currentSlideIndex) return;
-      if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+      if (window.SPEAKO_TTS) window.SPEAKO_TTS.stop();
       currentSlideIndex = index;
       renderCurrentSlide(true);
     }
