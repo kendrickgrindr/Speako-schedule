@@ -62,15 +62,6 @@ const STATE = {
   // Student Portal UI states (in-memory only, no localStorage)
   prepChecklist: { 0: false, 1: false, 2: false },
   confirmCancelBookingId: "",
-
-  // Interactive Thai Survival Kit state (in-memory only)
-  skSituationId: "",
-  skMode: "cards", // 'cards' | 'phrases' | 'quiz' | 'result'
-  skQuizQuestions: [],
-  skQuizIdx: 0,
-  skQuizScore: 0,
-  skQuizSelected: "",
-  skFailedAudio: {},
 };
 
 const PREP_CHECKLIST_ITEMS = [
@@ -78,58 +69,6 @@ const PREP_CHECKLIST_ITEMS = [
   "Have a notebook ready",
   "Find a quiet place",
 ];
-
-const SURVIVAL_AUDIO_BASE = `${PORTAL_BASE}/audio/`;
-const SURVIVAL_KIT_DATA = {
-  "ordering-food": {
-    id: "ordering-food",
-    title: "Ordering food",
-    icon: "🍜",
-    phrases: [
-      { thai: "ขอเมนูหน่อยครับ/ค่ะ", romanization: "khǒr mee-nuu nòi khrap/kha", meaning: "Can I have the menu, please?", audioUrl: `${SURVIVAL_AUDIO_BASE}ordering-food-1.mp3` },
-      { thai: "เอาอันนี้ครับ/ค่ะ", romanization: "ao an níi khrap/kha", meaning: "I'll have this one.", audioUrl: `${SURVIVAL_AUDIO_BASE}ordering-food-2.mp3` },
-      { thai: "ไม่เผ็ดนะครับ/คะ", romanization: "mâi phèt ná khrap/kha", meaning: "Not spicy, please.", audioUrl: `${SURVIVAL_AUDIO_BASE}ordering-food-3.mp3` },
-      { thai: "ขอน้ำเปล่าหนึ่งขวดครับ/ค่ะ", romanization: "khǒr náam plàao nùeng khùat khrap/kha", meaning: "One bottle of water, please.", audioUrl: `${SURVIVAL_AUDIO_BASE}ordering-food-4.mp3` },
-      { thai: "เช็คบิลด้วยครับ/ค่ะ", romanization: "chék bin dûai khrap/kha", meaning: "The bill, please.", audioUrl: `${SURVIVAL_AUDIO_BASE}ordering-food-5.mp3` },
-    ],
-  },
-  "taking-a-taxi": {
-    id: "taking-a-taxi",
-    title: "Taking a taxi",
-    icon: "🚕",
-    phrases: [
-      { thai: "ไปสนามบินได้ไหมครับ/คะ", romanization: "pai sà-nǎam-bin dâi mǎi khrap/kha", meaning: "Can you go to the airport?", audioUrl: `${SURVIVAL_AUDIO_BASE}taking-a-taxi-1.mp3` },
-      { thai: "เปิดมิเตอร์ด้วยครับ/ค่ะ", romanization: "pòet mí-dtôe dûai khrap/kha", meaning: "Please use the meter.", audioUrl: `${SURVIVAL_AUDIO_BASE}taking-a-taxi-2.mp3` },
-      { thai: "เลี้ยวซ้ายตรงนี้ครับ/ค่ะ", romanization: "líao sáai dtrong níi khrap/kha", meaning: "Turn left here.", audioUrl: `${SURVIVAL_AUDIO_BASE}taking-a-taxi-3.mp3` },
-      { thai: "จอดตรงนี้ครับ/ค่ะ", romanization: "jòt dtrong níi khrap/kha", meaning: "Stop here, please.", audioUrl: `${SURVIVAL_AUDIO_BASE}taking-a-taxi-4.mp3` },
-      { thai: "เท่าไหร่ครับ/คะ", romanization: "thâo-rài khrap/kha", meaning: "How much is it?", audioUrl: `${SURVIVAL_AUDIO_BASE}taking-a-taxi-5.mp3` },
-    ],
-  },
-  "meeting-parents": {
-    id: "meeting-parents",
-    title: "Meeting a friend’s parents",
-    icon: "🙏",
-    phrases: [
-      { thai: "สวัสดีครับ/ค่ะ", romanization: "sà-wàt-dii khrap/kha", meaning: "Hello (polite greeting).", audioUrl: `${SURVIVAL_AUDIO_BASE}meeting-parents-1.mp3` },
-      { thai: "ยินดีที่ได้รู้จักครับ/ค่ะ", romanization: "yin-dii thîi dâi rúu-jàk khrap/kha", meaning: "Nice to meet you.", audioUrl: `${SURVIVAL_AUDIO_BASE}meeting-parents-2.mp3` },
-      { thai: "ขอบคุณที่เชิญมานะครับ/คะ", romanization: "khòp-khun thîi choen maa ná khrap/kha", meaning: "Thank you for inviting me.", audioUrl: `${SURVIVAL_AUDIO_BASE}meeting-parents-3.mp3` },
-      { thai: "อาหารอร่อยมากครับ/ค่ะ", romanization: "aa-hǎan à-ròi mâak khrap/kha", meaning: "The food is delicious.", audioUrl: `${SURVIVAL_AUDIO_BASE}meeting-parents-4.mp3` },
-      { thai: "ขอตัวก่อนนะครับ/คะ", romanization: "khǒr dtua gòn ná khrap/kha", meaning: "Please excuse me, I have to go.", audioUrl: `${SURVIVAL_AUDIO_BASE}meeting-parents-5.mp3` },
-    ],
-  },
-  "shopping-market": {
-    id: "shopping-market",
-    title: "Shopping at a market",
-    icon: "🛍️",
-    phrases: [
-      { thai: "อันนี้เท่าไหร่ครับ/คะ", romanization: "an níi thâo-rài khrap/kha", meaning: "How much is this?", audioUrl: `${SURVIVAL_AUDIO_BASE}shopping-market-1.mp3` },
-      { thai: "ขอดูหน่อยได้ไหมครับ/คะ", romanization: "khǒr duu nòi dâi mǎi khrap/kha", meaning: "Can I take a look?", audioUrl: `${SURVIVAL_AUDIO_BASE}shopping-market-2.mp3` },
-      { thai: "แพงไปหน่อยครับ/ค่ะ", romanization: "phaeng pai nòi khrap/kha", meaning: "It's a bit expensive.", audioUrl: `${SURVIVAL_AUDIO_BASE}shopping-market-3.mp3` },
-      { thai: "ลดได้ไหมครับ/คะ", romanization: "lót dâi mǎi khrap/kha", meaning: "Can you give me a discount?", audioUrl: `${SURVIVAL_AUDIO_BASE}shopping-market-4.mp3` },
-      { thai: "เอาสองอันครับ/ค่ะ", romanization: "ao sǒng an khrap/kha", meaning: "I'll take two.", audioUrl: `${SURVIVAL_AUDIO_BASE}shopping-market-5.mp3` },
-    ],
-  },
-};
 
 function formatConsistentDateTime(dateStr, timeSlot) {
   const dt = new Date(`${dateStr}T${timeSlot || "00:00"}:00+07:00`);
@@ -542,7 +481,6 @@ async function signOut() {
 
 // =========================================================
 // 1. PRIVATE LOGIN & SIGN-UP GATEWAY (/index.html)
-//    + INTERACTIVE THAI SURVIVAL KIT (No signup required)
 // =========================================================
 const GOOGLE_CLIENT_ID = "79359271791-9vlm6a8gmtbbv5vpa17frd568le3srfl.apps.googleusercontent.com";
 let _hasRenderedLogin = false;
@@ -556,71 +494,64 @@ function renderLoginGateway() {
   _hasRenderedLogin = true;
 
   main.innerHTML = `
-    <div style="max-width:740px;width:100%;margin:0 auto;">
-      <div style="max-width:440px;width:100%;margin:0 auto;" class="anim-up">
-        <div style="text-align:center;margin-bottom:22px;">
-          <img src="Speako logo.png" alt="Speako" style="width:52px;height:52px;object-fit:contain;margin-bottom:10px;" />
-          <h1 style="font-size:clamp(26px,5vw,32px);">Speako Portal</h1>
-          <p style="font-size:14.5px;color:var(--muted);margin-top:6px;">
-            Sign in or create a free account to pick your class time.
-          </p>
-        </div>
-
-        <div class="card" style="padding:26px 22px;">
-          <div class="segmented-nav" style="width:100%;margin-bottom:18px;">
-            <button class="seg-btn ${STATE.authMode === "signin" ? "active" : ""}" style="flex:1;" onclick="STATE.authMode='signin';renderLoginGateway()">Sign In</button>
-            <button class="seg-btn ${STATE.authMode === "signup" ? "active" : ""}" style="flex:1;" onclick="STATE.authMode='signup';renderLoginGateway()">Sign Up</button>
-          </div>
-
-          <div id="google-signin-slot" class="google-signin-slot">
-            <div class="google-signin-loading">Loading Google Sign-In…</div>
-          </div>
-
-          <div class="auth-divider"><span>or continue with email</span></div>
-
-          ${
-            STATE.authMode === "signin"
-              ? `
-            <form onsubmit="handleSignIn(event)" style="display:flex;flex-direction:column;gap:14px;">
-              <div>
-                <label style="font-size:12.5px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;">Email Address</label>
-                <input id="login-email" type="email" class="input-clean" placeholder="you@example.com" autocomplete="email" required />
-              </div>
-              <div>
-                <label style="font-size:12.5px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;">Password</label>
-                <input id="login-password" type="password" class="input-clean" placeholder="••••••••" autocomplete="current-password" required />
-              </div>
-              <button type="submit" class="btn btn-primary btn-lg" style="width:100%;margin-top:4px;">Sign In</button>
-            </form>
-          `
-              : `
-            <form onsubmit="handleSignUp(event)" style="display:flex;flex-direction:column;gap:14px;">
-              <div>
-                <label style="font-size:12.5px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;">Your Name</label>
-                <input id="signup-name" type="text" class="input-clean" placeholder="e.g. Sarah Jenkins" autocomplete="name" required />
-              </div>
-              <div>
-                <label style="font-size:12.5px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;">Email Address</label>
-                <input id="signup-email" type="email" class="input-clean" placeholder="sarah@example.com" autocomplete="email" required />
-              </div>
-              <div>
-                <label style="font-size:12.5px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;">Password (min 6 characters)</label>
-                <input id="signup-password" type="password" class="input-clean" placeholder="At least 6 characters" autocomplete="new-password" required minlength="6" />
-              </div>
-              <button type="submit" class="btn btn-primary btn-lg" style="width:100%;margin-top:4px;">Create Free Account</button>
-            </form>
-          `
-          }
-
-          <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--line);text-align:center;font-size:12.5px;color:var(--muted);">
-            ✓ Zero commitment after your 1st free class · No card needed
-          </div>
-        </div>
+    <div style="max-width:440px;width:100%;margin:0 auto;" class="anim-up">
+      <div style="text-align:center;margin-bottom:22px;">
+        <img src="Speako logo.png" alt="Speako" style="width:52px;height:52px;object-fit:contain;margin-bottom:10px;" />
+        <h1 style="font-size:clamp(26px,5vw,32px);">Speako Portal</h1>
+        <p style="font-size:14.5px;color:var(--muted);margin-top:6px;">
+          Sign in or create a free account to pick your class time.
+        </p>
       </div>
 
-      <!-- Interactive Thai Survival Kit (First-time visitors, no signup needed) -->
-      <div id="survival-kit-mount" style="margin-top:32px;">
-        ${renderThaiSurvivalKitSection()}
+      <div class="card" style="padding:26px 22px;">
+        <div class="segmented-nav" style="width:100%;margin-bottom:18px;">
+          <button class="seg-btn ${STATE.authMode === "signin" ? "active" : ""}" style="flex:1;" onclick="STATE.authMode='signin';renderLoginGateway()">Sign In</button>
+          <button class="seg-btn ${STATE.authMode === "signup" ? "active" : ""}" style="flex:1;" onclick="STATE.authMode='signup';renderLoginGateway()">Sign Up</button>
+        </div>
+
+        <div id="google-signin-slot" class="google-signin-slot">
+          <div class="google-signin-loading">Loading Google Sign-In…</div>
+        </div>
+
+        <div class="auth-divider"><span>or continue with email</span></div>
+
+        ${
+          STATE.authMode === "signin"
+            ? `
+          <form onsubmit="handleSignIn(event)" style="display:flex;flex-direction:column;gap:14px;">
+            <div>
+              <label style="font-size:12.5px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;">Email Address</label>
+              <input id="login-email" type="email" class="input-clean" placeholder="you@example.com" autocomplete="email" required />
+            </div>
+            <div>
+              <label style="font-size:12.5px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;">Password</label>
+              <input id="login-password" type="password" class="input-clean" placeholder="••••••••" autocomplete="current-password" required />
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg" style="width:100%;margin-top:4px;">Sign In</button>
+          </form>
+        `
+            : `
+          <form onsubmit="handleSignUp(event)" style="display:flex;flex-direction:column;gap:14px;">
+            <div>
+              <label style="font-size:12.5px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;">Your Name</label>
+              <input id="signup-name" type="text" class="input-clean" placeholder="e.g. Sarah Jenkins" autocomplete="name" required />
+            </div>
+            <div>
+              <label style="font-size:12.5px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;">Email Address</label>
+              <input id="signup-email" type="email" class="input-clean" placeholder="sarah@example.com" autocomplete="email" required />
+            </div>
+            <div>
+              <label style="font-size:12.5px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;">Password (min 6 characters)</label>
+              <input id="signup-password" type="password" class="input-clean" placeholder="At least 6 characters" autocomplete="new-password" required minlength="6" />
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg" style="width:100%;margin-top:4px;">Create Free Account</button>
+          </form>
+        `
+        }
+
+        <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--line);text-align:center;font-size:12.5px;color:var(--muted);">
+          ✓ Zero commitment after your 1st free class · No card needed
+        </div>
       </div>
     </div>
   `;
@@ -2779,218 +2710,6 @@ async function markAllAlertsRead() {
   } catch (err) {
     showToast(err.message);
   }
-}
-
-// =========================================================
-// INTERACTIVE THAI SURVIVAL KIT (No signup required)
-// =========================================================
-const SK_AUDIO_CACHE = {};
-
-function renderThaiSurvivalKitSection() {
-  const situations = Object.values(SURVIVAL_KIT_DATA);
-  const current = SURVIVAL_KIT_DATA[STATE.skSituationId] || null;
-
-  if (!current || STATE.skMode === "cards") {
-    return `
-      <div class="card" style="padding:26px 20px;">
-        <div style="text-align:center;margin-bottom:18px;">
-          <span class="pill-tag">🇹🇭 Free Interactive Guide · No Signup Required</span>
-          <h2 style="font-size:clamp(22px,4.5vw,28px);margin-top:8px;color:var(--navy);">Thai Survival Kit</h2>
-          <p style="font-size:14px;color:var(--muted);margin-top:4px;">
-            Pick a real-life situation in Thailand to hear &amp; practice 5 essential polite phrases.
-          </p>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px;">
-          ${situations
-            .map(
-              (s) => `
-            <button type="button" class="choice-card" style="min-height:108px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:16px 12px;" onclick="skSelectSituation('${esc(s.id)}')">
-              <span style="font-size:30px;line-height:1;">${s.icon}</span>
-              <strong style="font-size:14px;color:var(--navy);">${esc(s.title)}</strong>
-            </button>
-          `
-            )
-            .join("")}
-        </div>
-      </div>
-    `;
-  }
-
-  if (STATE.skMode === "phrases") {
-    return `
-      <div class="card" style="padding:26px 20px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
-          <div>
-            <span class="pill-tag">${current.icon} ${esc(current.title)}</span>
-            <h2 style="font-size:22px;margin-top:6px;color:var(--navy);">5 Essential Phrases</h2>
-          </div>
-          <button type="button" class="btn btn-outline btn-sm" onclick="skReset()">← All situations</button>
-        </div>
-        <div style="display:grid;gap:12px;">
-          ${current.phrases
-            .map((p, idx) => {
-              const key = `${current.id}-${idx}`;
-              const hideAudio = !!STATE.skFailedAudio[key];
-              return `
-              <div style="padding:16px;border-radius:18px;background:rgba(255,255,255,0.82);border:1px solid var(--line);">
-                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
-                  <div>
-                    <div style="font-size:20px;font-weight:700;color:var(--navy);">${esc(p.thai)}</div>
-                    <div style="font-size:14px;font-weight:600;color:var(--teal-dark);margin-top:2px;">“${esc(p.romanization)}”</div>
-                    <div style="font-size:14px;color:var(--ink);margin-top:4px;">${esc(p.meaning)}</div>
-                  </div>
-                  ${
-                    hideAudio
-                      ? ""
-                      : `
-                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                      <button type="button" class="btn btn-primary btn-sm" onmouseenter="skPreloadAudio('${esc(p.audioUrl)}','${key}')" onclick="skPlayAudio('${esc(p.audioUrl)}','${esc(p.thai)}',1,'${key}')">▶ Play</button>
-                      <button type="button" class="btn btn-outline btn-sm" onmouseenter="skPreloadAudio('${esc(p.audioUrl)}','${key}')" onclick="skPlayAudio('${esc(p.audioUrl)}','${esc(p.thai)}',0.7,'${key}')">🐢 Slow (0.7x)</button>
-                    </div>
-                  `
-                  }
-                </div>
-              </div>
-            `;
-            })
-            .join("")}
-        </div>
-        <div style="margin-top:20px;text-align:center;">
-          <button type="button" class="btn btn-primary btn-lg" style="width:100%;max-width:320px;" onclick="skStartPractice()">Practice These Phrases →</button>
-        </div>
-      </div>
-    `;
-  }
-
-  if (STATE.skMode === "quiz") {
-    const q = STATE.skQuizQuestions[STATE.skQuizIdx];
-    return `
-      <div class="card" style="padding:26px 20px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-          <span class="pill-tag">Practice ${STATE.skQuizIdx + 1} of ${STATE.skQuizQuestions.length}</span>
-          <span style="font-size:13px;font-weight:600;color:var(--muted);">Score: ${STATE.skQuizScore}/${STATE.skQuizQuestions.length}</span>
-        </div>
-        <h3 style="font-size:22px;color:var(--navy);">${esc(q.phrase.thai)}</h3>
-        <p style="font-size:14.5px;color:var(--teal-dark);font-weight:600;margin-top:4px;">“${esc(q.phrase.romanization)}”</p>
-        <p style="font-size:13.5px;color:var(--muted);margin-top:10px;">Tap the correct English meaning:</p>
-        <div style="display:grid;gap:10px;margin-top:14px;">
-          ${q.options
-            .map(
-              (opt) => `
-            <button type="button" class="btn btn-outline" style="justify-content:flex-start;text-align:left;width:100%;" onclick="skAnswerQuiz('${esc(opt)}')">
-              ${esc(opt)}
-            </button>
-          `
-            )
-            .join("")}
-        </div>
-      </div>
-    `;
-  }
-
-  // Result card
-  return `
-    <div class="card next-class-card" style="padding:28px 22px;text-align:center;">
-      <span class="pill-tag dark" style="margin:0 auto 12px;">Practice Score: ${STATE.skQuizScore} / ${STATE.skQuizQuestions.length}</span>
-      <h2 style="font-size:clamp(22px,4.5vw,28px);color:#fff;">You’re ready for ${esc(current.title.toLowerCase())}... almost.</h2>
-      <p style="color:rgba(255,255,255,0.86);font-size:14.5px;max-width:520px;margin:10px auto 0;">
-        In Thai, 5 tones completely change the meaning of these words — and most beginners get tones wrong without live feedback.
-      </p>
-      <div style="display:flex;justify-content:center;flex-wrap:wrap;gap:12px;margin-top:22px;">
-        <button type="button" class="btn btn-primary btn-lg" onclick="STATE.authMode='signup';renderLoginGateway();window.scrollTo({top:0,behavior:'smooth'})">Book a free trial lesson</button>
-        <button type="button" class="btn btn-outline btn-lg" onclick="skReset()">Try another situation</button>
-      </div>
-    </div>
-  `;
-}
-
-function refreshSurvivalKitMount() {
-  const mount = document.getElementById("survival-kit-mount");
-  if (mount) mount.innerHTML = renderThaiSurvivalKitSection();
-}
-
-function skSelectSituation(id) {
-  STATE.skSituationId = id;
-  STATE.skMode = "phrases";
-  refreshSurvivalKitMount();
-}
-
-function skReset() {
-  STATE.skMode = "cards";
-  STATE.skSituationId = "";
-  refreshSurvivalKitMount();
-}
-
-function skPreloadAudio(url, key) {
-  if (SK_AUDIO_CACHE[url] || STATE.skFailedAudio[key]) return;
-  try {
-    const audio = new Audio();
-    audio.preload = "auto";
-    audio.src = url;
-    SK_AUDIO_CACHE[url] = audio;
-  } catch (_) {}
-}
-
-function skPlayAudio(url, thaiText, rate, key) {
-  try {
-    const audio = SK_AUDIO_CACHE[url] || new Audio(url);
-    SK_AUDIO_CACHE[url] = audio;
-    audio.currentTime = 0;
-    audio.playbackRate = rate || 1.0;
-    const playPromise = audio.play();
-    if (playPromise && typeof playPromise.catch === "function") {
-      playPromise.catch(() => {
-        // Fallback to native Thai speech synthesis if MP3 file is not uploaded yet,
-        // or hide buttons if speech synthesis is also unavailable
-        if ("speechSynthesis" in window && thaiText) {
-          window.speechSynthesis.cancel();
-          const utter = new SpeechSynthesisUtterance(thaiText.replace("/ค่ะ", "").replace("/คะ", ""));
-          utter.lang = "th-TH";
-          utter.rate = rate || 1.0;
-          window.speechSynthesis.speak(utter);
-        } else {
-          STATE.skFailedAudio[key] = true;
-          refreshSurvivalKitMount();
-        }
-      });
-    }
-  } catch (_) {
-    STATE.skFailedAudio[key] = true;
-    refreshSurvivalKitMount();
-  }
-}
-
-function skStartPractice() {
-  const current = SURVIVAL_KIT_DATA[STATE.skSituationId];
-  if (!current) return;
-  const shuffled = [...current.phrases].sort(() => Math.random() - 0.5);
-  const picked = shuffled.slice(0, 2);
-  STATE.skQuizQuestions = picked.map((p) => {
-    const distractors = current.phrases
-      .filter((x) => x.meaning !== p.meaning)
-      .sort(() => Math.random() - 0.5)
-      .slice(0, 2)
-      .map((x) => x.meaning);
-    const options = [p.meaning, ...distractors].sort(() => Math.random() - 0.5);
-    return { phrase: p, options };
-  });
-  STATE.skQuizIdx = 0;
-  STATE.skQuizScore = 0;
-  STATE.skMode = "quiz";
-  refreshSurvivalKitMount();
-}
-
-function skAnswerQuiz(selectedMeaning) {
-  const q = STATE.skQuizQuestions[STATE.skQuizIdx];
-  if (q && selectedMeaning === q.phrase.meaning) {
-    STATE.skQuizScore += 1;
-  }
-  if (STATE.skQuizIdx + 1 < STATE.skQuizQuestions.length) {
-    STATE.skQuizIdx += 1;
-  } else {
-    STATE.skMode = "result";
-  }
-  refreshSurvivalKitMount();
 }
 
 // =========================================================
