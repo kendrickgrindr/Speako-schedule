@@ -23,6 +23,37 @@ const ALL_HOURS = [
 
 const DAYS_SHORT = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
+const MASCOT_POSES = {
+  happy: "mascot/cartoon/transparent/01_very_happy.png",
+  curious: "mascot/cartoon/transparent/02_curious.png",
+  excited: "mascot/cartoon/transparent/03_excited.png",
+  laughing: "mascot/cartoon/transparent/04_laughing.png",
+  surprised: "mascot/cartoon/transparent/05_surprised.png",
+  confused: "mascot/cartoon/transparent/06_confused.png",
+  thinking: "mascot/cartoon/transparent/07_thinking.png",
+  sad: "mascot/cartoon/transparent/08_sad.png",
+  crying: "mascot/cartoon/transparent/09_crying.png",
+  angry: "mascot/cartoon/transparent/10_angry.png",
+  sleepy: "mascot/cartoon/transparent/11_sleepy.png",
+  embarrassed: "mascot/cartoon/transparent/12_embarrassed.png",
+  proud: "mascot/cartoon/transparent/13_proud.png",
+  shy: "mascot/cartoon/transparent/14_shy.png",
+  scared: "mascot/cartoon/transparent/16_scared.png",
+  bored: "mascot/cartoon/transparent/17_bored.png",
+  winking: "mascot/cartoon/transparent/18_winking.png",
+  determined: "mascot/cartoon/transparent/19_determined.png",
+  relaxed: "mascot/cartoon/transparent/20_relaxed_calm.png",
+  writing: "mascot/cartoon/transparent/24_writing_pencil.png",
+};
+
+function mascotSrc(pose = "happy") {
+  return MASCOT_POSES[pose] || MASCOT_POSES.happy;
+}
+
+function mascotImg(pose = "happy", cls = "", alt = "Speako Mascot") {
+  return `<img src="${mascotSrc(pose)}" class="mascot-sticker ${cls}" alt="${esc(alt)}" loading="lazy" />`;
+}
+
 const STATE = {
   portal: document.body.dataset.portal || "login",
   token: localStorage.getItem("speako_token") || "",
@@ -495,11 +526,14 @@ function renderLoginGateway() {
 
   main.innerHTML = `
     <div style="max-width:440px;width:100%;margin:0 auto;" class="anim-up">
-      <div style="text-align:center;margin-bottom:22px;">
-        <img src="Speako logo.png" alt="Speako" style="width:52px;height:52px;object-fit:contain;margin-bottom:10px;" />
-        <h1 style="font-size:clamp(26px,5vw,32px);">Speako Portal</h1>
+      <div style="text-align:center;margin-bottom:20px;">
+        ${mascotImg(STATE.authMode === "signup" ? "excited" : "happy", "mascot-login-hero", STATE.authMode === "signup" ? "Speako Mascot Excited" : "Speako Mascot Welcome")}
+        <div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:4px;">
+          <img src="Speako logo.png" alt="Speako" style="width:28px;height:28px;object-fit:contain;" />
+          <h1 style="font-size:clamp(26px,5vw,32px);margin:0;">Speako Portal</h1>
+        </div>
         <p style="font-size:14.5px;color:var(--muted);margin-top:6px;">
-          Sign in or create a free account to pick your class time.
+          ${STATE.authMode === "signup" ? "Create a free account — let's start speaking Thai or English!" : "Sign in or create a free account to pick your class time."}
         </p>
       </div>
 
@@ -691,6 +725,8 @@ function renderStudentSchedule(main) {
   const currentLessonNum = nextClass ? Math.min(totalCourseLessons, Math.max(1, Number(nextClass.lesson_number) || 1)) : 1;
   const progressRatio = (currentLessonNum / totalCourseLessons).toFixed(2);
   const hasEmptyCredit = (u.thai_credits || 0) <= 0 || (u.english_credits || 0) <= 0;
+  const allPrepDone = PREP_CHECKLIST_ITEMS.every((_, idx) => !!STATE.prepChecklist[idx]);
+  const nextCardMood = isUrgentOrLive ? "excited" : allPrepDone ? "determined" : "writing";
 
   main.innerHTML = `
     <div class="page-hero">
@@ -720,11 +756,16 @@ function renderStudentSchedule(main) {
                   : ""
               }
             </div>
-            <h2 style="font-size:26px;margin-top:16px;">Lesson ${nextClass.lesson_number}: ${esc(nextClass.lesson_title)}</h2>
-            ${lessonGoal ? `<p class="np-goal">${esc(lessonGoal)}</p>` : ""}
-            <p style="color:rgba(255,255,255,0.78);font-size:14px;margin-top:8px;">
-              ${esc(nextClass.course_title)} · Teacher: <strong>${esc(nextClass.teacher_name)}</strong>
-            </p>
+            <div class="mascot-card-row" style="margin-top:14px;">
+              <div class="mascot-card-copy">
+                <h2 style="font-size:26px;">Lesson ${nextClass.lesson_number}: ${esc(nextClass.lesson_title)}</h2>
+                ${lessonGoal ? `<p class="np-goal">${esc(lessonGoal)}</p>` : ""}
+                <p style="color:rgba(255,255,255,0.78);font-size:14px;margin-top:8px;">
+                  ${esc(nextClass.course_title)} · Teacher: <strong>${esc(nextClass.teacher_name)}</strong>
+                </p>
+              </div>
+              ${mascotImg(nextCardMood, "mascot-card-figure", "Speako Study Buddy")}
+            </div>
 
             <!-- Course Progress Bar -->
             <div class="np-progress">
@@ -766,12 +807,15 @@ function renderStudentSchedule(main) {
       `
           : `
         <div class="card next-class-card">
-          <div>
-            <span class="pill-tag dark">Private 1-on-1</span>
-            <h2 style="font-size:26px;margin-top:14px;">No upcoming class</h2>
-            <p style="color:rgba(255,255,255,0.78);font-size:14.5px;margin-top:8px;max-width:460px;">
-              Pick any open time slot on ${esc(teacher.name)}'s live weekly schedule to book your next lesson.
-            </p>
+          <div class="mascot-card-row">
+            <div class="mascot-card-copy">
+              <span class="pill-tag dark">Private 1-on-1</span>
+              <h2 style="font-size:26px;margin-top:14px;">No upcoming class</h2>
+              <p style="color:rgba(255,255,255,0.78);font-size:14.5px;margin-top:8px;max-width:460px;">
+                Pick any open time slot on ${esc(teacher.name)}'s live weekly schedule to book your next lesson.
+              </p>
+            </div>
+            ${mascotImg("curious", "mascot-card-figure", "Curious Speako Mascot")}
           </div>
           <div style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;">
             <button class="btn btn-primary" onclick="switchTab('book')">Book →</button>
@@ -787,7 +831,10 @@ function renderStudentSchedule(main) {
           hasEmptyCredit
             ? `
           <div class="credit-banner">
-            <span><span class="dot"></span>You have no credits left. Top up to book your next lesson.</span>
+            <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:180px;">
+              ${mascotImg("sad", "mascot-inline-sm", "Low Credits Mascot")}
+              <span><span class="dot"></span>You have no credits left. Top up to book your next lesson.</span>
+            </div>
             <button class="btn btn-primary btn-sm" onclick="switchTab('credits')">Top Up</button>
           </div>
         `
@@ -833,7 +880,11 @@ function renderStudentSchedule(main) {
       </div>
       ${
         upcoming.length === 0
-          ? `<div class="card" style="text-align:center;padding:36px;color:var(--muted);">No upcoming bookings yet.</div>`
+          ? `<div class="card mascot-empty-state">
+              ${mascotImg("thinking", "", "Thinking Speako Mascot")}
+              <div style="font-weight:700;color:var(--navy);font-size:15px;">No upcoming bookings yet</div>
+              <div style="font-size:13.5px;color:var(--muted);">Tap any teal <strong>+ Open</strong> slot below or book a lesson whenever you're ready.</div>
+            </div>`
           : `
         <div class="list-group">
           ${upcoming
@@ -862,6 +913,7 @@ function renderStudentSchedule(main) {
                   isConfirming
                     ? `
                   <div class="cancel-confirm">
+                    ${mascotImg("crying", "mascot-inline-xs", "Sad Cancel Mascot")}
                     <span>Cancel this lesson? You’ll get 1 credit back.</span>
                     <button class="btn btn-primary btn-sm" style="background:var(--coral);border-color:transparent;" onclick="studentCancelBooking('${esc(b.id)}')">Yes, cancel</button>
                     <button class="btn btn-outline btn-sm" onclick="STATE.confirmCancelBookingId='';renderCurrentPortal(false)">Keep</button>
@@ -960,6 +1012,14 @@ function renderStudentSchedule(main) {
 function togglePrepChecklist(idx) {
   STATE.prepChecklist[idx] = !STATE.prepChecklist[idx];
   renderCurrentPortal(false);
+  const doneCount = PREP_CHECKLIST_ITEMS.filter((_, i) => !!STATE.prepChecklist[i]).length;
+  if (STATE.prepChecklist[idx]) {
+    if (doneCount === PREP_CHECKLIST_ITEMS.length) {
+      setMascotMood("excited", "พร้อมเรียนแล้ว! (phróm rian láew!)", "All prepped — you're ready for class!");
+    } else {
+      setMascotMood("proud", "เก่งมาก! (gèng mâak!)", `${doneCount}/${PREP_CHECKLIST_ITEMS.length} prep steps checked off!`);
+    }
+  }
 }
 
 function renderStudentWeeklyTimetable(teacher) {
@@ -1041,6 +1101,7 @@ async function studentCancelBooking(bookingId) {
     await refreshState();
     renderCurrentPortal(false);
     showToast("Class cancelled — 1 lesson credit refunded to your account.");
+    setMascotMood("relaxed", "ไม่เป็นไรครับ (mâi bpen rai)", "1 credit refunded — rebook anytime!");
   } catch (err) {
     showToast(err.message);
   }
@@ -1314,10 +1375,11 @@ async function submitStudentBooking() {
     });
     dispatchEmailFallback(res);
     await refreshState();
+    setMascotMood("excited", "เย้! จองเรียนแล้ว (Yêe!)", "Class booked — see you soon!");
     openModal(`
       <div style="text-align:center;padding:12px 6px;">
-        <div class="apple-check-circle">✓</div>
-        <span class="pill-tag">Confirmed &amp; Teacher Notified</span>
+        ${mascotImg("excited", "mascot-modal-hero", "Excited Speako Mascot")}
+        <span class="pill-tag">✓ Confirmed &amp; Teacher Notified</span>
         <h2 style="font-size:26px;margin-top:10px;">Your Private Class is Booked!</h2>
         <p style="color:var(--muted);font-size:14.5px;margin-top:6px;">
           <strong>Lesson ${res.booking.lesson_number}: ${esc(res.booking.lesson_title)}</strong> with <strong>${esc(res.booking.teacher_name)}</strong>
@@ -1347,10 +1409,13 @@ function renderStudentLessons(main) {
 
   main.innerHTML = `
     <div class="page-hero">
-      <div>
-        <span class="pill-tag">8-Lesson Structured Curriculum</span>
-        <h1 style="margin-top:8px;">Class Details &amp; Interactive Slides</h1>
-        <p>${esc(course?.subtitle || "Click any lesson to inspect vocabulary, grammar, role-plays, and interactive slide decks.")}</p>
+      <div class="mascot-hero-pair">
+        ${mascotImg("writing", "", "Study Notes Mascot")}
+        <div>
+          <span class="pill-tag">8-Lesson Structured Curriculum</span>
+          <h1 style="margin-top:8px;">Class Details &amp; Interactive Slides</h1>
+          <p>${esc(course?.subtitle || "Click any lesson to inspect vocabulary, grammar, role-plays, and interactive slide decks.")}</p>
+        </div>
       </div>
       <div class="segmented-nav">
         <button class="seg-btn ${STATE.curriculumCourse === "thai" ? "active" : ""}" onclick="STATE.curriculumCourse='thai';renderCurrentPortal(false)">🇹🇭 Basic Thai (8)</button>
@@ -1419,9 +1484,12 @@ function openStudentLessonDetail(courseId, lessonNum) {
         l.slideDeckUrl
           ? `
         <div style="margin-top:18px;padding:16px 18px;border-radius:16px;background:var(--teal-soft);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
-          <div>
-            <strong style="color:var(--navy);">✦ Interactive Classroom Slide Deck + Audio</strong>
-            <div style="font-size:12.5px;color:var(--muted);">Practice pronunciation, tone marks, and dialogues with built-in audio.</div>
+          <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:200px;">
+            ${mascotImg("proud", "mascot-inline-sm", "Proud Speako Mascot")}
+            <div>
+              <strong style="color:var(--navy);">✦ Interactive Classroom Slide Deck + Audio</strong>
+              <div style="font-size:12.5px;color:var(--muted);">Practice pronunciation, tone marks, and dialogues with built-in audio.</div>
+            </div>
           </div>
           <button class="btn btn-primary btn-sm" onclick="openSlideDeck('${esc(l.slideDeckUrl)}','Lesson ${l.number}: ${esc(l.title)}')">Launch Slide Deck ↗</button>
         </div>
@@ -1513,10 +1581,13 @@ function renderStudentCredits(main) {
 
     <!-- Weekly Offer Countdown & No-Commitment Reassurance -->
     <div class="schedule-offer-banner anim-up">
-      <div>
-        <span class="pill-tag" style="background:rgba(244,124,107,.2);color:#ffb4a8;border:1px solid rgba(244,124,107,.42);">⚡ Weekly Trial Window Closes Sunday</span>
-        <h3 style="color:#fff;font-size:20px;margin-top:8px;">Free Trial Slots &amp; Bonus Notes Held Until Sunday</h3>
-        <p style="font-size:13.5px;color:#c9d6e8;margin-top:4px;">Zero sales pressure after your 1st free class — choose a package only if you love learning with Kendrick.</p>
+      <div style="display:flex;align-items:center;gap:16px;">
+        ${mascotImg("proud", "mascot-banner-side", "Proud Speako Mascot")}
+        <div>
+          <span class="pill-tag" style="background:rgba(244,124,107,.2);color:#ffb4a8;border:1px solid rgba(244,124,107,.42);">⚡ Weekly Trial Window Closes Sunday</span>
+          <h3 style="color:#fff;font-size:20px;margin-top:8px;">Free Trial Slots &amp; Bonus Notes Held Until Sunday</h3>
+          <p style="font-size:13.5px;color:#c9d6e8;margin-top:4px;">Zero sales pressure after your 1st free class — choose a package only if you love learning with Kendrick.</p>
+        </div>
       </div>
       <div class="schedule-offer-grid" role="timer" aria-label="Weekly offer countdown">
         <div class="schedule-cd-box"><span class="schedule-cd-num" data-sched-cd="days">00</span><span class="schedule-cd-lbl">Days</span></div>
@@ -2716,10 +2787,29 @@ async function markAllAlertsRead() {
 // STATIC BACKGROUND GRID, MASCOT & COUNTDOWN TICKERS
 // =========================================================
 const MASCOT_QUOTES = [
-  { th: "สวัสดีครับ! (sà-wàt-dii khráp)", en: "Tap me for a quick Thai tip!" },
-  { th: "ไม่เป็นไร (mâi bpen rai)", en: "No worries — practice step by step!" },
-  { th: "ขอบคุณครับ (khòp-khun khráp)", en: "Ready for your 1-on-1 lesson?" },
-  { th: "เก่งมาก! (gèng mâak!)", en: "You're doing great!" },
+  { pose: "happy", th: "สวัสดีครับ! (sà-wàt-dii khráp)", en: "Tap me for a quick Thai tip!" },
+  { pose: "winking", th: "ไม่เป็นไร (mâi bpen rai)", en: "No worries — practice step by step!" },
+  { pose: "laughing", th: "สนุกมาก! (sà-nùk mâak!)", en: "Learning Thai should feel fun!" },
+  { pose: "proud", th: "เก่งมาก! (gèng mâak!)", en: "You're doing great — keep it up!" },
+  { pose: "writing", th: "จดไว้เลย! (jòt wái loei!)", en: "Review your lesson notes before class!" },
+  { pose: "curious", th: "พร้อมไหม? (phróm mǎi?)", en: "Ready for your next 1-on-1 lesson?" },
+  { pose: "determined", th: "สู้ๆ นะครับ! (sûu-sûu ná khráp!)", en: "You've got this — let's practice!" },
+];
+
+const MASCOT_BUDDY_POSES = [
+  "happy", "winking", "laughing", "proud", "writing",
+  "curious", "determined", "excited", "relaxed", "sleepy",
+  "embarrassed", "angry", "surprised", "shy", "confused",
+  "scared", "bored", "sad", "crying", "thinking"
+];
+
+const MASCOT_SECRET_PHRASES = [
+  { pose: "surprised", th: "อ๊ะ! เจอผมแล้ว! (á! joe phǒm láew!)", en: "Whoa, you found the hidden Speako mascot!" },
+  { pose: "shy", th: "แอบดูอยู่นะ (àep duu yùu ná)", en: "Shh… secret study buddy cheering you on!" },
+  { pose: "confused", th: "งงมั้ย? (ngong mái?)", en: "Confused by Thai tones? Ask Kendrick in class!" },
+  { pose: "scared", th: "แฮ่! ตกใจไหม? (hâe! tòk-jai mǎi?)", en: "Boo! Surprise Thai vocab check!" },
+  { pose: "bored", th: "เบื่อไหม? (bùea mǎi?)", en: "Bored? Say 'สบายดีไหม' out loud right now!" },
+  { pose: "laughing", th: "555 (hâa hâa hâa!)", en: "Fun fact: '5' is 'hâa' in Thai, so 555 = LOL!" },
 ];
 
 function updateScheduleWeeklyCountdowns() {
@@ -2760,11 +2850,13 @@ function initBackgroundAndMascot() {
   if (!document.querySelector(".mascot-buddy")) {
     const buddy = document.createElement("div");
     buddy.className = "mascot-buddy";
+    const hr = new Date().getHours();
+    const initialPose = hr >= 22 || hr < 6 ? "sleepy" : "happy";
     buddy.innerHTML = `
       <button type="button" class="mascot-face" aria-label="Kendrick Mascot Tip" onclick="cycleMascotTip(true)">
-        <img src="mascot/smile.jpg" class="on" alt="Kendrick Smile" />
-        <img src="mascot/wink.jpg" alt="Kendrick Wink" />
-        <img src="mascot/laugh.jpg" alt="Kendrick Laugh" />
+        ${MASCOT_BUDDY_POSES.map(
+          (p) => `<img src="${mascotSrc(p)}" data-pose="${p}" class="${p === initialPose ? "on" : ""}" alt="Kendrick ${p}" />`
+        ).join("")}
       </button>
       <div id="mascot-bubble" class="mascot-bubble">
         <span>สวัสดีครับ!</span>
@@ -2772,9 +2864,11 @@ function initBackgroundAndMascot() {
       </div>
     `;
     document.body.appendChild(buddy);
-    setTimeout(() => cycleMascotTip(false), 1800);
-    setInterval(() => cycleMascotTip(false), 12000);
+    setTimeout(() => cycleMascotTip(false), 2600);
+    setInterval(() => cycleMascotTip(false), 14000);
   }
+
+  initMascotEasterEggs();
 
   // Update Next Class countdown every 60 seconds
   setInterval(() => {
@@ -2793,19 +2887,186 @@ function initBackgroundAndMascot() {
 
 let mascotIdx = 0;
 let mascotBubbleTimer = null;
-function cycleMascotTip(showBubble = true) {
+let mascotTapCount = 0;
+let mascotTapResetTimer = null;
+
+function spawnMascotSparks(x, y, count = 12) {
+  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const colors = ["#3F8A91", "#F48C3E", "#F7C948", "#0B2A5B"];
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement("span");
+    el.className = "mascot-spark";
+    const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.4;
+    const dist = 36 + Math.random() * 44;
+    el.style.left = `${x}px`;
+    el.style.top = `${y}px`;
+    el.style.background = colors[i % colors.length];
+    el.style.setProperty("--dx", `${Math.round(Math.cos(angle) * dist)}px`);
+    el.style.setProperty("--dy", `${Math.round(Math.sin(angle) * dist - 18)}px`);
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 900);
+  }
+}
+
+function setMascotMood(pose = "happy", th = "", en = "") {
   const imgs = document.querySelectorAll(".mascot-face img");
   if (imgs.length) {
-    mascotIdx = (mascotIdx + 1) % imgs.length;
-    imgs.forEach((im, i) => im.classList.toggle("on", i === mascotIdx));
+    let matched = false;
+    imgs.forEach((im) => {
+      const hit = im.dataset.pose === pose;
+      if (hit) matched = true;
+      im.classList.toggle("on", hit);
+    });
+    if (!matched && imgs[0]) imgs[0].classList.add("on");
   }
   const bubble = document.getElementById("mascot-bubble");
-  if (bubble && showBubble) {
-    const q = MASCOT_QUOTES[Math.floor(Math.random() * MASCOT_QUOTES.length)];
-    bubble.innerHTML = `<span>${esc(q.th)}</span><small>${esc(q.en)}</small>`;
+  if (bubble && (th || en)) {
+    bubble.innerHTML = `<span>${esc(th)}</span><small>${esc(en)}</small>`;
     bubble.classList.add("show");
     clearTimeout(mascotBubbleTimer);
-    mascotBubbleTimer = setTimeout(() => bubble.classList.remove("show"), 4500);
+    mascotBubbleTimer = setTimeout(() => bubble.classList.remove("show"), 4800);
+  }
+}
+
+function cycleMascotTip(showBubble = true) {
+  if (showBubble) {
+    mascotTapCount += 1;
+    clearTimeout(mascotTapResetTimer);
+    mascotTapResetTimer = setTimeout(() => { mascotTapCount = 0; }, 3500);
+
+    const faceBtn = document.querySelector(".mascot-face");
+    const rect = faceBtn ? faceBtn.getBoundingClientRect() : null;
+    const cx = rect ? rect.left + rect.width / 2 : 60;
+    const cy = rect ? rect.top + rect.height / 2 : window.innerHeight - 60;
+
+    // Multi-tap "poke" Easter egg
+    if (mascotTapCount === 5) {
+      setMascotMood("embarrassed", "เขินนะครับ! (khǒen ná khráp)", "Hehe, stop poking me — you found my shy side!");
+      return;
+    }
+    if (mascotTapCount === 8) {
+      setMascotMood("angry", "พอแล้วน้า! (phɔɔ láew náa!)", "Puffed cheeks! Okay, back to Thai practice!");
+      return;
+    }
+    if (mascotTapCount >= 10) {
+      mascotTapCount = 0;
+      spawnMascotSparks(cx, cy, 14);
+      setMascotMood("laughing", "555 ยอมแล้วครับ! (yɔɔm láew!)", "Okay you win! Bonus Thai word: 555 = LOL!");
+      return;
+    }
+  }
+
+  const hr = new Date().getHours();
+  const isLate = hr >= 22 || hr < 6;
+  const pool = isLate
+    ? [
+        ...MASCOT_QUOTES,
+        { pose: "sleepy", th: "ดึกแล้วนะครับ (dùek láew ná khráp)", en: "Late-night study? Rest up before class!" },
+      ]
+    : MASCOT_QUOTES;
+  mascotIdx = (mascotIdx + 1) % pool.length;
+  const q = pool[mascotIdx];
+  if (showBubble) {
+    setMascotMood(q.pose, q.th, q.en);
+  } else {
+    setMascotMood(q.pose);
+  }
+}
+
+function initMascotEasterEggs() {
+  // 1. Right-edge Peek-a-Boo corner peeker
+  if (!document.querySelector(".mascot-peeker")) {
+    const peeker = document.createElement("button");
+    peeker.type = "button";
+    peeker.className = "mascot-peeker";
+    peeker.setAttribute("aria-label", "Hidden Speako Mascot Easter Egg");
+    peeker.innerHTML = `
+      <span class="mascot-peeker-tip">
+        <span>อ๊ะ! เจอผมแล้ว!</span>
+        <small>You found the hidden mascot!</small>
+      </span>
+      <img src="${mascotSrc("shy")}" alt="Peeking Speako Mascot" />
+    `;
+    document.body.appendChild(peeker);
+
+    let peekIdx = 0;
+    let hideTimer = null;
+
+    const triggerPeek = () => {
+      if (peeker.classList.contains("found")) return;
+      peeker.classList.add("peek");
+      const img = peeker.querySelector("img");
+      if (img) img.src = mascotSrc(peekIdx % 2 === 0 ? "shy" : "curious");
+    };
+
+    // Peek gently after scrolling down a bit or after 18s idle
+    let scrolledPeeked = false;
+    window.addEventListener(
+      "scroll",
+      () => {
+        if (!scrolledPeeked && window.scrollY > 140) {
+          scrolledPeeked = true;
+          triggerPeek();
+        }
+      },
+      { passive: true }
+    );
+    setTimeout(triggerPeek, 18000);
+
+    peeker.addEventListener("click", () => {
+      const secret = MASCOT_SECRET_PHRASES[peekIdx % MASCOT_SECRET_PHRASES.length];
+      peekIdx += 1;
+      const img = peeker.querySelector("img");
+      const tip = peeker.querySelector(".mascot-peeker-tip");
+      if (img) img.src = mascotSrc(secret.pose);
+      if (tip) tip.innerHTML = `<span>${esc(secret.th)}</span><small>${esc(secret.en)}</small>`;
+      peeker.classList.add("found");
+      const r = peeker.getBoundingClientRect();
+      spawnMascotSparks(r.left + r.width - 36, r.top + r.height / 2, 12);
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(() => {
+        peeker.classList.remove("found");
+        if (img) img.src = mascotSrc("shy");
+      }, 4600);
+    });
+  }
+
+  // 2. Brand logo 5-click secret mood Easter egg
+  const brandLogo = document.querySelector(".brand-logo");
+  if (brandLogo && !brandLogo.dataset.eggBound) {
+    brandLogo.dataset.eggBound = "1";
+    let logoClicks = 0;
+    let logoTimer = null;
+    brandLogo.addEventListener("click", (e) => {
+      logoClicks += 1;
+      clearTimeout(logoTimer);
+      logoTimer = setTimeout(() => { logoClicks = 0; }, 2200);
+      if (logoClicks >= 5) {
+        logoClicks = 0;
+        const secret = MASCOT_SECRET_PHRASES[Math.floor(Math.random() * MASCOT_SECRET_PHRASES.length)];
+        setMascotMood(secret.pose, secret.th, secret.en);
+        spawnMascotSparks(e.clientX || 120, e.clientY || 44, 14);
+      }
+    });
+  }
+
+  // 3. Secret keyboard Easter egg: type "speako" or "sawasdee" outside inputs
+  if (!window.__speakoKeyEggBound) {
+    window.__speakoKeyEggBound = true;
+    let buffer = "";
+    document.addEventListener("keydown", (e) => {
+      const tag = (e.target && e.target.tagName) || "";
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || e.target?.isContentEditable) return;
+      if (e.key.length !== 1) return;
+      buffer = (buffer + e.key.toLowerCase()).slice(-12);
+      if (buffer.endsWith("speako") || buffer.endsWith("sawasdee")) {
+        buffer = "";
+        const faceBtn = document.querySelector(".mascot-face");
+        const rect = faceBtn ? faceBtn.getBoundingClientRect() : null;
+        spawnMascotSparks(rect ? rect.left + 42 : 60, rect ? rect.top + 42 : window.innerHeight - 60, 18);
+        setMascotMood("excited", "สวัสดีครับ! Secret Speako Club!", "You unlocked the secret Thai greeting Easter egg!");
+      }
+    });
   }
 }
 
