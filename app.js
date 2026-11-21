@@ -44,6 +44,7 @@ const MASCOT_POSES = {
   determined: "mascot/cartoon/transparent/19_determined.png",
   relaxed: "mascot/cartoon/transparent/20_relaxed_calm.png",
   writing: "mascot/cartoon/transparent/24_writing_pencil.png",
+  picked_up: "mascot/cartoon/transparent/36_picked_up.png",
 };
 
 function mascotSrc(pose = "happy") {
@@ -2800,7 +2801,7 @@ const MASCOT_BUDDY_POSES = [
   "happy", "winking", "laughing", "proud", "writing",
   "curious", "determined", "excited", "relaxed", "sleepy",
   "embarrassed", "angry", "surprised", "shy", "confused",
-  "scared", "bored", "sad", "crying", "thinking"
+  "scared", "bored", "sad", "crying", "thinking", "picked_up"
 ];
 
 const MASCOT_SECRET_PHRASES = [
@@ -2853,19 +2854,22 @@ function initBackgroundAndMascot() {
     const hr = new Date().getHours();
     const initialPose = hr >= 22 || hr < 6 ? "sleepy" : "happy";
     buddy.innerHTML = `
-      <button type="button" class="mascot-face" aria-label="Kendrick Mascot Tip" onclick="cycleMascotTip(true)">
+      <button type="button" class="mascot-face" aria-label="Kendrick Mascot — tap for a tip, or hold and drag anywhere">
         ${MASCOT_BUDDY_POSES.map(
-          (p) => `<img src="${mascotSrc(p)}" data-pose="${p}" class="${p === initialPose ? "on" : ""}" alt="Kendrick ${p}" />`
+          (p) => `<img src="${mascotSrc(p)}" data-pose="${p}" class="${p === initialPose ? "on" : ""}" alt="Kendrick ${p}" draggable="false" />`
         ).join("")}
       </button>
       <div id="mascot-bubble" class="mascot-bubble">
         <span>สวัสดีครับ!</span>
-        <small>Tap Kendrick for a Thai tip</small>
+        <small>Tap for a tip · Hold to drag</small>
       </div>
     `;
     document.body.appendChild(buddy);
+    initMascotDrag(buddy);
     setTimeout(() => cycleMascotTip(false), 2600);
-    setInterval(() => cycleMascotTip(false), 14000);
+    setInterval(() => {
+      if (!document.hidden && !mascotPickedUp) cycleMascotTip(false);
+    }, 14000);
   }
 
   initMascotEasterEggs();
@@ -2889,6 +2893,172 @@ let mascotIdx = 0;
 let mascotBubbleTimer = null;
 let mascotTapCount = 0;
 let mascotTapResetTimer = null;
+let mascotPickedUp = false;
+
+function initMascotDrag(buddy) {
+  const faceBtn = buddy.querySelector(".mascot-face");
+  if (!faceBtn || faceBtn.dataset.dragBound) return;
+  faceBtn.dataset.dragBound = "1";
+
+  const SCRUFF_X = 0.68;
+  const SCRUFF_Y = 0.16;
+  const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let activePid = null;
+  let startX = 0;
+  let startY = 0;
+  let lastX = 0;
+  let holdTimer = null;
+  let snapTimer = null;
+  let swingTimer = null;
+  let landTimer = null;
+  let hasMoved = false;
+  let suppressClick = false;
+  let totalShake = 0;
+
+  const clampPos = (left, top, w, h) => ({
+    left: Math.max(6, Math.min(window.innerWidth - w - 6, left)),
+    top: Math.max(6, Math.min(window.innerHeight - h - 6, top)),
+  });
+
+  const syncBubbleSide = (left, top, w) => {
+    buddy.classList.toggle("bubble-left", left + w / 2 > window.innerWidth * 0.54);
+    buddy.classList.toggle("bubble-below", top < 88);
+  };
+
+  const enterPickedUp = (cx, cy) => {
+    if (mascotPickedUp) return;
+    mascotPickedUp = true;
+    hasMoved = true;
+    suppressClick = true;
+    totalShake = 0;
+    clearTimeout(landTimer);
+    faceBtn.classList.remove("landing");
+
+    const rect = buddy.getBoundingClientRect();
+    buddy.style.bottom = "auto";
+    buddy.style.right = "auto";
+    buddy.style.left = `${rect.left}px`;
+    buddy.style.top = `${rect.top}px`;
+
+    buddy.classList.add("snapping", "dragging");
+    faceBtn.classList.add("picked-up");
+    faceBtn.style.setProperty("--dangle-deg", "0deg");
+    document.body.classList.add("mascot-dragging");
+    setMascotMood("picked_up", "อ๊ะ! จับผมขึ้นแล้ว!", "Hanging like a kitten — drop me anywhere!");
+
+    const pos = clampPos(cx - rect.width * SCRUFF_X, cy - rect.height * SCRUFF_Y, rect.width, rect.height);
+    lastX = cx;
+    requestAnimationFrame(() => {
+      if (!mascotPickedUp) return;
+      buddy.style.left = `${pos.left}px`;
+      buddy.style.top = `${pos.top}px`;
+      syncBubbleSide(pos.left, pos.top, rect.width);
+    });
+    clearTimeout(snapTimer);
+    snapTimer = setTimeout(() => buddy.classList.remove("snapping"), 170);
+  };
+
+  faceBtn.addEventListener("dragstart", (e) => e.preventDefault());
+
+  faceBtn.addEventListener("pointerdown", (e) => {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    e.preventDefault();
+    activePid = e.pointerId;
+    startX = e.clientX;
+    startY = e.clientY;
+    lastX = e.clientX;
+    hasMoved = false;
+    suppressClick = false;
+    try { faceBtn.setPointerCapture(e.pointerId); } catch (_) {}
+    clearTimeout(holdTimer);
+    holdTimer = setTimeout(() => enterPickedUp(startX, startY), 150);
+  });
+
+  window.addEventListener("pointermove", (e) => {
+    if (e.pointerId !== activePid) return;
+    if (!mascotPickedUp) {
+      if (Math.hypot(e.clientX - startX, e.clientY - startY) > 5) {
+        clearTimeout(holdTimer);
+        enterPickedUp(e.clientX, e.clientY);
+      }
+      return;
+    }
+    buddy.classList.remove("snapping");
+    const rect = buddy.getBoundingClientRect();
+    const pos = clampPos(e.clientX - rect.width * SCRUFF_X, e.clientY - rect.height * SCRUFF_Y, rect.width, rect.height);
+    const vx = e.clientX - lastX;
+    lastX = e.clientX;
+    totalShake += Math.abs(vx);
+
+    buddy.style.left = `${pos.left}px`;
+    buddy.style.top = `${pos.top}px`;
+    syncBubbleSide(pos.left, pos.top, rect.width);
+
+    const deg = reduceMotion ? 0 : Math.max(-20, Math.min(20, vx * 1.15));
+    faceBtn.style.setProperty("--dangle-deg", `${deg.toFixed(1)}deg`);
+    clearTimeout(swingTimer);
+    swingTimer = setTimeout(() => {
+      if (mascotPickedUp) faceBtn.style.setProperty("--dangle-deg", "0deg");
+    }, 95);
+  });
+
+  const releasePickup = (e) => {
+    if (e.pointerId !== activePid) return;
+    clearTimeout(holdTimer);
+    clearTimeout(snapTimer);
+    clearTimeout(swingTimer);
+    const wasPicked = mascotPickedUp;
+    mascotPickedUp = false;
+    activePid = null;
+    try { faceBtn.releasePointerCapture(e.pointerId); } catch (_) {}
+    document.body.classList.remove("mascot-dragging");
+    buddy.classList.remove("dragging", "snapping");
+    faceBtn.classList.remove("picked-up");
+    faceBtn.style.removeProperty("--dangle-deg");
+
+    if (wasPicked) {
+      const rect = buddy.getBoundingClientRect();
+      const pos = clampPos(rect.left, rect.top, rect.width, rect.height);
+      buddy.style.left = `${pos.left}px`;
+      buddy.style.top = `${pos.top}px`;
+      syncBubbleSide(pos.left, pos.top, rect.width);
+
+      faceBtn.classList.remove("landing");
+      void faceBtn.offsetWidth;
+      faceBtn.classList.add("landing");
+      clearTimeout(landTimer);
+      landTimer = setTimeout(() => faceBtn.classList.remove("landing"), 450);
+
+      if (totalShake > 280) {
+        spawnMascotSparks(pos.left + rect.width / 2, pos.top + rect.height / 2, 12);
+        setMascotMood("surprised", "มึนตึ้บเลย! (muen tûep loei!)", "Whoa, gentle! That was a wild ride!");
+      } else {
+        setMascotMood("happy", "วางตรงนี้เลย! (waang trong níi loei!)", "Cozy spot! Hold & drag me anywhere!");
+      }
+      setTimeout(() => { suppressClick = false; }, 160);
+    } else if (!hasMoved) {
+      suppressClick = true;
+      cycleMascotTip(true);
+      setTimeout(() => { suppressClick = false; }, 160);
+    }
+  };
+
+  window.addEventListener("pointerup", releasePickup);
+  window.addEventListener("pointercancel", releasePickup);
+  window.addEventListener("resize", () => {
+    if (!buddy.style.left) return;
+    const rect = buddy.getBoundingClientRect();
+    const pos = clampPos(rect.left, rect.top, rect.width, rect.height);
+    buddy.style.left = `${pos.left}px`;
+    buddy.style.top = `${pos.top}px`;
+    syncBubbleSide(pos.left, pos.top, rect.width);
+  });
+
+  faceBtn.addEventListener("click", (e) => {
+    if (suppressClick || mascotPickedUp || e.detail !== 0) return;
+    cycleMascotTip(true);
+  });
+}
 
 function spawnMascotSparks(x, y, count = 12) {
   if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -2909,6 +3079,7 @@ function spawnMascotSparks(x, y, count = 12) {
 }
 
 function setMascotMood(pose = "happy", th = "", en = "") {
+  if (mascotPickedUp && pose !== "picked_up") return;
   const imgs = document.querySelectorAll(".mascot-face img");
   if (imgs.length) {
     let matched = false;
@@ -2929,6 +3100,7 @@ function setMascotMood(pose = "happy", th = "", en = "") {
 }
 
 function cycleMascotTip(showBubble = true) {
+  if (mascotPickedUp) return;
   if (showBubble) {
     mascotTapCount += 1;
     clearTimeout(mascotTapResetTimer);

@@ -1402,55 +1402,96 @@ img, video, iframe { max-width: 100%; }
   color: #a9bad2;
 }
 
-/* Foreground mascot buddy with rotating Thai phrase bubble */
+/* Foreground mascot buddy with rotating Thai phrase bubble + click-and-hold pickup */
+body.mascot-dragging,
+body.mascot-dragging * {
+  cursor: grabbing !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
 .mascot-buddy {
   position: fixed;
   left: 18px;
   bottom: 18px;
+  width: 84px;
+  height: 84px;
   z-index: 250;
-  display: flex;
-  align-items: flex-end;
-  gap: 8px;
   pointer-events: none;
+}
+.mascot-buddy.snapping {
+  transition: left 160ms cubic-bezier(0.22, 1, 0.36, 1), top 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.mascot-buddy.dragging {
+  z-index: 360;
 }
 .mascot-face {
   pointer-events: auto;
-  width: 84px;
-  height: 84px;
+  width: 100%;
+  height: 100%;
   border-radius: 0;
   overflow: visible;
   border: none;
   box-shadow: none;
   background: transparent;
-  cursor: pointer;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
   position: relative;
   padding: 0;
   transition: transform 0.25s var(--spring);
   animation: mascotBob 4.2s ease-in-out infinite;
 }
 .mascot-face:hover { transform: translateY(-4px) scale(1.06); }
+.mascot-face:active { transform: scale(0.95); }
+.mascot-face.picked-up,
+.mascot-face.picked-up:hover,
+.mascot-face.picked-up:active {
+  cursor: grabbing;
+  animation: none;
+  transform-origin: 68% 16%;
+  transform: translateY(-4px) scale(1.12) rotate(var(--dangle-deg, 0deg));
+  transition: transform 95ms ease-out;
+}
+.mascot-face.landing {
+  animation: mascotLand 420ms var(--spring) 1;
+}
 .mascot-face img {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: contain;
+  pointer-events: none;
+  -webkit-user-drag: none;
   opacity: 0;
   transform: scale(0.92);
   filter: drop-shadow(0 8px 16px rgba(11, 42, 91, 0.22));
-  transition: opacity 0.3s ease, transform 0.3s var(--spring);
+  transition: opacity 0.22s ease, transform 0.28s var(--spring), filter 0.22s ease;
 }
 .mascot-face img.on { opacity: 1; transform: scale(1); }
-.mascot-face:active { transform: scale(0.92); }
+.mascot-face.picked-up img.on {
+  filter: drop-shadow(0 18px 22px rgba(11, 42, 91, 0.32));
+}
 @keyframes mascotBob {
   0%, 100% { transform: translateY(0) rotate(-1.5deg); }
   50% { transform: translateY(-6px) rotate(1.5deg); }
+}
+@keyframes mascotLand {
+  0% { transform: translateY(-8px) scale(1.08); }
+  45% { transform: translateY(3px) scale(1.08, 0.9); }
+  100% { transform: translateY(0) scale(1); }
 }
 @keyframes mascotPop {
   0% { opacity: 0; transform: scale(0.75) translateY(10px); }
   100% { opacity: 1; transform: scale(1) translateY(0); }
 }
 .mascot-bubble {
+  position: absolute;
+  left: calc(100% + 10px);
+  bottom: 36px;
+  width: max-content;
   background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -1463,10 +1504,23 @@ img, video, iframe { max-width: 100%; }
   line-height: 1.35;
   box-shadow: 0 10px 26px rgba(11, 42, 91, 0.14);
   max-width: 225px;
-  margin-bottom: 36px;
+  pointer-events: none;
   opacity: 0;
   transform: translateY(6px) scale(0.96);
   transition: opacity 0.3s ease, transform 0.3s var(--spring);
+}
+.mascot-buddy.bubble-left .mascot-bubble {
+  left: auto;
+  right: calc(100% + 10px);
+  border-radius: 16px 16px 4px 16px;
+}
+.mascot-buddy.bubble-below .mascot-bubble {
+  bottom: auto;
+  top: calc(100% + 6px);
+  border-radius: 4px 16px 16px 16px;
+}
+.mascot-buddy.bubble-left.bubble-below .mascot-bubble {
+  border-radius: 16px 4px 16px 16px;
 }
 .mascot-bubble.show { opacity: 1; transform: none; }
 .mascot-bubble small { display: block; font-weight: 500; color: var(--muted); font-size: 11.5px; }
@@ -1732,9 +1786,8 @@ img, video, iframe { max-width: 100%; }
   .bg-face.f1 { --s: 96px; }
   .bg-face.f2 { --s: 78px; }
   .bg-face.f3 { --s: 64px; }
-  .mascot-buddy { left: auto; right: 12px; bottom: calc(max(12px, env(safe-area-inset-bottom)) + 64px); flex-direction: row-reverse; }
-  .mascot-face { width: 64px; height: 64px; }
-  .mascot-bubble { border-radius: 16px 16px 4px 16px; max-width: 185px; font-size: 12.5px; margin-bottom: 26px; }
+  .mascot-buddy { left: 12px; bottom: calc(max(12px, env(safe-area-inset-bottom)) + 64px); width: 68px; height: 68px; }
+  .mascot-bubble { max-width: 185px; font-size: 12.5px; bottom: 24px; }
   body[data-portal="login"] .mascot-buddy { bottom: 16px; }
   .mascot-card-row { flex-direction: column; align-items: flex-start; }
   .mascot-card-figure { width: 92px; height: 92px; align-self: flex-end; margin-top: -14px; }
