@@ -1,0 +1,2888 @@
+<!--
+  DESIGN MOCKUP — sample content & interactive X-inspired Teacher Channel + Linked Account System.
+  Intended URL: speakolanguages.com/post/ (listing), /post/<slug> (article), /post/#/compose (composer), /post/#/author/<id> (channel).
+  All copy, dates, and demo switchers below are for visual & UX review only.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Speako Journal — Stories, News &amp; Teacher Channel | Speako Languages</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #EEF2F7;
+      --surface: rgba(255, 255, 255, 0.95);
+      --surface-glass: rgba(255, 255, 255, 0.80);
+      --glass-border: rgba(255, 255, 255, 0.94);
+      --glass-highlight: inset 0 1px 1px 0 rgba(255, 255, 255, 0.92), inset 0 -1px 1px 0 rgba(255, 255, 255, 0.35);
+      --ink: #111827;
+      --muted: #64748B;
+      --navy: #0B2A5B;
+      --navy-dark: #071936;
+      --teal: #0FA6A3;
+      --teal-dark: #0B7F7C;
+      --teal-soft: rgba(20, 163, 160, 0.13);
+      --coral: #F47C6B;
+      --amber: #FF9F0A;
+      --line: rgba(15, 23, 42, 0.06);
+      --line-strong: rgba(15, 23, 42, 0.12);
+      --shadow-xs: 0 4px 14px rgba(15, 23, 42, 0.04);
+      --shadow-sm: 0 12px 34px rgba(15, 23, 42, 0.06);
+      --shadow-md: 0 22px 54px rgba(15, 23, 42, 0.10);
+      --shadow-lg: 0 34px 84px rgba(15, 23, 42, 0.16);
+      --radius-sm: 14px;
+      --radius-md: 20px;
+      --radius-lg: 28px;
+      --radius-xl: 36px;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Noto Sans Thai', sans-serif;
+      --font-display: 'Montserrat', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Noto Sans Thai', sans-serif;
+      --font-thai: 'Noto Sans Thai', 'Inter', sans-serif;
+      --spring: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: var(--font-sans); background-color: var(--bg); color: var(--ink);
+      line-height: 1.55; -webkit-font-smoothing: antialiased; overflow-x: hidden; min-height: 100vh; position: relative;
+    }
+    h1, h2, h3, h4 { font-family: var(--font-display); color: var(--ink); letter-spacing: -0.03em; line-height: 1.15; }
+    a { color: inherit; text-decoration: none; }
+    button, input, textarea, select { font-family: inherit; }
+    :focus-visible { outline: 3px solid rgba(15, 166, 163, 0.55); outline-offset: 2px; }
+    [hidden] { display: none !important; }
+
+    /* Ambient Blobs */
+    .ambient-bg { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+    .blob { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.42; }
+    .blob-navy { width: 520px; height: 520px; top: -140px; left: -120px; background: radial-gradient(circle, rgba(11, 42, 91, 0.24), transparent 72%); }
+    .blob-teal { width: 560px; height: 560px; top: 120px; right: -140px; background: radial-gradient(circle, rgba(15, 166, 163, 0.26), transparent 72%); }
+    .blob-coral { width: 480px; height: 480px; bottom: -140px; left: 28%; background: radial-gradient(circle, rgba(244, 124, 107, 0.22), transparent 72%); }
+
+    /* Reading Progress Bar */
+    .reading-progress { position: fixed; top: 0; left: 0; right: 0; height: 4px; z-index: 300; pointer-events: none; opacity: 0; transition: opacity 0.2s ease; }
+    .reading-progress.is-active { opacity: 1; }
+    .reading-progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--teal) 0%, var(--coral) 100%); border-radius: 0 4px 4px 0; transition: width 0.08s linear; }
+
+    /* Shell & Navbar */
+    .container { width: 100%; max-width: 1140px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+    .navbar { position: sticky; top: 14px; z-index: 150; padding: 0 24px; pointer-events: none; }
+    .nav-inner {
+      pointer-events: auto; max-width: 1140px; margin: 0 auto; min-height: 64px; padding: 8px 14px 8px 18px;
+      border-radius: 999px; background: var(--surface-glass); backdrop-filter: blur(22px) saturate(180%); -webkit-backdrop-filter: blur(22px) saturate(180%);
+      border: 1px solid var(--glass-border); box-shadow: var(--glass-highlight), 0 14px 36px rgba(15, 23, 42, 0.08);
+      display: flex; align-items: center; justify-content: space-between; gap: 12px; position: relative;
+    }
+    .brand-logo { display: inline-flex; align-items: center; gap: 10px; flex-shrink: 0; transition: transform 0.25s var(--spring); }
+    .brand-logo:hover { transform: scale(1.03); }
+    .brand-logo img { width: 32px; height: 32px; object-fit: contain; display: block; }
+    .brand-wordmark { font-family: var(--font-display); font-weight: 800; font-size: 18.5px; color: var(--navy); letter-spacing: -0.03em; }
+
+    .nav-links {
+      display: flex; align-items: center; gap: 3px; background: rgba(15, 23, 42, 0.045);
+      border: 1px solid rgba(255, 255, 255, 0.65); padding: 4px; border-radius: 999px;
+    }
+    .nav-link { padding: 7px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; color: var(--muted); white-space: nowrap; transition: all 0.22s var(--spring); position: relative; }
+    .nav-link:hover { color: var(--ink); background: rgba(255, 255, 255, 0.55); }
+    .nav-link.is-active { background: rgba(255, 255, 255, 0.94); color: var(--navy); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.07); }
+    .nav-link.is-active::after { content: ""; position: absolute; left: 14px; right: 14px; bottom: 4px; height: 2.5px; border-radius: 99px; background: var(--teal); }
+
+    .nav-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; position: relative; }
+
+    /* Buttons & Badges */
+    .btn-primary, .btn-write, .btn-coral, .btn-ghost, .btn-danger-soft {
+      display: inline-flex; align-items: center; justify-content: center; gap: 7px; border-radius: 999px;
+      font-weight: 700; cursor: pointer; white-space: nowrap; transition: transform 0.22s var(--spring), box-shadow 0.22s var(--spring), background-color 0.2s ease;
+    }
+    .btn-primary { padding: 9px 17px; border: none; background: var(--navy); color: #fff; font-size: 13.5px; box-shadow: 0 8px 20px rgba(11, 42, 91, 0.22); }
+    .btn-primary:hover { background: var(--navy-dark); transform: translateY(-1px); }
+    .btn-write { padding: 9px 16px; border: none; background: linear-gradient(135deg, var(--teal-dark), var(--navy)); color: #fff; font-size: 13.5px; box-shadow: 0 8px 20px rgba(15, 166, 163, 0.26); }
+    .btn-write:hover { transform: translateY(-1px); box-shadow: 0 12px 26px rgba(15, 166, 163, 0.34); }
+    .btn-coral { padding: 11px 22px; border: none; background: var(--coral); color: #fff; font-size: 14px; box-shadow: 0 10px 24px rgba(244, 124, 107, 0.34); }
+    .btn-coral:hover { transform: translateY(-1px); filter: brightness(1.04); }
+    .btn-ghost {
+      padding: 9px 18px; background: var(--surface-glass); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      border: 1px solid var(--glass-border); box-shadow: var(--glass-highlight), var(--shadow-xs); color: var(--navy); font-size: 13.5px;
+    }
+    .btn-ghost:hover { background: rgba(255, 255, 255, 0.96); transform: translateY(-1px); box-shadow: var(--glass-highlight), var(--shadow-sm); }
+    .btn-danger-soft { padding: 8px 14px; border: 1px solid rgba(239, 68, 68, 0.25); background: rgba(239, 68, 68, 0.10); color: #B91C1C; font-size: 13px; }
+    .btn-danger-soft:hover { background: rgba(239, 68, 68, 0.16); }
+
+    /* Unified Account Pill & Avatar */
+    .avatar-circle {
+      width: 32px; height: 32px; border-radius: 50%; color: #fff; font-size: 11.5px; font-weight: 700;
+      display: inline-flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;
+      box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.7), 0 2px 6px rgba(15, 23, 42, 0.12); position: relative;
+    }
+    .avatar-circle.has-photo { background: linear-gradient(145deg, #D9EEF0, #B8DDE2) !important; }
+    .avatar-circle img { width: 100%; height: 100%; object-fit: cover; object-position: center 14%; display: block; border-radius: 50%; }
+
+    .account-pill-btn {
+      display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px 4px 4px; border-radius: 999px;
+      background: rgba(255, 255, 255, 0.85); border: 1px solid var(--glass-border); box-shadow: var(--glass-highlight), var(--shadow-xs);
+      cursor: pointer; transition: all 0.22s var(--spring); max-width: 240px;
+    }
+    .account-pill-btn:hover { background: #fff; transform: translateY(-1px); }
+    .account-pill-name { font-size: 13px; font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .role-badge {
+      display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; white-space: nowrap;
+    }
+    .role-badge.teacher { background: rgba(15, 166, 163, 0.14); color: var(--teal-dark); }
+    .role-badge.admin { background: rgba(185, 28, 28, 0.12); color: #991B1B; }
+    .role-badge.student { background: rgba(11, 42, 91, 0.11); color: var(--navy); }
+    .role-badge.guest { background: rgba(100, 116, 139, 0.14); color: var(--muted); }
+
+    /* Account Hub Dropdown */
+    .account-hub {
+      position: absolute; top: calc(100% + 10px); right: 0; width: 320px; border-radius: var(--radius-lg);
+      background: #ffffff;
+      border: 1px solid rgba(15, 23, 42, 0.08); box-shadow: var(--shadow-lg); padding: 14px; z-index: 220; pointer-events: auto;
+    }
+    .hub-header { display: flex; align-items: center; gap: 12px; padding: 6px 6px 12px; border-bottom: 1px solid var(--line); }
+    .hub-header .avatar-circle { width: 44px; height: 44px; font-size: 15px; }
+    .hub-name { font-family: var(--font-display); font-size: 15px; font-weight: 800; color: var(--navy); }
+    .hub-handle { font-size: 12.5px; color: var(--muted); }
+    .hub-actions { display: flex; flex-direction: column; gap: 3px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+    .hub-item {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; padding: 9px 10px;
+      border: none; background: transparent; border-radius: var(--radius-sm); font-size: 13.5px; font-weight: 600; color: var(--ink);
+      cursor: pointer; text-align: left; transition: background-color 0.15s ease;
+    }
+    .hub-item:hover { background: rgba(15, 23, 42, 0.05); }
+    .hub-section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); padding: 10px 8px 6px; }
+    .hub-switcher { display: flex; flex-direction: column; gap: 3px; max-height: 230px; overflow-y: auto; }
+    .switch-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 7px 9px; border-radius: 12px;
+      border: none; background: transparent; width: 100%; cursor: pointer; text-align: left; transition: background-color 0.15s ease;
+    }
+    .switch-row:hover { background: rgba(15, 23, 42, 0.045); }
+    .switch-row.is-current { background: var(--teal-soft); }
+    .switch-left { display: flex; align-items: center; gap: 9px; min-width: 0; }
+    .switch-left .avatar-circle { width: 28px; height: 28px; font-size: 10.5px; }
+    .switch-meta { min-width: 0; }
+    .switch-name { font-size: 13px; font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .switch-role { font-size: 11px; color: var(--muted); }
+    .switch-check { color: var(--teal-dark); font-weight: 800; font-size: 14px; }
+
+    /* Mobile Nav */
+    .hamburger-btn {
+      display: none; width: 38px; height: 38px; border-radius: 999px; border: 1px solid var(--glass-border);
+      background: rgba(255, 255, 255, 0.88); color: var(--navy); align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;
+    }
+    .mobile-menu {
+      display: none; max-width: 1140px; margin: 10px auto 0; padding: 12px; border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--glass-border); box-shadow: var(--shadow-md); pointer-events: auto; flex-direction: column; gap: 4px;
+    }
+    .mobile-menu.is-open { display: flex; }
+    .mobile-menu a, .mobile-menu button { padding: 10px 14px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; color: var(--ink); display: flex; align-items: center; justify-content: space-between; border: none; background: transparent; text-align: left; cursor: pointer; }
+    .mobile-menu a.is-active { background: var(--teal-soft); color: var(--teal-dark); }
+    .mobile-menu .mobile-write-btn { background: linear-gradient(135deg, var(--teal-dark), var(--navy)); color: #fff; justify-content: center; margin-top: 4px; }
+
+    /* Hero */
+    .hero { padding: 38px 0 22px; }
+    .hero-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.65fr); gap: 28px; align-items: center; }
+    .eyebrow-pill {
+      display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px;
+      background: var(--surface-glass); backdrop-filter: blur(16px); border: 1px solid var(--glass-border); box-shadow: var(--shadow-xs);
+      font-size: 11.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--navy); margin-bottom: 16px;
+    }
+    .eyebrow-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 0 4px rgba(15, 166, 163, 0.16); }
+    .hero h1 { font-size: clamp(2rem, 4.2vw, 3.25rem); font-weight: 800; line-height: 1.08; color: var(--navy); margin-bottom: 10px; }
+    .hero-gradient-line { display: block; background: linear-gradient(120deg, var(--teal) 0%, var(--navy) 82%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .hero-thai-sub { font-family: var(--font-thai); font-size: 16px; font-weight: 600; color: var(--teal-dark); margin-bottom: 8px; }
+    .hero-intro { font-size: 16px; color: var(--muted); max-width: 560px; margin-bottom: 20px; }
+    .search-shell { position: relative; max-width: 460px; display: flex; align-items: center; }
+    .search-icon { position: absolute; left: 17px; z-index: 2; display: inline-flex; align-items: center; justify-content: center; color: var(--muted); pointer-events: none; }
+    .search-input {
+      width: 100%; padding: 13px 42px 13px 44px; border-radius: 999px; background: rgba(255, 255, 255, 0.86);
+      backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid var(--glass-border); box-shadow: var(--glass-highlight), var(--shadow-sm); font-size: 15px; color: var(--ink);
+      transition: box-shadow 0.25s var(--spring), background-color 0.2s ease;
+    }
+    .search-input:focus { outline: none; background: #fff; border-color: rgba(15, 166, 163, 0.45); box-shadow: 0 0 0 4px rgba(15, 166, 163, 0.14), var(--shadow-md); }
+    .search-clear { position: absolute; right: 12px; z-index: 2; width: 26px; height: 26px; border-radius: 50%; border: none; background: rgba(15, 23, 42, 0.08); color: var(--muted); cursor: pointer; display: none; align-items: center; justify-content: center; }
+    .search-clear.is-visible { display: inline-flex; }
+    .hero-mascot-wrap { display: flex; align-items: center; justify-content: center; }
+    .hero-mascot-halo {
+      width: 224px; height: 224px; border-radius: 36px; background: linear-gradient(145deg, rgba(255, 255, 255, 0.88), rgba(20, 163, 160, 0.14));
+      backdrop-filter: blur(20px); border: 1px solid var(--glass-border); box-shadow: var(--glass-highlight), var(--shadow-md);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .hero-mascot-img { width: 200px; height: 200px; object-fit: contain; filter: drop-shadow(0 16px 24px rgba(11, 42, 91, 0.16)); animation: mascotFloat 4.6s ease-in-out infinite; }
+    @keyframes mascotFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+    /* =========================================================
+       TEACHER CHANNEL BAR ("WHAT'S ON YOUR MIND?")
+       ========================================================= */
+    .teacher-channel-section { margin: 4px 0 20px; }
+    .channel-card {
+      border-radius: var(--radius-lg); background: rgba(255, 255, 255, 0.86); backdrop-filter: blur(22px) saturate(180%); -webkit-backdrop-filter: blur(22px) saturate(180%);
+      border: 1px solid var(--glass-border); box-shadow: var(--glass-highlight), var(--shadow-sm); padding: 18px 22px;
+      position: relative; overflow: hidden;
+    }
+    .channel-card::before {
+      content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--navy), var(--teal), var(--coral));
+    }
+    .channel-top-row { display: flex; align-items: center; gap: 14px; }
+    .channel-avatar-wrap { position: relative; flex-shrink: 0; }
+    .channel-avatar-wrap .avatar-circle { width: 46px; height: 46px; font-size: 15px; }
+    .online-dot { position: absolute; right: 0; bottom: 0; width: 12px; height: 12px; border-radius: 50%; background: #10B981; border: 2px solid #fff; }
+    .channel-prompt-btn {
+      flex: 1; text-align: left; padding: 13px 18px; border-radius: 999px; border: 1px solid rgba(15, 23, 42, 0.08);
+      background: rgba(238, 242, 247, 0.72); color: var(--muted); font-size: 15px; font-weight: 500; cursor: pointer;
+      transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+    .channel-prompt-btn:hover { background: #fff; border-color: rgba(15, 166, 163, 0.45); color: var(--ink); }
+    .channel-actions-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); flex-wrap: wrap; }
+    .channel-quick-pills { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .quick-action-chip {
+      display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px; border-radius: 999px;
+      border: 1px solid rgba(15, 23, 42, 0.07); background: rgba(255, 255, 255, 0.8); font-size: 13px; font-weight: 600; color: var(--navy);
+      cursor: pointer; transition: transform 0.2s var(--spring), background-color 0.2s ease;
+    }
+    .quick-action-chip:hover { background: var(--teal-soft); color: var(--teal-dark); transform: translateY(-1px); }
+    .channel-role-hint { font-size: 12.5px; color: var(--muted); font-weight: 600; }
+
+    .guest-channel-bar {
+      display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+      padding: 13px 20px; border-radius: var(--radius-md); background: rgba(255, 255, 255, 0.74); backdrop-filter: blur(18px);
+      border: 1px solid var(--glass-border); box-shadow: var(--shadow-xs); font-size: 13.5px; color: var(--muted);
+    }
+
+    /* Category Chips */
+    .chips-section { padding: 4px 0 24px; }
+    .chips-row { display: flex; align-items: center; gap: 10px; overflow-x: auto; padding: 4px 2px 8px; scrollbar-width: none; }
+    .chips-row::-webkit-scrollbar { display: none; }
+    .chip-btn {
+      display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 999px;
+      background: var(--surface-glass); backdrop-filter: blur(18px); border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-highlight), var(--shadow-xs); color: var(--ink); font-size: 13.5px; font-weight: 600; white-space: nowrap; cursor: pointer; flex-shrink: 0;
+      transition: transform 0.22s var(--spring), background-color 0.2s ease, color 0.2s ease;
+    }
+    .chip-btn:hover { transform: translateY(-2px); background: rgba(255, 255, 255, 0.96); }
+    .chip-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .chip-btn.is-active { background: var(--navy); color: #fff; border-color: var(--navy); box-shadow: 0 10px 22px rgba(11, 42, 91, 0.24); }
+    .chip-btn.is-active .chip-dot { background: #fff !important; }
+
+    /* Cover Art & Adaptive X-Style Photo Bento Grid */
+    .cover-art { position: relative; overflow: hidden; display: flex; align-items: flex-end; justify-content: flex-end; user-select: none; }
+    .cover-circle { position: absolute; border-radius: 50%; background: rgba(255, 255, 255, 0.16); border: 1px solid rgba(255, 255, 255, 0.28); pointer-events: none; }
+    .cover-circle-1 { width: 170px; height: 170px; top: -48px; left: -34px; }
+    .cover-circle-2 { width: 110px; height: 110px; bottom: -24px; left: 36%; background: rgba(255, 255, 255, 0.12); }
+    .cover-thai-watermark { position: absolute; top: 50%; left: 22px; transform: translateY(-54%); font-family: var(--font-thai); font-weight: 800; font-size: clamp(2rem, 3vw, 2.8rem); line-height: 1.1; color: rgba(255, 255, 255, 0.24); pointer-events: none; max-width: 68%; }
+    .cover-mascot { position: relative; z-index: 2; width: 120px; height: 120px; object-fit: contain; margin: 0 14px -4px 0; filter: drop-shadow(0 12px 18px rgba(7, 25, 54, 0.22)); transition: transform 0.35s var(--spring); }
+    .cover-emoji { position: relative; z-index: 2; font-size: 56px; line-height: 1; margin: 0 22px 18px 0; filter: drop-shadow(0 10px 18px rgba(7, 25, 54, 0.2)); transition: transform 0.35s var(--spring); }
+
+    .photo-cover-single { width: 100%; height: 100%; position: relative; overflow: hidden; background: #0B2A5B; }
+    .photo-cover-single img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.4s var(--spring); }
+    .photo-count-badge {
+      position: absolute; top: 12px; right: 12px; z-index: 3; padding: 5px 10px; border-radius: 999px;
+      background: rgba(7, 25, 54, 0.72); backdrop-filter: blur(10px); color: #fff; font-size: 11.5px; font-weight: 700;
+      display: inline-flex; align-items: center; gap: 5px;
+    }
+
+    /* X-Inspired Adaptive 1-4 Photo Bento Grid */
+    .photo-bento { display: grid; gap: 6px; border-radius: 20px; overflow: hidden; width: 100%; }
+    .photo-bento[data-count="1"] { grid-template-columns: 1fr; }
+    .photo-bento[data-count="1"] .bento-tile { aspect-ratio: 16 / 9; }
+    .photo-bento[data-count="2"] { grid-template-columns: 1fr 1fr; }
+    .photo-bento[data-count="2"] .bento-tile { height: 210px; }
+    .photo-bento[data-count="3"] { grid-template-columns: 1.15fr 1fr; grid-template-rows: 132px 132px; }
+    .photo-bento[data-count="3"] .bento-tile:first-child { grid-row: span 2; height: 100%; }
+    .photo-bento[data-count="4"] { grid-template-columns: 1fr 1fr; grid-template-rows: 155px 155px; }
+    .bento-tile { position: relative; overflow: hidden; background: #0B2A5B; width: 100%; height: 100%; }
+    .bento-tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .bento-tile.is-clickable { cursor: zoom-in; }
+    .bento-tile.is-clickable:hover img { transform: scale(1.03); transition: transform 0.35s var(--spring); }
+    .bento-caption-tag {
+      position: absolute; left: 8px; right: 8px; bottom: 8px; padding: 5px 9px; border-radius: 10px;
+      background: rgba(7, 25, 54, 0.68); backdrop-filter: blur(8px); color: #fff; font-size: 11.5px; font-weight: 500;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none;
+    }
+
+    /* Card Bento overrides inside story cards */
+    .story-cover-bento { aspect-ratio: 16 / 10; border-radius: 0; position: relative; }
+    .story-cover-bento .photo-bento { height: 100%; border-radius: 0; gap: 3px; }
+    .story-cover-bento .photo-bento[data-count="2"] .bento-tile,
+    .story-cover-bento .photo-bento[data-count="3"] .bento-tile,
+    .story-cover-bento .photo-bento[data-count="4"] .bento-tile { height: 100%; }
+    .story-cover-bento .photo-bento[data-count="3"] { grid-template-rows: 1fr 1fr; }
+    .story-cover-bento .photo-bento[data-count="4"] { grid-template-rows: 1fr 1fr; }
+
+    /* Featured & Story Cards */
+    .featured-section { margin-bottom: 40px; }
+    .featured-card {
+      display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); border-radius: var(--radius-xl);
+      background: var(--surface-glass); backdrop-filter: blur(22px) saturate(180%); border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-highlight), var(--shadow-md); overflow: hidden; transition: transform 0.32s var(--spring), box-shadow 0.32s var(--spring);
+    }
+    .featured-card:hover { transform: translateY(-4px); box-shadow: var(--glass-highlight), var(--shadow-lg); }
+    .featured-cover { min-height: 320px; height: 100%; }
+    .featured-cover .cover-thai-watermark { font-size: clamp(2.6rem, 4.2vw, 4rem); left: 28px; }
+    .featured-cover .cover-mascot { width: 170px; height: 170px; margin: 0 22px 0 0; }
+    .featured-body { padding: 32px 34px; display: flex; flex-direction: column; justify-content: center; gap: 14px; }
+    .tag-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+    .featured-badge { display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; border-radius: 999px; background: linear-gradient(135deg, var(--navy), #16448F); color: #fff; font-size: 11.5px; font-weight: 700; }
+    .format-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 999px; background: rgba(15, 23, 42, 0.06); color: var(--muted); font-size: 11.5px; font-weight: 700; }
+    .cat-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 999px; font-size: 12px; font-weight: 700; width: fit-content; }
+    .featured-title { font-size: clamp(1.4rem, 2.2vw, 1.9rem); font-weight: 800; color: var(--navy); line-height: 1.2; }
+    .featured-excerpt { font-size: 15.5px; color: var(--muted); line-height: 1.62; }
+
+    .meta-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 6px; padding-top: 12px; border-top: 1px solid var(--line); }
+    .author-link { display: inline-flex; align-items: center; gap: 10px; min-width: 0; border-radius: 999px; padding: 2px 6px 2px 2px; transition: background-color 0.2s ease; }
+    .author-link:hover { background: rgba(15, 166, 163, 0.10); }
+    .meta-text { display: flex; flex-direction: column; min-width: 0; }
+    .meta-author { font-size: 13px; font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .meta-sub { font-size: 12px; color: var(--muted); white-space: nowrap; }
+    .read-cta { font-size: 13.5px; font-weight: 700; color: var(--teal-dark); white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; }
+
+    /* Stories Grid */
+    .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+    .section-head h2 { font-size: clamp(1.35rem, 2.2vw, 1.7rem); font-weight: 800; color: var(--navy); }
+    .results-count { font-size: 13.5px; font-weight: 600; color: var(--muted); }
+    .stories-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
+    .story-card {
+      display: flex; flex-direction: column; border-radius: var(--radius-lg); background: var(--surface-glass);
+      backdrop-filter: blur(20px) saturate(180%); border: 1px solid var(--glass-border); box-shadow: var(--glass-highlight), var(--shadow-sm);
+      overflow: hidden; transition: transform 0.28s var(--spring), box-shadow 0.28s var(--spring), opacity 0.42s var(--spring);
+      opacity: 0; transform: translateY(18px);
+    }
+    .story-card.is-visible { opacity: 1; transform: translateY(0); }
+    .story-card.is-visible:hover { transform: translateY(-4px); box-shadow: var(--glass-highlight), var(--shadow-md); }
+    .story-card:hover .cover-mascot, .story-card:hover .cover-emoji { transform: scale(1.06) translateY(-3px); }
+    .story-cover { aspect-ratio: 16 / 10; width: 100%; display: block; }
+    .story-body { padding: 18px 20px 18px; display: flex; flex-direction: column; flex: 1; gap: 9px; }
+    .story-title { font-size: 17px; font-weight: 700; color: var(--navy); line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .story-excerpt { font-size: 14px; color: var(--muted); line-height: 1.55; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; flex: 1; }
+    .load-more-wrap { display: flex; justify-content: center; margin-top: 34px; }
+
+    /* Empty State & Newsletter */
+    .empty-state { text-align: center; padding: 50px 24px; border-radius: var(--radius-xl); background: var(--surface-glass); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); box-shadow: var(--shadow-sm); margin-top: 12px; }
+    .empty-state img { width: 130px; height: 130px; object-fit: contain; margin-bottom: 12px; }
+    .empty-state h3 { font-size: 20px; color: var(--navy); margin-bottom: 8px; }
+    .empty-state p { font-size: 14.5px; color: var(--muted); margin-bottom: 18px; }
+
+    .newsletter-section { margin: 54px 0 46px; }
+    .newsletter-card {
+      border-radius: var(--radius-xl); background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 52%, var(--teal) 100%);
+      color: #fff; padding: 36px 40px; display: grid; grid-template-columns: minmax(0, 1.35fr) auto; gap: 28px; align-items: center;
+      box-shadow: 0 24px 58px rgba(11, 42, 91, 0.24); position: relative; overflow: hidden;
+    }
+    .newsletter-copy h2 { color: #fff; font-size: clamp(1.5rem, 2.5vw, 2rem); font-weight: 800; margin-bottom: 6px; }
+    .newsletter-thai { font-family: var(--font-thai); font-size: 15px; font-weight: 600; color: rgba(255, 255, 255, 0.86); margin-bottom: 16px; }
+    .newsletter-form { display: flex; align-items: center; gap: 10px; max-width: 470px; flex-wrap: wrap; }
+    .newsletter-input { flex: 1 1 220px; padding: 12px 18px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.28); background: rgba(255, 255, 255, 0.14); color: #fff; font-size: 14.5px; }
+    .newsletter-input::placeholder { color: rgba(255, 255, 255, 0.72); }
+    .newsletter-mascot { width: 150px; height: 150px; object-fit: contain; filter: drop-shadow(0 14px 24px rgba(7, 25, 54, 0.35)); }
+
+    /* =========================================================
+       POST COMPOSER STUDIO (#/compose)
+       ========================================================= */
+    .compose-view { padding: 26px 0 56px; }
+    .compose-topbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
+    .compose-status-pill { padding: 5px 12px; border-radius: 999px; background: rgba(15, 166, 163, 0.12); color: var(--teal-dark); font-size: 12.5px; font-weight: 700; }
+    .compose-studio-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.85fr); gap: 26px; align-items: start; }
+
+    .composer-card {
+      border-radius: var(--radius-xl); background: rgba(255, 255, 255, 0.90); backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid var(--glass-border); box-shadow: var(--glass-highlight), var(--shadow-md); padding: 26px 28px;
+      display: flex; flex-direction: column; gap: 18px;
+    }
+    .composer-author-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+    .composer-author-info { display: flex; align-items: center; gap: 11px; }
+    .composer-author-info .avatar-circle { width: 42px; height: 42px; font-size: 14px; }
+
+    .segmented-switch { display: inline-flex; padding: 4px; border-radius: 999px; background: rgba(15, 23, 42, 0.06); gap: 4px; }
+    .seg-tab { padding: 7px 14px; border-radius: 999px; border: none; background: transparent; font-size: 13px; font-weight: 700; color: var(--muted); cursor: pointer; transition: all 0.2s var(--spring); }
+    .seg-tab.is-active { background: #fff; color: var(--navy); box-shadow: 0 3px 10px rgba(15, 23, 42, 0.08); }
+
+    .composer-meta-controls { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .cat-select-pills { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .cat-opt-pill { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line-strong); background: rgba(255, 255, 255, 0.8); font-size: 12.5px; font-weight: 600; color: var(--ink); cursor: pointer; transition: all 0.18s ease; }
+    .cat-opt-pill.is-active { background: var(--navy); color: #fff; border-color: var(--navy); }
+    .pin-toggle { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 700; color: var(--navy); cursor: pointer; padding: 6px 12px; border-radius: 999px; background: rgba(255, 159, 10, 0.12); }
+
+    .compose-headline-input {
+      width: 100%; border: none; background: transparent; font-family: var(--font-display); font-size: clamp(1.4rem, 2.2vw, 1.85rem);
+      font-weight: 800; color: var(--navy); letter-spacing: -0.03em; padding: 4px 0; border-bottom: 1px dashed rgba(15, 23, 42, 0.12);
+    }
+    .compose-headline-input:focus { outline: none; border-bottom-color: var(--teal); }
+    .compose-excerpt-input { width: 100%; border: 1px solid var(--line-strong); border-radius: 14px; background: rgba(238, 242, 247, 0.55); padding: 10px 14px; font-size: 14px; color: var(--ink); }
+    .compose-excerpt-input:focus { outline: none; background: #fff; border-color: var(--teal); }
+
+    .compose-body-textarea {
+      width: 100%; min-height: 155px; resize: vertical; border: 1px solid var(--line-strong); border-radius: 18px;
+      background: rgba(255, 255, 255, 0.72); padding: 14px 16px; font-size: 16px; line-height: 1.65; color: var(--ink);
+    }
+    .compose-body-textarea:focus { outline: none; background: #fff; border-color: var(--teal); box-shadow: 0 0 0 4px rgba(15, 166, 163, 0.10); }
+    .format-chips { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .fmt-chip { padding: 5px 11px; border-radius: 999px; border: 1px solid var(--line-strong); background: rgba(255, 255, 255, 0.8); font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; }
+    .fmt-chip:hover { color: var(--navy); border-color: var(--teal); }
+
+    /* Media Dropzone & Uploaded Photo Grid */
+    .media-tray { border-radius: var(--radius-md); border: 1.5px dashed rgba(15, 166, 163, 0.45); background: rgba(20, 163, 160, 0.05); padding: 16px; transition: background-color 0.2s ease, border-color 0.2s ease; }
+    .media-tray.is-dragover { background: rgba(20, 163, 160, 0.14); border-color: var(--teal-dark); }
+    .media-tray-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+    .media-tray-title { font-size: 13.5px; font-weight: 700; color: var(--navy); }
+    .sample-photo-pills { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+    .sample-photo-btn { padding: 5px 11px; border-radius: 999px; border: 1px solid var(--line-strong); background: #fff; font-size: 12px; font-weight: 600; color: var(--navy); cursor: pointer; transition: transform 0.18s var(--spring); }
+    .sample-photo-btn:hover { transform: translateY(-1px); border-color: var(--teal); }
+
+    .composer-bento-item { position: relative; border-radius: 14px; overflow: hidden; background: #0B2A5B; }
+    .composer-photo-controls { position: absolute; top: 8px; left: 8px; right: 8px; display: flex; justify-content: space-between; align-items: center; gap: 6px; z-index: 4; }
+    .cover-select-btn {
+      padding: 4px 10px; border-radius: 999px; border: none; background: rgba(7, 25, 54, 0.72); backdrop-filter: blur(8px);
+      color: #fff; font-size: 11px; font-weight: 700; cursor: pointer;
+    }
+    .cover-select-btn.is-cover { background: var(--teal); }
+    .photo-remove-btn {
+      width: 26px; height: 26px; border-radius: 50%; border: none; background: rgba(7, 25, 54, 0.78); color: #fff;
+      font-size: 15px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+    }
+    .photo-caption-input {
+      position: absolute; left: 8px; right: 8px; bottom: 8px; z-index: 4; padding: 6px 10px; border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.35); background: rgba(7, 25, 54, 0.65); backdrop-filter: blur(8px);
+      color: #fff; font-size: 12px;
+    }
+    .photo-caption-input::placeholder { color: rgba(255, 255, 255, 0.75); }
+
+    /* Sub-panels inside Composer (Phrase Card, Quote, Cover Customizer) */
+    .sub-panel { border-radius: var(--radius-md); background: rgba(238, 242, 247, 0.65); border: 1px solid var(--line-strong); padding: 16px; }
+    .sub-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; font-size: 13.5px; font-weight: 700; color: var(--navy); }
+    .phrase-builder-row { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 8px; margin-bottom: 8px; align-items: center; }
+    .mini-input { width: 100%; padding: 8px 11px; border-radius: 10px; border: 1px solid var(--line-strong); background: #fff; font-size: 13px; color: var(--ink); }
+    .swatch-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0 12px; }
+    .grad-swatch { width: 34px; height: 34px; border-radius: 10px; border: 2px solid transparent; cursor: pointer; }
+    .grad-swatch.is-active { border-color: var(--navy); transform: scale(1.08); box-shadow: 0 4px 12px rgba(11, 42, 91, 0.25); }
+    .mascot-picker { display: flex; gap: 8px; flex-wrap: wrap; }
+    .mascot-opt { width: 44px; height: 44px; border-radius: 12px; border: 1.5px solid var(--line-strong); background: #fff; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 4px; }
+    .mascot-opt img { width: 100%; height: 100%; object-fit: contain; }
+    .mascot-opt.is-active { border-color: var(--teal); background: var(--teal-soft); }
+
+    /* Bottom Composer Dock */
+    .composer-dock {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+      padding-top: 14px; border-top: 1px solid var(--line);
+    }
+    .dock-tools { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .dock-tool-btn {
+      padding: 8px 12px; border-radius: 999px; border: 1px solid transparent; background: rgba(15, 166, 163, 0.08);
+      color: var(--teal-dark); font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.18s ease;
+    }
+    .dock-tool-btn:hover, .dock-tool-btn.is-active { background: var(--teal); color: #fff; }
+    .dock-metrics { display: flex; align-items: center; gap: 12px; }
+    .progress-ring-wrap { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 600; color: var(--muted); }
+    .draft-pills-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding-top: 6px; }
+    .draft-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 999px; background: rgba(11, 42, 91, 0.07); font-size: 12px; font-weight: 600; color: var(--navy); cursor: pointer; border: none; }
+
+    /* Live Preview Column */
+    .preview-sticky { position: sticky; top: 96px; }
+    .preview-label { font-size: 11.5px; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; display: flex; justify-content: space-between; }
+
+    /* =========================================================
+       AUTHOR PROFILE VIEW (#/author/<id>)
+       ========================================================= */
+    .author-profile-view { padding: 26px 0 54px; }
+    .profile-hero-card {
+      border-radius: var(--radius-xl); background: var(--surface-glass); backdrop-filter: blur(22px) saturate(180%);
+      border: 1px solid var(--glass-border); box-shadow: var(--glass-highlight), var(--shadow-md); overflow: hidden; margin-bottom: 28px;
+    }
+    .profile-banner { height: 150px; background: linear-gradient(125deg, var(--navy-dark), var(--navy) 45%, var(--teal) 100%); position: relative; }
+    .profile-body { padding: 0 32px 28px; position: relative; }
+    .profile-avatar-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: -46px; margin-bottom: 14px; }
+    .profile-avatar-lg { width: 92px; height: 92px; font-size: 30px; border: 4px solid #fff; box-shadow: var(--shadow-md); }
+    .profile-name-line { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .profile-name-line h1 { font-size: 26px; color: var(--navy); }
+    .profile-handle { font-size: 14px; color: var(--muted); font-weight: 600; margin-bottom: 6px; }
+    .profile-bio { font-size: 15px; color: var(--ink); max-width: 680px; margin-bottom: 14px; }
+    .profile-stats { display: flex; gap: 20px; font-size: 13.5px; font-weight: 700; color: var(--navy); }
+    .profile-tabs { display: flex; gap: 8px; margin-bottom: 22px; }
+
+    /* =========================================================
+       ARTICLE DETAIL VIEW (#/post/<slug>)
+       ========================================================= */
+    .article-view { padding: 26px 0 38px; }
+    .article-topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+    .back-pill {
+      display: inline-flex; align-items: center; gap: 7px; padding: 8px 16px; border-radius: 999px;
+      background: var(--surface-glass); backdrop-filter: blur(18px); border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-highlight), var(--shadow-xs); font-size: 13.5px; font-weight: 700; color: var(--navy);
+    }
+    .article-owner-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .breadcrumb { font-size: 13.5px; color: var(--muted); font-weight: 500; }
+    .breadcrumb a { color: var(--teal-dark); font-weight: 600; }
+    .article-header { max-width: 820px; margin-bottom: 22px; }
+    .article-header h1 { font-size: clamp(1.8rem, 3.6vw, 2.7rem); font-weight: 800; color: var(--navy); margin: 12px 0 16px; }
+    .article-banner { width: 100%; height: 300px; border-radius: var(--radius-lg); box-shadow: var(--shadow-md); margin-bottom: 30px; border: 1px solid rgba(255, 255, 255, 0.65); }
+    .article-banner .cover-thai-watermark { font-size: clamp(3rem, 5.2vw, 4.8rem); left: 40px; }
+    .article-banner .cover-mascot { width: 190px; height: 190px; margin: 0 36px 0 0; }
+    .article-banner .cover-emoji { font-size: 92px; margin: 0 46px 32px 0; }
+    .article-gallery-wrap { max-width: 820px; margin: 0 0 32px; }
+
+    .article-layout { display: grid; grid-template-columns: 64px minmax(0, 720px) 1fr; gap: 32px; align-items: start; }
+    .share-rail { position: sticky; top: 104px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .share-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+    .share-btn {
+      width: 44px; height: 44px; border-radius: 50%; background: var(--surface-glass); backdrop-filter: blur(18px);
+      border: 1px solid var(--glass-border); box-shadow: var(--glass-highlight), var(--shadow-xs); color: var(--navy);
+      font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+    .share-btn:hover { background: #fff; color: var(--teal-dark); transform: translateY(-2px); }
+
+    .article-prose { font-size: 18px; line-height: 1.75; color: #1F2937; }
+    .article-prose p { margin-bottom: 20px; }
+    .article-prose h2 { font-size: 24px; font-weight: 800; color: var(--navy); margin: 32px 0 14px; }
+    .article-prose ul { margin: 0 0 24px 22px; display: flex; flex-direction: column; gap: 10px; }
+    .pull-quote {
+      margin: 26px 0; padding: 18px 22px; border-left: 4px solid var(--teal); border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      background: var(--surface-glass); backdrop-filter: blur(18px); box-shadow: var(--shadow-xs);
+      font-family: var(--font-display); font-size: 19px; font-weight: 600; color: var(--navy);
+    }
+    .phrase-callout {
+      margin: 26px 0; padding: 22px 24px; border-radius: var(--radius-lg); background: rgba(255, 255, 255, 0.90);
+      backdrop-filter: blur(20px); border: 1px solid var(--glass-border); box-shadow: var(--glass-highlight), var(--shadow-sm);
+    }
+    .phrase-callout-head { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--teal-dark); margin-bottom: 14px; }
+    .phrase-item { padding: 12px 0; border-top: 1px solid var(--line); }
+    .phrase-item:first-of-type { border-top: none; padding-top: 0; }
+    .phrase-thai { font-family: var(--font-thai); font-size: 21px; font-weight: 700; color: var(--navy); }
+    .phrase-roman { font-size: 14.5px; font-weight: 600; color: var(--teal-dark); margin: 2px 0; }
+    .phrase-eng { font-size: 14.5px; color: var(--muted); }
+
+    .article-end-stack { max-width: 720px; margin: 38px auto 0; }
+    .author-card {
+      padding: 20px 24px; border-radius: var(--radius-lg); background: var(--surface-glass); backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border); box-shadow: var(--shadow-sm); display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 22px;
+    }
+    .author-card-left { display: flex; align-items: center; gap: 16px; flex: 1; min-width: 240px; }
+    .author-card .avatar-circle { width: 56px; height: 56px; font-size: 18px; }
+    .article-cta-card {
+      padding: 24px 26px; border-radius: var(--radius-lg); background: linear-gradient(135deg, rgba(11, 42, 91, 0.08), rgba(15, 166, 163, 0.14));
+      border: 1px solid rgba(255, 255, 255, 0.85); box-shadow: var(--shadow-sm); display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 42px;
+    }
+    .related-section h2 { font-size: 22px; color: var(--navy); margin-bottom: 18px; }
+
+    /* Modals (Sign In & Photo Lightbox) */
+    .modal-backdrop {
+      position: fixed; inset: 0; z-index: 350; background: rgba(7, 25, 54, 0.56); backdrop-filter: blur(10px);
+      display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-card {
+      width: 100%; max-width: 440px; border-radius: var(--radius-xl); background: rgba(255, 255, 255, 0.96);
+      border: 1px solid var(--glass-border); box-shadow: var(--shadow-lg); padding: 26px; position: relative;
+    }
+    .lightbox-card { max-width: 820px; background: rgba(11, 20, 38, 0.94); color: #fff; padding: 18px; border-color: rgba(255, 255, 255, 0.2); }
+    .lightbox-img { width: 100%; max-height: 70vh; object-fit: contain; border-radius: 16px; display: block; }
+    .lightbox-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; }
+
+    /* Footer & Toast */
+    .site-footer { border-top: 1px solid var(--line-strong); background: rgba(255, 255, 255, 0.56); backdrop-filter: blur(18px); padding: 42px 0 30px; position: relative; z-index: 1; }
+    .footer-grid { display: grid; grid-template-columns: 1.5fr repeat(3, 1fr); gap: 28px; margin-bottom: 30px; }
+    .footer-brand p { margin-top: 10px; font-size: 13.5px; color: var(--muted); max-width: 280px; }
+    .footer-col h4 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--navy); margin-bottom: 12px; }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .footer-col a { font-size: 13.5px; color: var(--muted); }
+    .footer-col a:hover { color: var(--teal-dark); }
+    .footer-bottom { padding-top: 18px; border-top: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+    .social-links { display: flex; gap: 14px; flex-wrap: wrap; }
+    .social-links a { font-weight: 600; color: var(--navy); }
+    .toast-region { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 400; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+    .toast { padding: 11px 20px; border-radius: 999px; background: rgba(11, 42, 91, 0.94); color: #fff; font-size: 13.5px; font-weight: 600; box-shadow: 0 14px 32px rgba(7, 25, 54, 0.28); }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .nav-link { padding: 7px 10px; font-size: 12.5px; }
+      .nav-actions .account-pill-btn .role-badge { display: none; }
+      .stories-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .featured-card, .compose-studio-grid { grid-template-columns: 1fr; }
+      .preview-sticky { position: static; }
+      .article-layout { grid-template-columns: 1fr; }
+      .share-rail { position: static; flex-direction: row; }
+      .footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 820px) {
+      .nav-links, .nav-actions .btn-write, .nav-actions .btn-primary, .nav-actions .account-pill-btn .role-badge { display: none; }
+      .hamburger-btn { display: inline-flex; }
+    }
+    @media (max-width: 640px) {
+      .navbar { padding: 0 12px; top: 10px; }
+      .container { padding: 0 16px; }
+      .hero { padding: 24px 0 16px; }
+      .hero-grid { grid-template-columns: 1fr; gap: 18px; }
+      .hero-mascot-halo { width: 162px; height: 162px; }
+      .hero-mascot-img { width: 144px; height: 144px; }
+      .stories-grid, .footer-grid, .phrase-builder-row { grid-template-columns: 1fr; }
+      .newsletter-card { grid-template-columns: 1fr; padding: 26px 22px; }
+      .newsletter-mascot { width: 116px; height: 116px; justify-self: center; }
+      .composer-card { padding: 20px 18px; }
+      .account-hub { width: min(310px, calc(100vw - 32px)); right: -8px; }
+      .channel-top-row { flex-wrap: wrap; }
+      .channel-prompt-btn { min-width: 200px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+      .story-card { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="ambient-bg" aria-hidden="true">
+    <div class="blob blob-navy"></div>
+    <div class="blob blob-teal"></div>
+    <div class="blob blob-coral"></div>
+  </div>
+
+  <div class="reading-progress" id="reading-progress" aria-hidden="true">
+    <div class="reading-progress-fill" id="reading-progress-fill"></div>
+  </div>
+
+  <!-- Sticky Glass Navbar with Linked Account System -->
+  <header class="navbar">
+    <div class="nav-inner">
+      <a class="brand-logo" href="#/" aria-label="Speako Journal Home">
+        <img src="../Speako%20logo.png" alt="Speako logo" />
+        <span class="brand-wordmark">Speako</span>
+      </a>
+
+      <nav class="nav-links" aria-label="Primary navigation">
+        <a class="nav-link" href="../index.html">Home</a>
+        <a class="nav-link" href="../index.html?course=thai">Thai Courses</a>
+        <a class="nav-link" href="../index.html?course=english">English Courses</a>
+        <a class="nav-link is-active" href="#/" aria-current="page">Journal</a>
+        <a class="nav-link" href="../index.html" id="nav-portal-link">Portal</a>
+      </nav>
+
+      <div class="nav-actions" id="nav-actions"></div>
+    </div>
+
+    <nav class="mobile-menu" id="mobile-menu" aria-label="Mobile navigation"></nav>
+  </header>
+
+  <main class="container">
+    <!-- =========================================================
+         1. LISTING / FEED VIEW (#/)
+         ========================================================= -->
+    <div id="listing-view" class="listing-view">
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <div class="eyebrow-pill">
+              <span class="eyebrow-dot" aria-hidden="true"></span>
+              <span>THE SPEAKO JOURNAL · Stories · News · Culture</span>
+            </div>
+            <h1>
+              More than lessons.
+              <span class="hero-gradient-line">Stories from Thailand &amp; beyond.</span>
+            </h1>
+            <p class="hero-thai-sub" lang="th">เรื่องราว ข่าวสาร และวัฒนธรรม จาก Speako</p>
+            <p class="hero-intro">
+              Announcements, Thai cultural guides, practical life-in-Bangkok playbooks, and live updates from our teachers.
+            </p>
+            <div class="search-shell">
+              <span class="search-icon" aria-hidden="true">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="7"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+              </span>
+              <input id="search-input" class="search-input" type="search" placeholder="Search articles…" aria-label="Search articles" autocomplete="off" />
+              <button type="button" id="search-clear" class="search-clear" aria-label="Clear search">×</button>
+            </div>
+          </div>
+          <div class="hero-mascot-wrap">
+            <div class="hero-mascot-halo">
+              <img class="hero-mascot-img" src="../mascot/cartoon/transparent/24_writing_pencil.png" alt="Speako mascot writing in a notebook" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- X-Inspired Teacher Channel Bar ("What's on your mind?") -->
+      <section class="teacher-channel-section" id="teacher-channel-section" aria-label="Teacher post channel"></section>
+
+      <!-- Category Chips -->
+      <section class="chips-section" aria-label="Article categories">
+        <div class="chips-row" id="category-chips" role="tablist"></div>
+      </section>
+
+      <!-- Featured Story -->
+      <section class="featured-section" id="featured-section" aria-label="Featured story"></section>
+
+      <!-- Latest Stories Grid -->
+      <section aria-label="Latest stories">
+        <div class="section-head">
+          <h2 id="grid-heading">Latest stories</h2>
+          <span class="results-count" id="results-count">10 stories</span>
+        </div>
+        <div class="stories-grid" id="stories-grid"></div>
+        <div class="empty-state" id="empty-state" hidden>
+          <img src="../mascot/cartoon/transparent/07_thinking.png" alt="Speako mascot thinking" />
+          <h3>No stories found — try another word.</h3>
+          <p>Try clearing your search or switching back to all categories.</p>
+          <button type="button" class="btn-ghost" id="reset-filters-btn">Show all stories</button>
+        </div>
+        <div class="load-more-wrap" id="load-more-wrap">
+          <button type="button" class="btn-ghost" id="load-more-btn">Load more stories</button>
+        </div>
+      </section>
+
+      <!-- Newsletter Band -->
+      <section class="newsletter-section" aria-label="Newsletter signup">
+        <div class="newsletter-card">
+          <div class="newsletter-copy">
+            <h2>Get Speako stories in your inbox</h2>
+            <p class="newsletter-thai" lang="th">รับบทความใหม่ทุกสัปดาห์</p>
+            <form class="newsletter-form" id="newsletter-form">
+              <input type="email" id="newsletter-email" class="newsletter-input" placeholder="you@example.com" aria-label="Email address" required />
+              <button type="submit" class="btn-coral">Subscribe</button>
+            </form>
+          </div>
+          <img class="newsletter-mascot" src="../mascot/cartoon/transparent/03_excited.png" alt="Excited Speako mascot" />
+        </div>
+      </section>
+    </div>
+
+    <!-- =========================================================
+         2. POST COMPOSER STUDIO (#/compose)
+         ========================================================= -->
+    <section id="compose-view" class="compose-view" hidden aria-label="Post Composer Studio"></section>
+
+    <!-- =========================================================
+         3. AUTHOR PROFILE / CHANNEL VIEW (#/author/<id>)
+         ========================================================= -->
+    <section id="author-view" class="author-profile-view" hidden aria-label="Author Profile"></section>
+
+    <!-- =========================================================
+         4. ARTICLE DETAIL VIEW (#/post/<slug>)
+         ========================================================= -->
+    <article id="article-view" class="article-view" hidden></article>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="brand-logo" href="#/">
+            <img src="../Speako%20logo.png" alt="Speako logo" />
+            <span class="brand-wordmark">Speako</span>
+          </a>
+          <p>Live 1-on-1 Thai &amp; English lessons paired with stories, cultural context, and teacher channels.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Learn</h4>
+          <ul>
+            <li><a href="../index.html?course=thai">Thai 1-on-1</a></li>
+            <li><a href="../index.html?course=english">English 1-on-1</a></li>
+            <li><a href="../student.html">Student Portal</a></li>
+            <li><a href="../teacher.html">Teacher Workspace</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Journal</h4>
+          <ul>
+            <li><a href="#/" data-footer-cat="All">All Stories</a></li>
+            <li><a href="#/" data-footer-cat="News">News &amp; Updates</a></li>
+            <li><a href="#/" data-footer-cat="Culture">Thai Culture</a></li>
+            <li><a href="#/compose">Write a Post</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Teachers &amp; Team</h4>
+          <ul>
+            <li><a href="#/author/kendrick">Kendrick (Piya)</a></li>
+            <li><a href="#/author/kruploy">Kru Ploy</a></li>
+            <li><a href="#/author/krumint">Kru Mint</a></li>
+            <li><a href="#/author/admin">Speako Team</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 Speako Languages · All rights reserved.</span>
+        <div class="social-links">
+          <a href="https://instagram.com/speakolanguages" target="_blank" rel="noopener">Instagram</a>
+          <a href="https://facebook.com/speakolanguages" target="_blank" rel="noopener">Facebook</a>
+          <a href="https://youtube.com/@speakolanguages" target="_blank" rel="noopener">YouTube</a>
+          <a href="../index.html">Portal</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Sign-In Modal & Photo Lightbox Modal -->
+  <div id="modal-root" class="modal-backdrop" hidden></div>
+
+  <div class="toast-region" id="toast-region" aria-live="polite"></div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // =========================================================
+      // 1. LINKED ACCOUNTS REGISTRY (SYNCED WITH SPEAKO PORTALS)
+      // =========================================================
+      const ACCOUNTS = {
+        kendrick: {
+          id: 'kendrick', name: 'Kendrick', fullName: 'Kendrick (Piya)', handle: '@kendrick',
+          role: 'teacher', roleBadge: 'Lead Teacher', title: 'Founder & Lead Thai / English Teacher',
+          photo: '../portrait.png', initials: 'KN', bg: 'linear-gradient(135deg, #0B2A5B, #0FA6A3)',
+          bio: "Hi! I'm Kendrick (Piya), founder of Speako Languages in Bangkok. I specialize in helping beginners speak Thai and English with real-life confidence.",
+          portalUrl: '../teacher.html', email: 'kendrick@speakolanguages.com'
+        },
+        admin: {
+          id: 'admin', name: 'Kendrick (Admin)', fullName: 'Kendrick · Speako Team', handle: '@speako',
+          role: 'admin', roleBadge: 'Admin', title: 'Founder & Main Admin',
+          photo: '../portrait.png', initials: 'KA', bg: 'linear-gradient(135deg, #B91C1C, #0B2A5B)',
+          bio: 'Official announcements, platform releases, and community updates from Speako Languages.',
+          portalUrl: '../admin.html', email: 'admin@speakolanguages.com'
+        },
+        kruploy: {
+          id: 'kruploy', name: 'Kru Ploy', fullName: 'Kru Ploy', handle: '@kruploy',
+          role: 'teacher', roleBadge: 'Teacher', title: 'Thai Culture & Everyday Speaking Coach',
+          photo: '', initials: 'KP', bg: 'linear-gradient(135deg, #F47C6B, #FF9F0A)',
+          bio: 'Lead Thai instructor at Speako. Loves street markets, idioms, and helping newcomers speak naturally.',
+          portalUrl: '../teacher.html', email: 'ploy.teacher@speakolanguages.com'
+        },
+        krumint: {
+          id: 'krumint', name: 'Kru Mint', fullName: 'Kru Mint', handle: '@krumint',
+          role: 'teacher', roleBadge: 'Teacher', title: 'Thai & English Pronunciation Coach',
+          photo: '', initials: 'KM', bg: 'linear-gradient(135deg, #0FA6A3, #0EA5E9)',
+          bio: 'Thai & English coach focusing on pronunciation clarity, tone confidence, and workplace communication.',
+          portalUrl: '../teacher.html', email: 'mint.teacher@speakolanguages.com'
+        },
+        daniel: {
+          id: 'daniel', name: 'Daniel R.', fullName: 'Daniel R.', handle: '@daniel_bkk',
+          role: 'teacher', roleBadge: 'Contributor', title: 'Expat Guide & Community Writer',
+          photo: '', initials: 'DR', bg: 'linear-gradient(135deg, #8B5CF6, #0B2A5B)',
+          bio: 'Bangkok-based writer and Speako learner sharing practical guides on moving to and thriving in Thailand.',
+          portalUrl: '../student.html', email: 'daniel@example.com'
+        },
+        alex: {
+          id: 'alex', name: 'Alex Mercer', fullName: 'Alex Mercer', handle: '@alex',
+          role: 'student', roleBadge: 'Student · 7 cr', title: 'Speako Student · Bangkok',
+          photo: '', initials: 'AM', bg: 'linear-gradient(135deg, #0B2A5B, #1E40AF)',
+          bio: 'Communicating confidently in daily life in Bangkok, ordering food politely, and introducing myself in Thai.',
+          portalUrl: '../student.html', email: 'alex@example.com'
+        },
+        guest: {
+          id: 'guest', name: 'Guest', fullName: 'Guest Visitor', handle: '@guest',
+          role: 'guest', roleBadge: 'Guest', title: 'Not signed in',
+          photo: '', initials: 'SP', bg: 'linear-gradient(135deg, #64748B, #0B2A5B)',
+          bio: 'Sign in with your Speako account to publish updates or manage your channel.',
+          portalUrl: '../index.html', email: ''
+        }
+      };
+
+      const CATEGORIES = [
+        { name: 'All', color: '#0B2A5B' },
+        { name: 'News', color: '#F47C6B' },
+        { name: 'Culture', color: '#FF9F0A' },
+        { name: 'Life in Thailand', color: '#0FA6A3' },
+        { name: 'Food & Travel', color: '#E85D75' },
+        { name: 'Learning Tips', color: '#0B2A5B' },
+        { name: 'Community', color: '#8B5CF6' },
+        { name: 'Careers', color: '#0EA5E9' }
+      ];
+
+      const CATEGORY_META = {
+        'News': { color: '#F47C6B', bg: 'rgba(244, 124, 107, 0.14)', text: '#B93E2D' },
+        'Culture': { color: '#FF9F0A', bg: 'rgba(255, 159, 10, 0.16)', text: '#9A5B00' },
+        'Life in Thailand': { color: '#0FA6A3', bg: 'rgba(15, 166, 163, 0.14)', text: '#0B7F7C' },
+        'Food & Travel': { color: '#E85D75', bg: 'rgba(232, 93, 117, 0.14)', text: '#A72840' },
+        'Learning Tips': { color: '#0B2A5B', bg: 'rgba(11, 42, 91, 0.11)', text: '#0B2A5B' },
+        'Community': { color: '#8B5CF6', bg: 'rgba(139, 92, 246, 0.14)', text: '#6032C9' },
+        'Careers': { color: '#0EA5E9', bg: 'rgba(14, 165, 233, 0.14)', text: '#0369A1' }
+      };
+
+      const GRADIENTS = [
+        { from: '#0B2A5B', to: '#0FA6A3', label: 'Navy → Teal' },
+        { from: '#0B2A5B', to: '#FF9F0A', label: 'Navy → Amber' },
+        { from: '#F47C6B', to: '#0B2A5B', label: 'Coral → Navy' },
+        { from: '#8B5CF6', to: '#0FA6A3', label: 'Violet → Teal' },
+        { from: '#E85D75', to: '#FF9F0A', label: 'Rose → Amber' },
+        { from: '#0EA5E9', to: '#0B2A5B', label: 'Sky → Navy' }
+      ];
+
+      const MASCOT_OPTIONS = [
+        { label: 'Happy', src: '../mascot/cartoon/transparent/01_very_happy.png' },
+        { label: 'Writing', src: '../mascot/cartoon/transparent/24_writing_pencil.png' },
+        { label: 'Excited', src: '../mascot/cartoon/transparent/03_excited.png' },
+        { label: 'Proud', src: '../mascot/cartoon/transparent/13_proud.png' },
+        { label: 'Winking', src: '../mascot/cartoon/transparent/18_winking.png' },
+        { label: 'Curious', src: '../mascot/cartoon/transparent/02_curious.png' },
+        { label: 'Thinking', src: '../mascot/cartoon/transparent/07_thinking.png' }
+      ];
+
+      function svgDataUri(svg) {
+        return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg.trim());
+      }
+
+      const SAMPLE_PHOTOS = [
+        {
+          id: 'market',
+          label: '🏮 Night Market',
+          caption: 'Evening snacks & Thai practice at a Bangkok night market',
+          url: svgDataUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500"><defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#071936"/><stop offset="55%" stop-color="#0B2A5B"/><stop offset="100%" stop-color="#F47C6B"/></linearGradient></defs><rect width="800" height="500" fill="url(#g1)"/><circle cx="650" cy="110" r="65" fill="#FF9F0A" opacity=".88"/><circle cx="160" cy="140" r="24" fill="#FF9F0A" opacity=".9"/><circle cx="250" cy="120" r="20" fill="#F47C6B" opacity=".9"/><circle cx="340" cy="145" r="24" fill="#0FA6A3" opacity=".9"/><rect x="80" y="290" width="640" height="150" rx="22" fill="rgba(255,255,255,0.14)" stroke="rgba(255,255,255,0.35)"/><text x="120" y="360" fill="#fff" font-family="sans-serif" font-size="38" font-weight="800">Bangkok Night Market</text><text x="120" y="405" fill="rgba(255,255,255,0.85)" font-family="sans-serif" font-size="24">อร่อยมากครับ · Street food &amp; tone practice</text></svg>`)
+        },
+        {
+          id: 'class',
+          label: '🗣️ 1-on-1 Class',
+          caption: 'Live 1-on-1 conversation session notes with Kru Kendrick',
+          url: svgDataUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500"><defs><linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0B2A5B"/><stop offset="100%" stop-color="#0FA6A3"/></linearGradient></defs><rect width="800" height="500" fill="url(#g2)"/><circle cx="680" cy="400" r="140" fill="rgba(255,255,255,0.09)"/><rect x="70" y="75" width="430" height="145" rx="28" fill="rgba(255,255,255,0.94)"/><text x="105" y="135" fill="#0B2A5B" font-family="sans-serif" font-size="34" font-weight="800">สวัสดีครับ! Today's Focus</text><text x="105" y="182" fill="#0B7F7C" font-family="sans-serif" font-size="22" font-weight="600">Natural greetings &amp; café role-play</text><rect x="260" y="265" width="460" height="150" rx="28" fill="rgba(255,255,255,0.18)" stroke="rgba(255,255,255,0.45)"/><text x="295" y="330" fill="#fff" font-family="sans-serif" font-size="30" font-weight="700">“ขอลาเต้เย็นหวานน้อยครับ”</text><text x="295" y="376" fill="rgba(255,255,255,0.85)" font-family="sans-serif" font-size="21">Iced latte, less sweet please!</text></svg>`)
+        },
+        {
+          id: 'river',
+          label: '🌅 Chao Phraya',
+          caption: 'Golden hour along the Chao Phraya River pier',
+          url: svgDataUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500"><defs><linearGradient id="g3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0B2A5B"/><stop offset="55%" stop-color="#F47C6B"/><stop offset="100%" stop-color="#FF9F0A"/></linearGradient></defs><rect width="800" height="500" fill="url(#g3)"/><circle cx="400" cy="240" r="88" fill="#FFF3C4" opacity=".9"/><path d="M0 320 Q200 295 400 320 T800 320 L800 500 L0 500 Z" fill="rgba(7,25,54,0.58)"/><polygon points="560,315 600,150 640,315" fill="#071936"/><text x="64" y="420" fill="#fff" font-family="sans-serif" font-size="34" font-weight="800">Chao Phraya River Sunset</text></svg>`)
+        },
+        {
+          id: 'tones',
+          label: '🎵 Tone Chart',
+          caption: 'Quick visual check on the 5 Thai tones from Lesson 3',
+          url: svgDataUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500"><defs><linearGradient id="g4" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#8B5CF6"/><stop offset="100%" stop-color="#0FA6A3"/></linearGradient></defs><rect width="800" height="500" fill="url(#g4)"/><path d="M90 270 L210 270 M240 270 Q290 360 350 360 M380 210 Q440 160 490 350 M520 200 L610 185 M640 330 Q685 360 730 190" stroke="#fff" stroke-width="14" stroke-linecap="round" fill="none"/><text x="70" y="95" fill="#fff" font-family="sans-serif" font-size="36" font-weight="800">5 Thai Tones · Visual Guide</text><text x="70" y="445" fill="rgba(255,255,255,0.9)" font-family="sans-serif" font-size="24" font-weight="600">Mid · Low · Falling · High · Rising</text></svg>`)
+        }
+      ];
+
+      const DEFAULT_POSTS = [
+        {
+          slug: 'loy-krathong-2026',
+          title: 'Loy Krathong 2026: What It Means and How to Celebrate Like a Local',
+          category: 'Culture',
+          format: 'article',
+          excerpt: 'Why thousands of glowing banana-leaf floats drift down rivers across Thailand every November — and the Thai phrases you need for the night.',
+          authorId: 'kruploy',
+          date: '24 Nov 2026',
+          readTime: '6 min read',
+          featured: true,
+          coverMode: 'gradient',
+          cover: { from: '#0B2A5B', to: '#FF9F0A', thai: 'ลอยกระทง', mascot: '../mascot/cartoon/transparent/01_very_happy.png' },
+          body: `
+            <p>Every November, on the evening of the full moon of the twelfth Thai lunar month, rivers, canals, and temple ponds across Thailand fill with candlelight. Friends, couples, and families gather along the water's edge holding delicate banana-leaf floats decorated with marigolds, incense, and a single candle.</p>
+            <p>If you are living in or visiting Thailand this season, <strong>Loy Krathong</strong> (ลอยกระทง) is one of the warmest, easiest cultural nights to join. You don't need an invitation — just a krathong, a lighter, and a little Thai to share the moment with the people beside you.</p>
+            <h2>What is Loy Krathong?</h2>
+            <p>The word <em>loy</em> (ลอย) means "to float," and a <em>krathong</em> (กระทง) is the small buoyant vessel traditionally folded from banana trunk slices and banana leaves. Historically, the ritual is an offering of gratitude to Phra Mae Khongkha, the goddess of water.</p>
+            <blockquote class="pull-quote">“When you let go of the krathong into the current, you’re also symbolically letting go of bad luck, grudges, and heavy thoughts from the past year.”</blockquote>
+            <h2>Where to celebrate in Bangkok</h2>
+            <ul>
+              <li><strong>Lumphini Park &amp; Benjasiri Park:</strong> Accessible by BTS and MRT, relaxed atmosphere, great for first-timers.</li>
+              <li><strong>Asiatique &amp; Iconsiam Riverfront:</strong> Big Chao Phraya river views with staged cultural performances.</li>
+              <li><strong>Choose eco-friendly krathongs:</strong> Look for natural banana trunk, bread, or ice krathongs instead of foam.</li>
+            </ul>
+            <h2>Useful Thai phrases for the night</h2>
+            <p>Locals love seeing newcomers take part respectfully. Try these three simple lines at the pier:</p>
+          `,
+          phrases: [
+            { thai: 'ลอยกระทงด้วยกันไหม', roman: 'loi krà-thong dûay-gan mái', eng: 'Shall we float a krathong together?' },
+            { thai: 'อันนี้ทำจากวัสดุธรรมชาติไหมครับ / คะ', roman: 'an-níi tham jàak wát-sà-dù tham-má-châat mái khráp / khá', eng: 'Is this one made from natural materials?' },
+            { thai: 'สุขสันต์วันลอยกระทง', roman: 'sùk-sǎn wan loi krà-thong', eng: 'Happy Loy Krathong Day!' }
+          ]
+        },
+        {
+          slug: 'why-we-started-speako-journal',
+          title: 'Why We Started The Speako Journal: Stories Beyond the Classroom',
+          category: 'News',
+          format: 'update',
+          excerpt: 'A space for our teachers to share real street photos, daily Thai expressions, and notes from Bangkok — all connected right to your Speako account.',
+          authorId: 'kendrick',
+          date: '22 Nov 2026',
+          readTime: '3 min read',
+          featured: false,
+          coverMode: 'photo',
+          cover: { from: '#0B2A5B', to: '#0FA6A3', thai: 'เรื่องราวของเรา', mascot: '../mascot/cartoon/transparent/24_writing_pencil.png' },
+          photos: [
+            { url: SAMPLE_PHOTOS[1].url, caption: 'Behind our live 1-on-1 slide decks & café role-plays' },
+            { url: SAMPLE_PHOTOS[0].url, caption: 'Real night-market Thai phrases you can use tonight' }
+          ],
+          bodyText: "Learning Thai or English shouldn't stay locked inside a 1-hour video call.\n\nWe built this channel so every teacher at Speako can quickly snap a photo from a Bangkok coffee shop, explain an everyday phrase, or write a deeper cultural guide — right here without waiting for a separate CMS.\n\n## What you can expect\n- Weekly quick updates from Kru Ploy, Kru Mint, and myself.\n- Real-life Thai phrase cards you can bookmark before dinner.\n- Stories from students navigating life in Thailand."
+        },
+        {
+          slug: 'evening-slots-working-professionals',
+          title: 'Speako Opens New Evening Slots for Working Professionals',
+          category: 'News',
+          format: 'article',
+          excerpt: 'New 19:00–22:00 Bangkok time slots are now live for both Thai and English 1-on-1 learners balancing busy workdays.',
+          authorId: 'admin',
+          date: '19 Nov 2026',
+          readTime: '3 min read',
+          featured: false,
+          coverMode: 'gradient',
+          cover: { from: '#F47C6B', to: '#0B2A5B', thai: 'ข่าวสาร', emoji: '🌆' }
+        },
+        {
+          slug: 'introducing-new-speako-student-portal',
+          title: 'Introducing the New Speako Student Portal',
+          category: 'News',
+          format: 'article',
+          excerpt: 'Faster booking, live lesson countdowns, audio-ready review decks, and cleaner credit tracking designed around your weekly routine.',
+          authorId: 'admin',
+          date: '14 Nov 2026',
+          readTime: '4 min read',
+          featured: false,
+          coverMode: 'gradient',
+          cover: { from: '#0B2A5B', to: '#0FA6A3', thai: 'พอร์ทัลใหม่', mascot: '../mascot/cartoon/transparent/13_proud.png' }
+        },
+        {
+          slug: 'guide-opening-bank-account-bangkok',
+          title: "A Foreigner's Guide to Opening a Bank Account in Bangkok",
+          category: 'Life in Thailand',
+          format: 'article',
+          excerpt: 'Which branches are friendlier to expats, what documents to bring in your folder, and the exact Thai phrases to tell the queue desk.',
+          authorId: 'daniel',
+          date: '10 Nov 2026',
+          readTime: '7 min read',
+          featured: false,
+          coverMode: 'gradient',
+          cover: { from: '#0FA6A3', to: '#0B2A5B', thai: 'ธนาคาร', emoji: '🏦' }
+        },
+        {
+          slug: '7-bangkok-street-foods-order-in-thai',
+          title: '7 Bangkok Street Foods You Must Try — and How to Order Them in Thai',
+          category: 'Food & Travel',
+          format: 'article',
+          excerpt: 'From crispy pad kra pao to mango sticky rice, learn how to customize spice levels, portions, and toppings like a regular.',
+          authorId: 'kruploy',
+          date: '05 Nov 2026',
+          readTime: '5 min read',
+          featured: false,
+          coverMode: 'gradient',
+          cover: { from: '#E85D75', to: '#FF9F0A', thai: 'อาหารริมทาง', emoji: '🍜' }
+        },
+        {
+          slug: 'why-20-minutes-a-day-beats-cramming',
+          title: 'Why 20 Minutes a Day Beats a 3-Hour Weekend Cram',
+          category: 'Learning Tips',
+          format: 'article',
+          excerpt: 'How short, repeatable speaking loops lock Thai tones and English phrasing into muscle memory without burnout.',
+          authorId: 'krumint',
+          date: '01 Nov 2026',
+          readTime: '4 min read',
+          featured: false,
+          coverMode: 'gradient',
+          cover: { from: '#0B2A5B', to: '#1E40AF', thai: 'เทคนิคเรียน', mascot: '../mascot/cartoon/transparent/18_winking.png' }
+        },
+        {
+          slug: 'emma-3-month-thai-journey',
+          title: "From Zero to Ordering Som Tam: Emma's 3-Month Journey",
+          category: 'Community',
+          format: 'article',
+          excerpt: 'How a remote product designer overcame tone anxiety and started chatting with her Silom neighbours in 90 days.',
+          authorId: 'daniel',
+          date: '26 Oct 2026',
+          readTime: '5 min read',
+          featured: false,
+          coverMode: 'gradient',
+          cover: { from: '#8B5CF6', to: '#0FA6A3', thai: 'เรื่องราวผู้เรียน', emoji: '🎉' }
+        },
+        {
+          slug: 'wai-smile-kreng-jai-thai-etiquette',
+          title: 'Wai, Smile, Kreng Jai: The Unspoken Rules of Thai Etiquette',
+          category: 'Culture',
+          format: 'article',
+          excerpt: 'Understanding when to wai, why staying calm wins every conversation, and what kreng jai really means in daily life.',
+          authorId: 'kruploy',
+          date: '20 Oct 2026',
+          readTime: '6 min read',
+          featured: false,
+          coverMode: 'gradient',
+          cover: { from: '#FF9F0A', to: '#F47C6B', thai: 'วัฒนธรรม', emoji: '🙏' }
+        },
+        {
+          slug: 'bilingual-skills-thailand-job-market',
+          title: "How Bilingual Skills Open Doors in Thailand's Job Market",
+          category: 'Careers',
+          format: 'article',
+          excerpt: 'Why practical Thai-English communication beats textbook grammar in hospitality, tech teams, and regional startups.',
+          authorId: 'krumint',
+          date: '15 Oct 2026',
+          readTime: '5 min read',
+          featured: false,
+          coverMode: 'gradient',
+          cover: { from: '#0EA5E9', to: '#0B2A5B', thai: 'เส้นทางอาชีพ', emoji: '💼' }
+        },
+        {
+          slug: 'meet-the-teachers-behind-speako',
+          title: 'Meet the Teachers Behind Speako',
+          category: 'Community',
+          format: 'article',
+          excerpt: 'Behind the scenes with the educators shaping our 1-on-1 Thai and English lessons, audio decks, and warm teaching style.',
+          authorId: 'admin',
+          date: '09 Oct 2026',
+          readTime: '5 min read',
+          featured: false,
+          coverMode: 'gradient',
+          cover: { from: '#8B5CF6', to: '#F47C6B', thai: 'ทีมครูสปีคโค', mascot: '../mascot/cartoon/transparent/02_curious.png' }
+        }
+      ];
+
+      // =========================================================
+      // 2. PERSISTENCE, LIVE SERVER API SYNC & STATE
+      // =========================================================
+      const PORTAL_BASE = window.location.pathname.startsWith('/schedule') ? '/schedule' : '';
+      const STORAGE_ACCOUNT_KEY = 'speako_journal_account_v1';
+      const STORAGE_POSTS_KEY = 'speako_journal_posts_v1';
+      const STORAGE_DRAFTS_KEY = 'speako_journal_drafts_v1';
+
+      function encodeUserHeader(u) {
+        if (!u || !u.id || !u.email) return '';
+        try {
+          const json = JSON.stringify({
+            id: u.id, name: u.name, email: u.email, role: u.role || 'student',
+            thai_credits: u.thai_credits || 0, english_credits: u.english_credits || 0,
+            phone: u.phone || '', timezone: u.timezone || 'Thailand (GMT+7)', avatar: u.avatar || ''
+          });
+          return btoa(unescape(encodeURIComponent(json))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        } catch (_) {
+          return '';
+        }
+      }
+
+      async function apiRequest(path, body = null, useAuth = true) {
+        if (window.location.protocol === 'file:') {
+          throw new Error('Offline file mode');
+        }
+        const headers = { Accept: 'application/json' };
+        if (useAuth) {
+          const tok = localStorage.getItem('speako_token') || '';
+          if (tok) headers['Authorization'] = `Bearer ${tok}`;
+          const vault = localStorage.getItem('speako_vault_v3') || '';
+          if (vault) headers['X-Speako-Vault'] = vault;
+          try {
+            const cached = JSON.parse(localStorage.getItem('speako_user_cache') || 'null');
+            const uh = encodeUserHeader(cached);
+            if (uh) headers['X-Speako-User'] = uh;
+          } catch (_) {}
+        }
+
+        const opts = { method: body ? 'POST' : 'GET', headers };
+        if (body) {
+          headers['Content-Type'] = 'application/json';
+          opts.body = JSON.stringify(body);
+        }
+        const url = path.startsWith('/') ? `${PORTAL_BASE}${path}` : path;
+        const res = await fetch(url, opts);
+        const data = await res.json().catch(() => ({}));
+        if (data && data.vault) {
+          try { localStorage.setItem('speako_vault_v3', data.vault); } catch (_) {}
+        }
+        if (data && data.user) {
+          try { localStorage.setItem('speako_user_cache', JSON.stringify(data.user)); } catch (_) {}
+        }
+        if (!res.ok) {
+          throw new Error(data.error || `Request failed (${res.status})`);
+        }
+        return data;
+      }
+
+      function mapServerUserToAccountId(u) {
+        if (!u) return null;
+        if (u.id === 'admin-main' || u.role === 'admin') return 'admin';
+        if (u.id === 'user-teacher-kendrick' || (u.email || '').toLowerCase() === 'kendrick@speakolanguages.com') return 'kendrick';
+        if (u.id === 'student-alex') return 'alex';
+        const role = u.role || 'student';
+        const isKendrick = (u.name || '').toLowerCase().includes('kendrick');
+        const initials = u.avatar || (u.name || 'SP').split(/\s+/).map((x) => x[0]).join('').slice(0, 2).toUpperCase();
+        ACCOUNTS[u.id] = {
+          id: u.id,
+          name: (u.name || 'Member').split(' (')[0],
+          fullName: u.name || 'Speako Member',
+          handle: '@' + (u.email || u.name || 'user').split('@')[0].toLowerCase().replace(/[^a-z0-9_]/g, ''),
+          role,
+          roleBadge: role === 'admin' ? 'Admin' : role === 'teacher' ? 'Teacher' : `Student · ${(u.thai_credits || 0) + (u.english_credits || 0)} cr`,
+          title: u.learning_goal || (role === 'teacher' ? 'Speako Language Teacher' : 'Speako Member'),
+          photo: isKendrick ? '../portrait.png' : '',
+          initials,
+          bg: role === 'admin' ? 'linear-gradient(135deg, #B91C1C, #0B2A5B)' : role === 'teacher' ? 'linear-gradient(135deg, #0B2A5B, #0FA6A3)' : 'linear-gradient(135deg, #0B2A5B, #1E40AF)',
+          bio: u.learning_goal || 'Member of the Speako Languages community.',
+          portalUrl: role === 'admin' ? '../admin.html' : role === 'teacher' ? '../teacher.html' : '../student.html',
+          email: u.email || ''
+        };
+        return u.id;
+      }
+
+      function registerPostAuthor(sp) {
+        if (!sp || !sp.authorId || ACCOUNTS[sp.authorId]) return;
+        ACCOUNTS[sp.authorId] = {
+          id: sp.authorId,
+          name: sp.authorName || 'Speako Teacher',
+          fullName: sp.authorName || 'Speako Teacher',
+          handle: sp.authorHandle || '@' + sp.authorId,
+          role: sp.authorRole || 'teacher',
+          roleBadge: sp.authorBadge || 'Teacher',
+          title: 'Speako Languages Contributor',
+          photo: sp.authorAvatar && sp.authorAvatar.includes('/') ? sp.authorAvatar : '',
+          initials: (sp.authorName || 'ST').split(/\s+/).map((x) => x[0]).join('').slice(0, 2).toUpperCase(),
+          bg: 'linear-gradient(135deg, #0B2A5B, #0FA6A3)',
+          bio: 'Sharing stories, news, and lessons on The Speako Journal.',
+          portalUrl: '../teacher.html',
+          email: ''
+        };
+      }
+
+      function mergeServerPosts(serverPosts) {
+        if (!Array.isArray(serverPosts) || !serverPosts.length) return;
+        const serverMap = new Map();
+        const deletedSlugs = new Set();
+        for (const sp of serverPosts) {
+          if (!sp || !sp.slug) continue;
+          if (sp.is_deleted) deletedSlugs.add(sp.slug);
+          else {
+            registerPostAuthor(sp);
+            serverMap.set(sp.slug, sp);
+          }
+        }
+        const defaultSlugs = new Set(DEFAULT_POSTS.map((d) => d.slug));
+        const merged = [];
+        for (const sp of serverPosts) {
+          if (sp && !sp.is_deleted && !defaultSlugs.has(sp.slug)) merged.push(sp);
+        }
+        for (const d of DEFAULT_POSTS) {
+          if (!deletedSlugs.has(d.slug)) merged.push(serverMap.get(d.slug) || d);
+        }
+        // Preserve any unsynced local-only posts created offline
+        const mergedSlugs = new Set(merged.map((m) => m.slug));
+        for (const lp of POSTS) {
+          if (lp._custom && !mergedSlugs.has(lp.slug) && !deletedSlugs.has(lp.slug)) {
+            merged.unshift(lp);
+          }
+        }
+        POSTS = merged;
+        savePostsState();
+      }
+
+      async function fetchServerPostsAndSession() {
+        try {
+          const res = await apiRequest('/api/posts');
+          if (res.user) {
+            const mappedId = mapServerUserToAccountId(res.user);
+            if (mappedId && !sessionStorage.getItem('speako_journal_demo_switch')) {
+              activeAccountId = mappedId;
+              localStorage.setItem(STORAGE_ACCOUNT_KEY, mappedId);
+            }
+          }
+          if (Array.isArray(res.posts) && res.posts.length) {
+            mergeServerPosts(res.posts);
+          }
+          renderNavbarActions();
+          renderTeacherChannelBar();
+          syncRoute();
+        } catch (_) {}
+      }
+
+      function loadActiveAccountId() {
+        const saved = localStorage.getItem(STORAGE_ACCOUNT_KEY);
+        if (saved && ACCOUNTS[saved]) return saved;
+        try {
+          const cached = JSON.parse(localStorage.getItem('speako_user_cache') || 'null');
+          if (cached) {
+            const mapped = mapServerUserToAccountId(cached);
+            if (mapped) return mapped;
+          }
+        } catch (_) {}
+        return 'kendrick';
+      }
+
+      function loadPosts() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(STORAGE_POSTS_KEY) || 'null');
+          if (saved && Array.isArray(saved.custom)) {
+            const deleted = new Set(saved.deleted || []);
+            const editedMap = new Map((saved.custom || []).map((p) => [p.slug, p]));
+            const merged = [];
+            for (const p of saved.custom) {
+              if (!DEFAULT_POSTS.some((d) => d.slug === p.slug) && !deleted.has(p.slug)) merged.push(p);
+            }
+            for (const d of DEFAULT_POSTS) {
+              if (!deleted.has(d.slug)) merged.push(editedMap.get(d.slug) || d);
+            }
+            return merged;
+          }
+        } catch (_) {}
+        return DEFAULT_POSTS.slice();
+      }
+
+      function savePostsState() {
+        const defaultSlugs = new Set(DEFAULT_POSTS.map((d) => d.slug));
+        const currentSlugs = new Set(POSTS.map((p) => p.slug));
+        const deleted = Array.from(defaultSlugs).filter((s) => !currentSlugs.has(s));
+        const custom = POSTS.filter((p) => p._custom || !defaultSlugs.has(p.slug));
+        try {
+          localStorage.setItem(STORAGE_POSTS_KEY, JSON.stringify({ custom, deleted }));
+        } catch (_) {
+          showToast('Saved in session (browser storage limit reached for large images)');
+        }
+      }
+
+      function loadDrafts() {
+        try {
+          const d = JSON.parse(localStorage.getItem(STORAGE_DRAFTS_KEY) || '[]');
+          return Array.isArray(d) ? d : [];
+        } catch (_) {
+          return [];
+        }
+      }
+
+      function saveDrafts() {
+        try {
+          localStorage.setItem(STORAGE_DRAFTS_KEY, JSON.stringify(DRAFTS));
+        } catch (_) {}
+      }
+
+      let activeAccountId = loadActiveAccountId();
+      let POSTS = loadPosts();
+      let DRAFTS = loadDrafts();
+      let activeCategory = 'All';
+      let searchQuery = '';
+      let hubOpen = false;
+      let authorProfileTab = 'posts';
+
+      function blankComposerState() {
+        return {
+          editingSlug: '',
+          format: 'update',
+          category: 'Culture',
+          featured: false,
+          title: '',
+          excerpt: '',
+          bodyText: '',
+          pullQuote: '',
+          photos: [],
+          coverPhotoIdx: 0,
+          coverMode: 'photo',
+          coverGradientIdx: 0,
+          coverThai: 'สวัสดี',
+          coverMascot: MASCOT_OPTIONS[0].src,
+          showPhrasePanel: false,
+          showQuotePanel: false,
+          showCoverPanel: false,
+          phrases: [{ thai: '', roman: '', eng: '' }]
+        };
+      }
+
+      let composer = blankComposerState();
+
+      // DOM Refs
+      const listingView = document.getElementById('listing-view');
+      const composeView = document.getElementById('compose-view');
+      const authorView = document.getElementById('author-view');
+      const articleView = document.getElementById('article-view');
+      const navActions = document.getElementById('nav-actions');
+      const mobileMenu = document.getElementById('mobile-menu');
+      const teacherChannelSection = document.getElementById('teacher-channel-section');
+      const chipsContainer = document.getElementById('category-chips');
+      const featuredSection = document.getElementById('featured-section');
+      const storiesGrid = document.getElementById('stories-grid');
+      const emptyState = document.getElementById('empty-state');
+      const loadMoreWrap = document.getElementById('load-more-wrap');
+      const resultsCount = document.getElementById('results-count');
+      const gridHeading = document.getElementById('grid-heading');
+      const searchInput = document.getElementById('search-input');
+      const searchClear = document.getElementById('search-clear');
+      const progressWrap = document.getElementById('reading-progress');
+      const progressFill = document.getElementById('reading-progress-fill');
+      const modalRoot = document.getElementById('modal-root');
+      const toastRegion = document.getElementById('toast-region');
+
+      // =========================================================
+      // 3. HELPERS & SHARED RENDERERS
+      // =========================================================
+      function esc(str) {
+        return String(str == null ? '' : str)
+          .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+      }
+
+      function currentUser() {
+        return ACCOUNTS[activeAccountId] || ACCOUNTS.kendrick;
+      }
+
+      function canWrite(user = currentUser()) {
+        return user.role === 'teacher' || user.role === 'admin';
+      }
+
+      function showToast(msg) {
+        const el = document.createElement('div');
+        el.className = 'toast';
+        el.textContent = msg;
+        toastRegion.appendChild(el);
+        setTimeout(() => {
+          el.style.opacity = '0';
+          el.style.transition = 'opacity 0.2s ease';
+          setTimeout(() => el.remove(), 220);
+        }, 2600);
+      }
+
+      function renderAvatar(account, extraClass = '') {
+        const a = account || ACCOUNTS.admin;
+        if (a.photo) {
+          return `<span class="avatar-circle has-photo ${extraClass}"><img src="${esc(a.photo)}" alt="${esc(a.name)}" /></span>`;
+        }
+        return `<span class="avatar-circle ${extraClass}" style="background:${a.bg};">${esc(a.initials)}</span>`;
+      }
+
+      function renderCatPill(category) {
+        const meta = CATEGORY_META[category] || CATEGORY_META['News'];
+        return `<span class="cat-pill" style="background:${meta.bg}; color:${meta.text};"><span class="chip-dot" style="background:${meta.color};"></span>${esc(category)}</span>`;
+      }
+
+      function renderAuthorChip(post) {
+        const acc = ACCOUNTS[post.authorId] || ACCOUNTS.admin;
+        return `
+          <a class="author-link" href="#/author/${esc(acc.id)}" title="View ${esc(acc.name)}'s channel">
+            ${renderAvatar(acc)}
+            <div class="meta-text">
+              <span class="meta-author">${esc(acc.name)}</span>
+              <span class="meta-sub">${esc(post.date)} · ${esc(post.readTime)}</span>
+            </div>
+          </a>
+        `;
+      }
+
+      function renderPhotoBento(photos, clickable = false) {
+        const list = (photos || []).slice(0, 4);
+        if (!list.length) return '';
+        return `
+          <div class="photo-bento" data-count="${list.length}">
+            ${list.map((ph, idx) => `
+              <div class="bento-tile ${clickable ? 'is-clickable' : ''}" ${clickable ? `data-lightbox-idx="${idx}"` : ''}>
+                <img src="${esc(ph.url)}" alt="${esc(ph.caption || 'Post image ' + (idx + 1))}" />
+                ${ph.caption && clickable ? `<span class="bento-caption-tag">${esc(ph.caption)}</span>` : ''}
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      function renderCardCover(post, extraClass, isFeatured = false) {
+        const photos = post.photos || [];
+        const hasPhotos = photos.length > 0 && post.coverMode !== 'gradient';
+        if (hasPhotos) {
+          if (post.format === 'update' && photos.length > 1 && !isFeatured) {
+            return `
+              <a class="story-cover story-cover-bento" href="#/post/${esc(post.slug)}">
+                ${renderPhotoBento(photos, false)}
+                <span class="photo-count-badge">📷 ${photos.length} photos</span>
+              </a>
+            `;
+          }
+          const idx = Math.min(post.coverPhotoIdx || 0, photos.length - 1);
+          const primary = photos[idx];
+          return `
+            <a class="${extraClass}" href="#/post/${esc(post.slug)}" style="display:block;position:relative;">
+              <div class="photo-cover-single">
+                <img src="${esc(primary.url)}" alt="${esc(primary.caption || post.title)}" />
+                <span class="photo-count-badge">📷 ${photos.length} ${photos.length === 1 ? 'photo' : 'photos'}</span>
+              </div>
+            </a>
+          `;
+        }
+        const cover = post.cover || { from: '#0B2A5B', to: '#0FA6A3', thai: 'Speako', mascot: MASCOT_OPTIONS[0].src };
+        const bg = `linear-gradient(135deg, ${cover.from} 0%, ${cover.to} 100%)`;
+        const visual = cover.mascot
+          ? `<img class="cover-mascot" src="${esc(cover.mascot)}" alt="${esc(post.title)}" loading="lazy" />`
+          : `<span class="cover-emoji" aria-hidden="true">${cover.emoji || '✨'}</span>`;
+        return `
+          <a class="cover-art ${extraClass}" href="#/post/${esc(post.slug)}" style="background:${bg};">
+            <span class="cover-circle cover-circle-1" aria-hidden="true"></span>
+            <span class="cover-circle cover-circle-2" aria-hidden="true"></span>
+            <span class="cover-thai-watermark" lang="th" aria-hidden="true">${esc(cover.thai || 'Speako')}</span>
+            ${visual}
+          </a>
+        `;
+      }
+
+      function renderBannerCover(post) {
+        const cover = post.cover || { from: '#0B2A5B', to: '#0FA6A3', thai: 'Speako', mascot: MASCOT_OPTIONS[0].src };
+        const bg = `linear-gradient(135deg, ${cover.from} 0%, ${cover.to} 100%)`;
+        const visual = cover.mascot
+          ? `<img class="cover-mascot" src="${esc(cover.mascot)}" alt="${esc(post.title)}" />`
+          : `<span class="cover-emoji" aria-hidden="true">${cover.emoji || '✨'}</span>`;
+        return `
+          <div class="cover-art article-banner" style="background:${bg};">
+            <span class="cover-circle cover-circle-1" aria-hidden="true"></span>
+            <span class="cover-circle cover-circle-2" aria-hidden="true"></span>
+            <span class="cover-thai-watermark" lang="th" aria-hidden="true">${esc(cover.thai || 'Speako')}</span>
+            ${visual}
+          </div>
+        `;
+      }
+
+      function switchAccount(id) {
+        if (!ACCOUNTS[id]) return;
+        activeAccountId = id;
+        localStorage.setItem(STORAGE_ACCOUNT_KEY, id);
+        sessionStorage.setItem('speako_journal_demo_switch', '1');
+        hubOpen = false;
+        renderNavbarActions();
+        renderTeacherChannelBar();
+        const hash = window.location.hash || '';
+        if (hash.startsWith('#/compose')) renderComposer();
+        else if (hash.startsWith('#/author/')) renderAuthorProfile(hash.slice('#/author/'.length));
+        else if (hash.startsWith('#/post/')) renderArticle(hash.slice('#/post/'.length));
+        const acc = ACCOUNTS[id];
+        showToast(acc.role === 'guest' ? 'Signed out to Guest view' : `Switched to ${acc.name} (${acc.handle})`);
+      }
+
+      // =========================================================
+      // 4. NAVBAR & ACCOUNT HUB
+      // =========================================================
+      function renderNavbarActions() {
+        const user = currentUser();
+        const switcherAccounts = ['kendrick', 'admin', 'kruploy', 'krumint', 'daniel', 'alex'];
+
+        let rightHtml = '';
+        if (canWrite(user)) {
+          rightHtml += `<a href="#/compose" class="btn-write" id="nav-write-btn" data-new-compose="1">✍️ Write a post</a>`;
+        } else if (user.role === 'student') {
+          rightHtml += `<button type="button" class="btn-primary" id="nav-trial-btn">Book a free trial</button>`;
+        } else {
+          rightHtml += `<button type="button" class="btn-ghost" id="nav-signin-btn">Sign in</button>`;
+          rightHtml += `<button type="button" class="btn-primary" id="nav-trial-btn">Book a free trial</button>`;
+        }
+
+        if (user.role !== 'guest') {
+          rightHtml += `
+            <button type="button" class="account-pill-btn" id="account-pill-btn" aria-expanded="${hubOpen}" aria-haspopup="true">
+              ${renderAvatar(user)}
+              <span class="account-pill-name">${esc(user.name)}</span>
+              <span class="role-badge ${esc(user.role)}">${esc(user.roleBadge)}</span>
+            </button>
+          `;
+        }
+
+        rightHtml += `
+          <button type="button" class="hamburger-btn" id="hamburger-btn" aria-label="Toggle navigation menu" aria-expanded="false">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round">
+              <line x1="4" y1="7" x2="20" y2="7"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="17" x2="20" y2="17"></line>
+            </svg>
+          </button>
+        `;
+
+        if (hubOpen && user.role !== 'guest') {
+          rightHtml += `
+            <div class="account-hub" id="account-hub" role="dialog" aria-label="Linked Speako Account Hub">
+              <div class="hub-header">
+                ${renderAvatar(user)}
+                <div>
+                  <div class="hub-name">${esc(user.fullName)}</div>
+                  <div class="hub-handle">${esc(user.handle)} · <span class="role-badge ${esc(user.role)}">${esc(user.roleBadge)}</span></div>
+                </div>
+              </div>
+              <div class="hub-actions">
+                <a class="hub-item" href="#/author/${esc(user.id)}" data-close-hub><span>👤 View my channel &amp; posts</span><span>→</span></a>
+                ${canWrite(user) ? `<a class="hub-item" href="#/compose" data-close-hub data-new-compose="1"><span>✍️ Write a post / What's on your mind</span><span>→</span></a>` : ''}
+                ${canWrite(user) ? `<button type="button" class="hub-item" id="hub-drafts-btn"><span>🗂️ Drafts (${DRAFTS.length})</span><span>Open</span></button>` : ''}
+                <a class="hub-item" href="${esc(user.portalUrl)}" target="_blank" rel="noopener"><span>↗ Open Speako ${esc(user.role === 'student' ? 'Portal' : 'Workspace')}</span></a>
+              </div>
+              <div class="hub-section-label">Switch Linked Account</div>
+              <div class="hub-switcher">
+                ${switcherAccounts.map((id) => {
+                  const a = ACCOUNTS[id];
+                  const active = id === activeAccountId;
+                  return `
+                    <button type="button" class="switch-row ${active ? 'is-current' : ''}" data-switch-acc="${esc(id)}">
+                      <span class="switch-left">
+                        ${renderAvatar(a)}
+                        <span class="switch-meta">
+                          <div class="switch-name">${esc(a.name)}</div>
+                          <div class="switch-role">${esc(a.roleBadge)} · ${esc(a.handle)}</div>
+                        </span>
+                      </span>
+                      ${active ? '<span class="switch-check">✓</span>' : ''}
+                    </button>
+                  `;
+                }).join('')}
+                <button type="button" class="switch-row" data-switch-acc="guest">
+                  <span class="switch-left">
+                    ${renderAvatar(ACCOUNTS.guest)}
+                    <span class="switch-meta">
+                      <div class="switch-name">Sign out (Guest)</div>
+                      <div class="switch-role">Preview public reader view</div>
+                    </span>
+                  </span>
+                </button>
+              </div>
+            </div>
+          `;
+        }
+
+        navActions.innerHTML = rightHtml;
+
+        const portalNav = document.getElementById('nav-portal-link');
+        if (portalNav) portalNav.setAttribute('href', user.portalUrl || '../index.html');
+
+        // Mobile menu links
+        mobileMenu.innerHTML = `
+          <a href="../index.html">Home</a>
+          <a href="../index.html?course=thai">Thai Courses</a>
+          <a href="../index.html?course=english">English Courses</a>
+          <a href="#/" class="is-active" aria-current="page">Journal</a>
+          <a href="${esc(user.portalUrl || '../index.html')}">Portal</a>
+          ${user.role !== 'guest' ? `<a href="#/author/${esc(user.id)}">👤 My Channel (${esc(user.name)})</a>` : `<button type="button" id="mobile-signin-btn">Sign in to Speako</button>`}
+          ${canWrite(user) ? `<a href="#/compose" class="mobile-write-btn" data-new-compose="1">✍️ Write a post / What's on your mind</a>` : `<button type="button" class="mobile-write-btn" id="mobile-switch-teacher">Switch to Teacher Channel</button>`}
+        `;
+
+        wireNavListeners();
+      }
+
+      function wireNavListeners() {
+        const pill = document.getElementById('account-pill-btn');
+        if (pill) {
+          pill.addEventListener('click', (e) => {
+            e.stopPropagation();
+            hubOpen = !hubOpen;
+            renderNavbarActions();
+          });
+        }
+        const signin = document.getElementById('nav-signin-btn');
+        if (signin) signin.addEventListener('click', openSignInModal);
+        const mSignin = document.getElementById('mobile-signin-btn');
+        if (mSignin) mSignin.addEventListener('click', openSignInModal);
+        const mSwitch = document.getElementById('mobile-switch-teacher');
+        if (mSwitch) mSwitch.addEventListener('click', () => switchAccount('kendrick'));
+        const trial = document.getElementById('nav-trial-btn');
+        if (trial) trial.addEventListener('click', () => { window.location.href = '../index.html?mode=signup&course=thai'; });
+
+        const draftsBtn = document.getElementById('hub-drafts-btn');
+        if (draftsBtn) {
+          draftsBtn.addEventListener('click', () => {
+            hubOpen = false;
+            if (DRAFTS.length) {
+              loadDraftIntoComposer(DRAFTS[0].id);
+            } else {
+              location.hash = '#/compose';
+              showToast('No saved drafts yet — start writing!');
+            }
+          });
+        }
+
+        document.querySelectorAll('[data-switch-acc]').forEach((btn) => {
+          btn.addEventListener('click', () => switchAccount(btn.getAttribute('data-switch-acc')));
+        });
+        document.querySelectorAll('[data-close-hub]').forEach((el) => {
+          el.addEventListener('click', () => { hubOpen = false; renderNavbarActions(); });
+        });
+
+        const hBtn = document.getElementById('hamburger-btn');
+        if (hBtn) {
+          hBtn.addEventListener('click', () => {
+            const open = mobileMenu.classList.toggle('is-open');
+            hBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+          });
+        }
+      }
+
+      // =========================================================
+      // 5. TEACHER CHANNEL BAR ("WHAT'S ON YOUR MIND?")
+      // =========================================================
+      function renderTeacherChannelBar() {
+        const user = currentUser();
+        if (canWrite(user)) {
+          teacherChannelSection.innerHTML = `
+            <div class="channel-card">
+              <div class="channel-top-row">
+                <a href="#/author/${esc(user.id)}" class="channel-avatar-wrap" title="View ${esc(user.name)}'s channel">
+                  ${renderAvatar(user)}
+                  <span class="online-dot" aria-hidden="true"></span>
+                </a>
+                <button type="button" class="channel-prompt-btn" id="channel-mind-btn">
+                  What's on your mind, ${esc(user.name)}? Share a lesson note, photo story, or article…
+                </button>
+                <a href="#/compose" class="btn-write" data-new-compose="1">✍️ Write a post</a>
+              </div>
+              <div class="channel-actions-row">
+                <div class="channel-quick-pills">
+                  <button type="button" class="quick-action-chip" data-compose-launch="photo">🖼️ Upload Pics</button>
+                  <button type="button" class="quick-action-chip" data-compose-launch="phrase">🇹🇭 Thai Phrase Card</button>
+                  <button type="button" class="quick-action-chip" data-compose-launch="update">💬 Quick Update</button>
+                  <button type="button" class="quick-action-chip" data-compose-launch="article">📰 Full Article</button>
+                </div>
+                <span class="channel-role-hint">Signed in as ${esc(user.handle)} · ${esc(user.roleBadge)}</span>
+              </div>
+            </div>
+          `;
+          document.getElementById('channel-mind-btn').addEventListener('click', () => {
+            composer = blankComposerState();
+            location.hash = '#/compose';
+          });
+          teacherChannelSection.querySelectorAll('[data-compose-launch]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+              const mode = btn.getAttribute('data-compose-launch');
+              composer = blankComposerState();
+              if (mode === 'article') composer.format = 'article';
+              if (mode === 'phrase') composer.showPhrasePanel = true;
+              location.hash = mode === 'photo' ? '#/compose?action=photo' : '#/compose';
+            });
+          });
+        } else {
+          const label = user.role === 'student' ? `Student (${user.name})` : 'Guest';
+          teacherChannelSection.innerHTML = `
+            <div class="guest-channel-bar">
+              <span>Viewing as <strong>${esc(label)}</strong> — switch to a Teacher account in the top-right pill to write a post.</span>
+              <button type="button" class="btn-write" id="quick-switch-teacher">Switch to Teacher (${esc(ACCOUNTS.kendrick.name)})</button>
+            </div>
+          `;
+          document.getElementById('quick-switch-teacher').addEventListener('click', () => switchAccount('kendrick'));
+        }
+      }
+
+      // =========================================================
+      // 6. LISTING VIEW (CHIPS, FEATURED, GRID)
+      // =========================================================
+      function matchesFilters(post) {
+        const catMatch = activeCategory === 'All' || post.category === activeCategory;
+        if (!catMatch) return false;
+        const q = searchQuery.trim().toLowerCase();
+        if (!q) return true;
+        return (
+          post.title.toLowerCase().includes(q) ||
+          post.excerpt.toLowerCase().includes(q) ||
+          (ACCOUNTS[post.authorId]?.name || '').toLowerCase().includes(q)
+        );
+      }
+
+      function renderChips() {
+        chipsContainer.innerHTML = CATEGORIES.map((c) => {
+          const active = c.name === activeCategory;
+          return `
+            <button type="button" class="chip-btn ${active ? 'is-active' : ''}" data-category="${esc(c.name)}" role="tab" aria-selected="${active}">
+              <span class="chip-dot" style="background:${c.color};"></span>
+              <span>${esc(c.name)}</span>
+            </button>
+          `;
+        }).join('');
+      }
+
+      let cardObserver = null;
+      function observeStoryCards() {
+        if (cardObserver) cardObserver.disconnect();
+        const cards = storiesGrid.querySelectorAll('.story-card');
+        if (!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          cards.forEach((c) => c.classList.add('is-visible'));
+          return;
+        }
+        cardObserver = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-visible');
+              cardObserver.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.08, rootMargin: '0px 0px -24px 0px' });
+        cards.forEach((card, idx) => {
+          card.style.transitionDelay = `${Math.min(idx * 40, 220)}ms`;
+          cardObserver.observe(card);
+        });
+      }
+
+      function renderStoryCardHtml(post, visibleImmediately = false) {
+        const formatTag = post.format === 'update' ? '<span class="format-badge">💬 Update</span>' : '';
+        return `
+          <article class="story-card ${visibleImmediately ? 'is-visible' : ''}">
+            ${renderCardCover(post, 'story-cover', false)}
+            <div class="story-body">
+              <div class="tag-row">
+                ${renderCatPill(post.category)}
+                ${formatTag}
+              </div>
+              <a href="#/post/${esc(post.slug)}"><h3 class="story-title">${esc(post.title)}</h3></a>
+              <p class="story-excerpt">${esc(post.excerpt)}</p>
+              <div class="meta-footer">
+                ${renderAuthorChip(post)}
+                <a class="read-cta" href="#/post/${esc(post.slug)}">Read →</a>
+              </div>
+            </div>
+          </article>
+        `;
+      }
+
+      function renderListing() {
+        const featured = POSTS.find((p) => p.featured);
+        const gridPosts = POSTS.filter((p) => p !== featured);
+        const isFiltered = activeCategory !== 'All' || searchQuery.trim() !== '';
+
+        if (featured && (!isFiltered || matchesFilters(featured))) {
+          featuredSection.hidden = false;
+          featuredSection.innerHTML = `
+            <article class="featured-card">
+              ${renderCardCover(featured, 'featured-cover', true)}
+              <div class="featured-body">
+                <div class="tag-row">
+                  <span class="featured-badge">★ Featured</span>
+                  ${renderCatPill(featured.category)}
+                </div>
+                <a href="#/post/${esc(featured.slug)}"><h2 class="featured-title">${esc(featured.title)}</h2></a>
+                <p class="featured-excerpt">${esc(featured.excerpt)}</p>
+                <div class="meta-footer">
+                  ${renderAuthorChip(featured)}
+                  <a class="read-cta" href="#/post/${esc(featured.slug)}">Read story →</a>
+                </div>
+              </div>
+            </article>
+          `;
+        } else {
+          featuredSection.hidden = true;
+          featuredSection.innerHTML = '';
+        }
+
+        const filteredGrid = gridPosts.filter(matchesFilters);
+        gridHeading.textContent = activeCategory === 'All' ? 'Latest stories' : `${activeCategory} stories`;
+        const totalMatched = filteredGrid.length + (featured && isFiltered && matchesFilters(featured) ? 1 : 0);
+        resultsCount.textContent = isFiltered ? `${totalMatched} ${totalMatched === 1 ? 'story' : 'stories'} matched` : `${filteredGrid.length} stories`;
+
+        if (filteredGrid.length === 0 && !(featured && isFiltered && matchesFilters(featured))) {
+          storiesGrid.innerHTML = '';
+          emptyState.hidden = false;
+          loadMoreWrap.hidden = true;
+        } else {
+          emptyState.hidden = true;
+          loadMoreWrap.hidden = isFiltered;
+          storiesGrid.innerHTML = filteredGrid.map((p) => renderStoryCardHtml(p, false)).join('');
+          observeStoryCards();
+        }
+      }
+
+      // =========================================================
+      // 7. POST COMPOSER STUDIO (#/compose)
+      // =========================================================
+      function renderComposer(autoOpenPhotoPicker = false) {
+        const user = currentUser();
+        if (!canWrite(user)) {
+          composeView.innerHTML = `
+            <div class="compose-topbar">
+              <a class="back-pill" href="#/">← Back to Feed</a>
+            </div>
+            <div class="empty-state">
+              <img src="../mascot/cartoon/transparent/07_thinking.png" alt="Speako mascot" />
+              <h3>Teacher or Admin account needed to write posts</h3>
+              <p>You are currently viewing as <strong>${esc(user.name)}</strong>. Switch to a Teacher account to unlock the X-inspired Post Studio.</p>
+              <button type="button" class="btn-write" id="compose-switch-teacher">Switch to Kendrick (Lead Teacher)</button>
+            </div>
+          `;
+          document.getElementById('compose-switch-teacher').addEventListener('click', () => switchAccount('kendrick'));
+          return;
+        }
+
+        const words = (composer.bodyText || '').trim().split(/\s+/).filter(Boolean).length;
+        const readMin = Math.max(1, Math.ceil(words / 180));
+        const pct = Math.min(1, words / 250);
+        const circ = 2 * Math.PI * 10;
+        const dashOffset = circ * (1 - pct);
+
+        composeView.innerHTML = `
+          <div class="compose-topbar">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+              <a class="back-pill" href="#/">← Back to Feed</a>
+              <span class="compose-status-pill">${composer.editingSlug ? 'Editing published post' : 'Studio Ready'}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+              <button type="button" class="btn-ghost" id="save-draft-btn">Save draft</button>
+              <button type="button" class="btn-coral" id="top-publish-btn">${composer.editingSlug ? 'Update post →' : 'Publish post →'}</button>
+            </div>
+          </div>
+
+          <div class="compose-studio-grid">
+            <div class="composer-card">
+              <!-- Linked Author + Format Switch -->
+              <div class="composer-author-bar">
+                <div class="composer-author-info">
+                  ${renderAvatar(user)}
+                  <div>
+                    <div style="font-weight:700;font-size:14px;color:var(--navy);">${esc(user.name)} <span class="role-badge ${esc(user.role)}">${esc(user.roleBadge)}</span></div>
+                    <div style="font-size:12px;color:var(--muted);">Publishing as ${esc(user.handle)}</div>
+                  </div>
+                </div>
+                <div class="segmented-switch" role="tablist" aria-label="Post format">
+                  <button type="button" class="seg-tab ${composer.format === 'update' ? 'is-active' : ''}" data-fmt="update">💬 Quick Update</button>
+                  <button type="button" class="seg-tab ${composer.format === 'article' ? 'is-active' : ''}" data-fmt="article">📰 Full Article</button>
+                </div>
+              </div>
+
+              <!-- Category & Pin Featured -->
+              <div class="composer-meta-controls">
+                <div class="cat-select-pills">
+                  ${CATEGORIES.filter((c) => c.name !== 'All').map((c) => `
+                    <button type="button" class="cat-opt-pill ${composer.category === c.name ? 'is-active' : ''}" data-comp-cat="${esc(c.name)}">${esc(c.name)}</button>
+                  `).join('')}
+                </div>
+                <label class="pin-toggle">
+                  <input type="checkbox" id="comp-featured" ${composer.featured ? 'checked' : ''} />
+                  <span>★ Pin as Featured</span>
+                </label>
+              </div>
+
+              <!-- Title & Excerpt -->
+              <input type="text" id="comp-title" class="compose-headline-input" placeholder="${composer.format === 'update' ? 'Headline (optional for quick updates)…' : 'Give your story a headline…'}" value="${esc(composer.title)}" />
+              <input type="text" id="comp-excerpt" class="compose-excerpt-input" placeholder="Short summary for the card preview (optional — auto-fills from body)…" value="${esc(composer.excerpt)}" />
+
+              <!-- Body Editor -->
+              <div>
+                <textarea id="comp-body" class="compose-body-textarea" placeholder="What's on your mind? Share a story, cultural insight, or lesson tip…">${esc(composer.bodyText)}</textarea>
+                <div class="format-chips" style="margin-top:8px;">
+                  <button type="button" class="fmt-chip" data-insert="\n\n## Section Heading\n">+ H2 Heading</button>
+                  <button type="button" class="fmt-chip" data-insert="\n- Tip 1: \n- Tip 2: ">+ Bullet List</button>
+                  <button type="button" class="fmt-chip" id="insert-sample-story">✨ Fill Sample Post</button>
+                </div>
+              </div>
+
+              <!-- Multi-Photo Upload & Adaptive Bento Grid -->
+              <div class="media-tray" id="media-dropzone">
+                <div class="media-tray-header">
+                  <span class="media-tray-title">🖼️ Photos (${composer.photos.length}/4) — Drag &amp; drop or upload</span>
+                  <div>
+                    <input type="file" id="photo-upload-input" accept="image/*" multiple hidden />
+                    <button type="button" class="btn-ghost" id="trigger-upload-btn" style="padding:6px 14px;font-size:12.5px;">+ Upload from device</button>
+                  </div>
+                </div>
+                ${composer.photos.length ? `
+                  <div class="photo-bento" data-count="${composer.photos.length}">
+                    ${composer.photos.map((ph, idx) => `
+                      <div class="bento-tile composer-bento-item">
+                        <div class="composer-photo-controls">
+                          <button type="button" class="cover-select-btn ${composer.coverPhotoIdx === idx ? 'is-cover' : ''}" data-set-cover="${idx}">
+                            ${composer.coverPhotoIdx === idx ? '★ Card Cover' : 'Set as Card Cover'}
+                          </button>
+                          <button type="button" class="photo-remove-btn" data-remove-photo="${idx}" aria-label="Remove photo">×</button>
+                        </div>
+                        <img src="${esc(ph.url)}" alt="Upload preview ${idx + 1}" />
+                        <input type="text" class="photo-caption-input" data-caption-idx="${idx}" placeholder="Add a caption…" value="${esc(ph.caption || '')}" />
+                      </div>
+                    `).join('')}
+                  </div>
+                ` : `<p style="font-size:13px;color:var(--muted);">No pictures attached yet. Upload 1–4 photos for an adaptive X-style gallery grid.</p>`}
+                <div class="sample-photo-pills">
+                  <span style="font-size:12px;color:var(--muted);font-weight:600;">Or try a sample photo:</span>
+                  ${SAMPLE_PHOTOS.map((sp) => `<button type="button" class="sample-photo-btn" data-sample-photo="${esc(sp.id)}">${esc(sp.label)}</button>`).join('')}
+                </div>
+              </div>
+
+              <!-- Toggleable Thai Phrase Card Builder -->
+              ${composer.showPhrasePanel ? `
+                <div class="sub-panel">
+                  <div class="sub-panel-head">
+                    <span>🇹🇭 Interactive Thai Phrase Card</span>
+                    <button type="button" class="fmt-chip" id="fill-sample-phrase">Fill sample phrase</button>
+                  </div>
+                  ${composer.phrases.map((ph, idx) => `
+                    <div class="phrase-builder-row">
+                      <input type="text" class="mini-input" data-ph-field="thai" data-ph-idx="${idx}" placeholder="Thai (e.g. สวัสดีครับ)" value="${esc(ph.thai)}" />
+                      <input type="text" class="mini-input" data-ph-field="roman" data-ph-idx="${idx}" placeholder="Romanization" value="${esc(ph.roman)}" />
+                      <input type="text" class="mini-input" data-ph-field="eng" data-ph-idx="${idx}" placeholder="English meaning" value="${esc(ph.eng)}" />
+                      ${composer.phrases.length > 1 ? `<button type="button" class="fmt-chip" data-del-phrase="${idx}">×</button>` : '<span></span>'}
+                    </div>
+                  `).join('')}
+                  ${composer.phrases.length < 3 ? `<button type="button" class="fmt-chip" id="add-phrase-row">+ Add another phrase</button>` : ''}
+                </div>
+              ` : ''}
+
+              <!-- Toggleable Pull Quote Panel -->
+              ${composer.showQuotePanel ? `
+                <div class="sub-panel">
+                  <div class="sub-panel-head"><span>❝ Highlight Pull Quote</span></div>
+                  <input type="text" id="comp-quote" class="mini-input" placeholder="e.g. Speak warmly first — perfection comes later." value="${esc(composer.pullQuote)}" />
+                </div>
+              ` : ''}
+
+              <!-- Toggleable Cover Customizer Panel -->
+              ${composer.showCoverPanel ? `
+                <div class="sub-panel">
+                  <div class="sub-panel-head"><span>🎨 Card Cover Style</span></div>
+                  <div class="segmented-switch" style="margin-bottom:12px;">
+                    <button type="button" class="seg-tab ${composer.coverMode === 'photo' ? 'is-active' : ''}" data-cover-mode="photo">Auto Photo Cover</button>
+                    <button type="button" class="seg-tab ${composer.coverMode === 'gradient' ? 'is-active' : ''}" data-cover-mode="gradient">Gradient + Thai + Mascot</button>
+                  </div>
+                  <div class="swatch-row">
+                    ${GRADIENTS.map((g, idx) => `
+                      <button type="button" class="grad-swatch ${composer.coverGradientIdx === idx ? 'is-active' : ''}" data-grad-idx="${idx}" title="${esc(g.label)}" style="background:linear-gradient(135deg,${g.from},${g.to});"></button>
+                    `).join('')}
+                  </div>
+                  <div style="display:grid;grid-template-columns:1fr;gap:10px;">
+                    <input type="text" id="comp-cover-thai" class="mini-input" placeholder="Background Thai watermark word (e.g. สวัสดี)" value="${esc(composer.coverThai)}" />
+                    <div class="mascot-picker">
+                      ${MASCOT_OPTIONS.map((m) => `
+                        <button type="button" class="mascot-opt ${composer.coverMascot === m.src ? 'is-active' : ''}" data-mascot-src="${esc(m.src)}" title="${esc(m.label)}">
+                          <img src="${esc(m.src)}" alt="${esc(m.label)}" />
+                        </button>
+                      `).join('')}
+                    </div>
+                  </div>
+                </div>
+              ` : ''}
+
+              <!-- X-Inspired Bottom Composer Dock -->
+              <div class="composer-dock">
+                <div class="dock-tools">
+                  <button type="button" class="dock-tool-btn" id="dock-photo-btn">🖼️ Upload Pics</button>
+                  <button type="button" class="dock-tool-btn ${composer.showPhrasePanel ? 'is-active' : ''}" id="dock-phrase-btn">🇹🇭 Thai Phrase</button>
+                  <button type="button" class="dock-tool-btn ${composer.showQuotePanel ? 'is-active' : ''}" id="dock-quote-btn">❝ Pull Quote</button>
+                  <button type="button" class="dock-tool-btn ${composer.showCoverPanel ? 'is-active' : ''}" id="dock-cover-btn">🎨 Cover Style</button>
+                </div>
+                <div class="dock-metrics">
+                  <span class="progress-ring-wrap" id="composer-word-count">
+                    <svg width="24" height="24" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10" fill="none" stroke="rgba(15,23,42,0.12)" stroke-width="2.5"></circle>
+                      <circle cx="12" cy="12" r="10" fill="none" stroke="#0FA6A3" stroke-width="2.5" stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${dashOffset.toFixed(1)}" transform="rotate(-90 12 12)"></circle>
+                    </svg>
+                    <span>${words} words · ${readMin} min read</span>
+                  </span>
+                  <button type="button" class="btn-primary" id="dock-publish-btn">${composer.editingSlug ? 'Update post' : 'Publish post'}</button>
+                </div>
+              </div>
+
+              ${DRAFTS.length ? `
+                <div class="draft-pills-row">
+                  <span style="font-size:12px;color:var(--muted);font-weight:700;">Saved drafts:</span>
+                  ${DRAFTS.map((d) => `<button type="button" class="draft-pill" data-load-draft="${esc(d.id)}">📄 ${esc(d.title || 'Untitled draft')}</button>`).join('')}
+                </div>
+              ` : ''}
+            </div>
+
+            <!-- Right Column: Live Card Preview -->
+            <aside class="preview-sticky" aria-label="Live card preview">
+              <div class="preview-label"><span>Live Card Preview</span><span>${composer.format === 'update' ? 'Quick Update' : 'Full Article'}</span></div>
+              <div id="composer-live-preview"></div>
+            </aside>
+          </div>
+        `;
+
+        wireComposerEvents();
+        updateLivePreview();
+
+        if (autoOpenPhotoPicker) {
+          const zone = document.getElementById('media-dropzone');
+          if (zone) zone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+
+      function buildPreviewPostObject() {
+        const user = currentUser();
+        const grad = GRADIENTS[composer.coverGradientIdx] || GRADIENTS[0];
+        const rawBody = (composer.bodyText || '').trim();
+        const derivedTitle = composer.title.trim() || (rawBody ? rawBody.split('\n')[0].slice(0, 68) : 'Your headline will appear here…');
+        const derivedExcerpt = composer.excerpt.trim() || (rawBody ? rawBody.replace(/^#+\s*/gm, '').slice(0, 145) : 'Start typing in the composer to see your live preview card update immediately.');
+        const words = rawBody.split(/\s+/).filter(Boolean).length;
+        return {
+          slug: composer.editingSlug || 'preview-slug',
+          title: derivedTitle,
+          category: composer.category,
+          format: composer.format,
+          excerpt: derivedExcerpt,
+          authorId: user.id,
+          date: 'Just now',
+          readTime: `${Math.max(1, Math.ceil(words / 180))} min read`,
+          featured: composer.featured,
+          photos: composer.photos,
+          coverPhotoIdx: composer.coverPhotoIdx,
+          coverMode: composer.photos.length ? composer.coverMode : 'gradient',
+          cover: { from: grad.from, to: grad.to, thai: composer.coverThai || 'Speako', mascot: composer.coverMascot }
+        };
+      }
+
+      function updateLivePreview() {
+        const box = document.getElementById('composer-live-preview');
+        if (!box) return;
+        const previewPost = buildPreviewPostObject();
+        box.innerHTML = renderStoryCardHtml(previewPost, true);
+        // Also refresh word counter if typing without full re-render
+        const wc = document.getElementById('composer-word-count');
+        if (wc) {
+          const words = (composer.bodyText || '').trim().split(/\s+/).filter(Boolean).length;
+          const readMin = Math.max(1, Math.ceil(words / 180));
+          const circ = 2 * Math.PI * 10;
+          const dashOffset = circ * (1 - Math.min(1, words / 250));
+          wc.innerHTML = `
+            <svg width="24" height="24" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" fill="none" stroke="rgba(15,23,42,0.12)" stroke-width="2.5"></circle>
+              <circle cx="12" cy="12" r="10" fill="none" stroke="#0FA6A3" stroke-width="2.5" stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${dashOffset.toFixed(1)}" transform="rotate(-90 12 12)"></circle>
+            </svg>
+            <span>${words} words · ${readMin} min read</span>
+          `;
+        }
+      }
+
+      function compressAndAddFiles(fileList) {
+        const files = Array.from(fileList || []).filter((f) => f.type.startsWith('image/'));
+        if (!files.length) return;
+        const remaining = 4 - composer.photos.length;
+        if (remaining <= 0) {
+          showToast('Maximum 4 photos per post');
+          return;
+        }
+        const batch = files.slice(0, remaining);
+        batch.forEach((file) => {
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            const img = new Image();
+            img.onload = () => {
+              const maxW = 1000;
+              let w = img.width;
+              let h = img.height;
+              if (w > maxW) {
+                h = Math.round((h * maxW) / w);
+                w = maxW;
+              }
+              const canvas = document.createElement('canvas');
+              canvas.width = w;
+              canvas.height = h;
+              canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+              const compressed = canvas.toDataURL('image/jpeg', 0.82);
+              if (composer.photos.length < 4) {
+                composer.photos.push({ url: compressed, caption: file.name.replace(/\.[^.]+$/, '') });
+                composer.coverMode = 'photo';
+                renderComposer();
+              }
+            };
+            img.src = ev.target.result;
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      function addSamplePhotoById(sampleId) {
+        if (composer.photos.length >= 4) {
+          showToast('Maximum 4 photos per post');
+          return;
+        }
+        const sp = SAMPLE_PHOTOS.find((s) => s.id === sampleId);
+        if (!sp) return;
+        composer.photos.push({ url: sp.url, caption: sp.caption });
+        composer.coverMode = 'photo';
+        renderComposer();
+      }
+
+      function wireComposerEvents() {
+        const titleIn = document.getElementById('comp-title');
+        const excerptIn = document.getElementById('comp-excerpt');
+        const bodyIn = document.getElementById('comp-body');
+        const featIn = document.getElementById('comp-featured');
+        const quoteIn = document.getElementById('comp-quote');
+        const thaiIn = document.getElementById('comp-cover-thai');
+
+        titleIn.addEventListener('input', () => { composer.title = titleIn.value; updateLivePreview(); });
+        excerptIn.addEventListener('input', () => { composer.excerpt = excerptIn.value; updateLivePreview(); });
+        bodyIn.addEventListener('input', () => { composer.bodyText = bodyIn.value; updateLivePreview(); });
+        featIn.addEventListener('change', () => { composer.featured = featIn.checked; updateLivePreview(); });
+        if (quoteIn) quoteIn.addEventListener('input', () => { composer.pullQuote = quoteIn.value; });
+        if (thaiIn) thaiIn.addEventListener('input', () => { composer.coverThai = thaiIn.value; updateLivePreview(); });
+
+        composeView.querySelectorAll('[data-fmt]').forEach((btn) => {
+          btn.addEventListener('click', () => { composer.format = btn.getAttribute('data-fmt'); renderComposer(); });
+        });
+        composeView.querySelectorAll('[data-comp-cat]').forEach((btn) => {
+          btn.addEventListener('click', () => { composer.category = btn.getAttribute('data-comp-cat'); renderComposer(); });
+        });
+        composeView.querySelectorAll('[data-insert]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            composer.bodyText = (composer.bodyText || '') + btn.getAttribute('data-insert');
+            renderComposer();
+          });
+        });
+
+        const fillSample = document.getElementById('insert-sample-story');
+        if (fillSample) {
+          fillSample.addEventListener('click', () => {
+            if (!composer.title) composer.title = 'Coffee Shop Thai: 3 Easy Phrases for Morning Orders';
+            composer.bodyText = "Walking into a local Bangkok café is one of the nicest ways to practice speaking every morning.\n\n## Three go-to lines\n- Start with a warm smile and add khráp / khá.\n- Ask for less sweet using wǎan nói.\n- Thank the barista clearly before stepping aside.";
+            if (!composer.photos.length) composer.photos.push({ url: SAMPLE_PHOTOS[1].url, caption: SAMPLE_PHOTOS[1].caption });
+            composer.showPhrasePanel = true;
+            composer.phrases = [{ thai: 'ขออเมริกาโน่เย็นหวานน้อยครับ', roman: 'khǎw a-mee-rí-gaa-nôo yen wǎan nói khráp', eng: 'Iced Americano, less sweet please.' }];
+            renderComposer();
+          });
+        }
+
+        // Photo upload + drag/drop + samples
+        const fileIn = document.getElementById('photo-upload-input');
+        const dropzone = document.getElementById('media-dropzone');
+        document.getElementById('trigger-upload-btn').addEventListener('click', () => fileIn.click());
+        document.getElementById('dock-photo-btn').addEventListener('click', () => fileIn.click());
+        fileIn.addEventListener('change', () => compressAndAddFiles(fileIn.files));
+        dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('is-dragover'); });
+        dropzone.addEventListener('dragleave', () => dropzone.classList.remove('is-dragover'));
+        dropzone.addEventListener('drop', (e) => {
+          e.preventDefault();
+          dropzone.classList.remove('is-dragover');
+          compressAndAddFiles(e.dataTransfer.files);
+        });
+
+        composeView.querySelectorAll('[data-sample-photo]').forEach((btn) => {
+          btn.addEventListener('click', () => addSamplePhotoById(btn.getAttribute('data-sample-photo')));
+        });
+        composeView.querySelectorAll('[data-remove-photo]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const idx = Number(btn.getAttribute('data-remove-photo'));
+            composer.photos.splice(idx, 1);
+            if (composer.coverPhotoIdx >= composer.photos.length) composer.coverPhotoIdx = 0;
+            renderComposer();
+          });
+        });
+        composeView.querySelectorAll('[data-set-cover]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            composer.coverPhotoIdx = Number(btn.getAttribute('data-set-cover'));
+            composer.coverMode = 'photo';
+            renderComposer();
+          });
+        });
+        composeView.querySelectorAll('[data-caption-idx]').forEach((inp) => {
+          inp.addEventListener('input', () => {
+            const idx = Number(inp.getAttribute('data-caption-idx'));
+            if (composer.photos[idx]) composer.photos[idx].caption = inp.value;
+          });
+        });
+
+        // Sub-panels
+        document.getElementById('dock-phrase-btn').addEventListener('click', () => { composer.showPhrasePanel = !composer.showPhrasePanel; renderComposer(); });
+        document.getElementById('dock-quote-btn').addEventListener('click', () => { composer.showQuotePanel = !composer.showQuotePanel; renderComposer(); });
+        document.getElementById('dock-cover-btn').addEventListener('click', () => { composer.showCoverPanel = !composer.showCoverPanel; renderComposer(); });
+
+        composeView.querySelectorAll('[data-ph-field]').forEach((inp) => {
+          inp.addEventListener('input', () => {
+            const idx = Number(inp.getAttribute('data-ph-idx'));
+            const field = inp.getAttribute('data-ph-field');
+            if (composer.phrases[idx]) composer.phrases[idx][field] = inp.value;
+          });
+        });
+        const addPhraseBtn = document.getElementById('add-phrase-row');
+        if (addPhraseBtn) addPhraseBtn.addEventListener('click', () => { composer.phrases.push({ thai: '', roman: '', eng: '' }); renderComposer(); });
+        const fillPhraseBtn = document.getElementById('fill-sample-phrase');
+        if (fillPhraseBtn) {
+          fillPhraseBtn.addEventListener('click', () => {
+            composer.phrases = [{ thai: 'ไม่เผ็ดนะครับ / คะ', roman: 'mâi phèt ná khráp / khá', eng: 'Not spicy, please.' }];
+            renderComposer();
+          });
+        }
+        composeView.querySelectorAll('[data-del-phrase]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            composer.phrases.splice(Number(btn.getAttribute('data-del-phrase')), 1);
+            renderComposer();
+          });
+        });
+
+        composeView.querySelectorAll('[data-cover-mode]').forEach((btn) => {
+          btn.addEventListener('click', () => { composer.coverMode = btn.getAttribute('data-cover-mode'); renderComposer(); });
+        });
+        composeView.querySelectorAll('[data-grad-idx]').forEach((btn) => {
+          btn.addEventListener('click', () => { composer.coverGradientIdx = Number(btn.getAttribute('data-grad-idx')); renderComposer(); });
+        });
+        composeView.querySelectorAll('[data-mascot-src]').forEach((btn) => {
+          btn.addEventListener('click', () => { composer.coverMascot = btn.getAttribute('data-mascot-src'); renderComposer(); });
+        });
+
+        // Drafts & Publish
+        document.getElementById('save-draft-btn').addEventListener('click', saveCurrentDraft);
+        document.getElementById('top-publish-btn').addEventListener('click', publishComposerPost);
+        document.getElementById('dock-publish-btn').addEventListener('click', publishComposerPost);
+        composeView.querySelectorAll('[data-load-draft]').forEach((btn) => {
+          btn.addEventListener('click', () => loadDraftIntoComposer(btn.getAttribute('data-load-draft')));
+        });
+      }
+
+      function saveCurrentDraft() {
+        const draft = Object.assign({}, JSON.parse(JSON.stringify(composer)), {
+          id: 'draft-' + Date.now(),
+          authorId: currentUser().id,
+          updatedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        });
+        DRAFTS.unshift(draft);
+        DRAFTS = DRAFTS.slice(0, 5);
+        saveDrafts();
+        renderNavbarActions();
+        renderComposer();
+        showToast('Draft saved!');
+      }
+
+      function loadDraftIntoComposer(draftId) {
+        const found = DRAFTS.find((d) => d.id === draftId);
+        if (!found) return;
+        composer = Object.assign(blankComposerState(), JSON.parse(JSON.stringify(found)));
+        location.hash = '#/compose';
+        renderComposer();
+        showToast('Loaded saved draft');
+      }
+
+      function slugify(str) {
+        const base = (str || 'speako-story').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 48);
+        return (base || 'post') + '-' + Math.random().toString(36).slice(2, 6);
+      }
+
+      async function publishComposerPost() {
+        const user = currentUser();
+        const bodyClean = (composer.bodyText || '').trim();
+        const titleClean = (composer.title || '').trim() || (composer.format === 'update' && bodyClean ? bodyClean.split('\n')[0].slice(0, 70) : '');
+        if (!titleClean) {
+          showToast('Please add a headline or message before publishing');
+          return;
+        }
+        if (!bodyClean && !composer.photos.length) {
+          showToast('Please write a message or attach a picture');
+          return;
+        }
+
+        const grad = GRADIENTS[composer.coverGradientIdx] || GRADIENTS[0];
+        const words = bodyClean.split(/\s+/).filter(Boolean).length;
+        const validPhrases = composer.showPhrasePanel ? composer.phrases.filter((p) => p.thai.trim() || p.eng.trim()) : [];
+        const slug = composer.editingSlug || slugify(titleClean);
+        const nowStr = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+        if (composer.featured) {
+          POSTS.forEach((p) => { p.featured = false; });
+        }
+
+        const newPost = {
+          slug,
+          title: titleClean,
+          category: composer.category,
+          format: composer.format,
+          excerpt: (composer.excerpt || '').trim() || bodyClean.replace(/^#+\s*/gm, '').slice(0, 150) || 'Shared on The Speako Journal.',
+          authorId: user.id,
+          authorName: user.name,
+          authorHandle: user.handle,
+          authorRole: user.role,
+          authorBadge: user.roleBadge,
+          authorAvatar: user.photo || user.initials,
+          date: nowStr,
+          readTime: `${Math.max(1, Math.ceil(words / 180))} min read`,
+          featured: composer.featured,
+          photos: JSON.parse(JSON.stringify(composer.photos)),
+          coverPhotoIdx: composer.coverPhotoIdx,
+          coverMode: composer.photos.length ? composer.coverMode : 'gradient',
+          cover: { from: grad.from, to: grad.to, thai: composer.coverThai || 'Speako', mascot: composer.coverMascot },
+          bodyText: bodyClean,
+          pullQuote: composer.showQuotePanel ? composer.pullQuote.trim() : '',
+          phrases: validPhrases,
+          _custom: true
+        };
+
+        const existingIdx = POSTS.findIndex((p) => p.slug === slug);
+        if (existingIdx >= 0) {
+          POSTS[existingIdx] = newPost;
+        } else {
+          POSTS.unshift(newPost);
+        }
+
+        savePostsState();
+        const useRealAuth = !sessionStorage.getItem('speako_journal_demo_switch');
+        let syncedServer = false;
+        try {
+          await apiRequest('/api/posts/save', newPost, useRealAuth);
+          syncedServer = true;
+        } catch (_) {}
+
+        composer = blankComposerState();
+        activeCategory = 'All';
+        searchQuery = '';
+        renderChips();
+        renderListing();
+        location.hash = '#/';
+        showToast(existingIdx >= 0 ? 'Post updated!' : (syncedServer ? 'Published & saved to Speako!' : 'Published locally!'));
+      }
+
+      // =========================================================
+      // 8. AUTHOR PROFILE / CHANNEL VIEW (#/author/<id>)
+      // =========================================================
+      function renderAuthorProfile(authorId) {
+        const acc = ACCOUNTS[authorId] || ACCOUNTS.kendrick;
+        const authorPosts = POSTS.filter((p) => p.authorId === acc.id);
+        const mediaPosts = authorPosts.filter((p) => (p.photos || []).length > 0);
+        const totalPhotos = authorPosts.reduce((sum, p) => sum + ((p.photos || []).length), 0);
+        const isSelf = currentUser().id === acc.id && canWrite(currentUser());
+
+        const shownList = authorProfileTab === 'media' ? mediaPosts : authorPosts;
+
+        authorView.innerHTML = `
+          <div class="article-topbar">
+            <a class="back-pill" href="#/">← Back to Feed</a>
+            <div class="breadcrumb"><a href="#/">Journal</a> / <span>${esc(acc.name)}</span></div>
+          </div>
+
+          <div class="profile-hero-card">
+            <div class="profile-banner"></div>
+            <div class="profile-body">
+              <div class="profile-avatar-row">
+                ${renderAvatar(acc, 'profile-avatar-lg')}
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                  ${isSelf ? `<a href="#/compose" class="btn-write" data-new-compose="1">+ What's on your mind? Write a post</a>` : ''}
+                  ${currentUser().id !== acc.id && acc.role !== 'guest' ? `<button type="button" class="btn-ghost" id="profile-switch-btn">Switch to ${esc(acc.name)}</button>` : ''}
+                </div>
+              </div>
+              <div class="profile-name-line">
+                <h1>${esc(acc.fullName)}</h1>
+                <span class="role-badge ${esc(acc.role)}">${esc(acc.roleBadge)}</span>
+              </div>
+              <div class="profile-handle">${esc(acc.handle)} · ${esc(acc.title)}</div>
+              <p class="profile-bio">${esc(acc.bio)}</p>
+              <div class="profile-stats">
+                <span>${authorPosts.length} Published ${authorPosts.length === 1 ? 'Story' : 'Stories'}</span>
+                <span>${totalPhotos} Attached ${totalPhotos === 1 ? 'Photo' : 'Photos'}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="profile-tabs">
+            <button type="button" class="chip-btn ${authorProfileTab === 'posts' ? 'is-active' : ''}" data-ptab="posts">Published Posts (${authorPosts.length})</button>
+            <button type="button" class="chip-btn ${authorProfileTab === 'media' ? 'is-active' : ''}" data-ptab="media">Media &amp; Photos (${mediaPosts.length})</button>
+          </div>
+
+          ${shownList.length ? `
+            <div class="stories-grid">
+              ${shownList.map((p) => renderStoryCardHtml(p, true)).join('')}
+            </div>
+          ` : `
+            <div class="empty-state">
+              <img src="../mascot/cartoon/transparent/02_curious.png" alt="Speako mascot" />
+              <h3>No ${authorProfileTab === 'media' ? 'photo posts' : 'stories'} yet</h3>
+              <p>${isSelf ? 'Click Write a post above to publish your first update or photo story!' : 'Check back soon for updates from this author.'}</p>
+            </div>
+          `}
+        `;
+
+        authorView.querySelectorAll('[data-ptab]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            authorProfileTab = btn.getAttribute('data-ptab');
+            renderAuthorProfile(acc.id);
+          });
+        });
+        const sw = document.getElementById('profile-switch-btn');
+        if (sw) sw.addEventListener('click', () => switchAccount(acc.id));
+      }
+
+      // =========================================================
+      // 9. ARTICLE DETAIL VIEW (#/post/<slug>)
+      // =========================================================
+      function formatPlainBodyToHtml(text) {
+        const lines = (text || '').split('\n');
+        let html = '';
+        let inList = false;
+        for (const raw of lines) {
+          const line = raw.trim();
+          if (!line) {
+            if (inList) { html += '</ul>'; inList = false; }
+            continue;
+          }
+          if (line.startsWith('## ')) {
+            if (inList) { html += '</ul>'; inList = false; }
+            html += `<h2>${esc(line.slice(3))}</h2>`;
+          } else if (line.startsWith('- ')) {
+            if (!inList) { html += '<ul>'; inList = true; }
+            html += `<li>${esc(line.slice(2))}</li>`;
+          } else {
+            if (inList) { html += '</ul>'; inList = false; }
+            html += `<p>${esc(line)}</p>`;
+          }
+        }
+        if (inList) html += '</ul>';
+        return html;
+      }
+
+      function buildFallbackBody(post) {
+        const meta = CATEGORY_META[post.category] || CATEGORY_META['News'];
+        return `
+          <p>${esc(post.excerpt)}</p>
+          <p>At Speako, we believe learning a language sticks best when it lives inside the real situations you navigate every week — whether stepping up to a Bangkok counter, joining an online lesson after work, or catching cultural cues with friends.</p>
+          <blockquote class="pull-quote" style="border-left-color:${meta.color};">“Real fluency isn’t about stiff textbook lines — it’s having the confidence to speak warmly in everyday life.”</blockquote>
+          <h2>Key takeaways</h2>
+          <ul>
+            <li>Built to match Speako's calm, legible iOS 27 liquid-glass experience.</li>
+            <li>Linked directly to your Speako teacher or student profile.</li>
+            <li>Ready for uploaded photo galleries and interactive Thai phrase callouts.</li>
+          </ul>
+        `;
+      }
+
+      function renderPhrasesHtml(phrases) {
+        if (!phrases || !phrases.length) return '';
+        return `
+          <div class="phrase-callout" aria-label="Thai phrases">
+            <div class="phrase-callout-head">Speak Like a Local · Key Thai Phrases</div>
+            ${phrases.map((ph) => `
+              <div class="phrase-item">
+                <div class="phrase-thai" lang="th">${esc(ph.thai)}</div>
+                ${ph.roman ? `<div class="phrase-roman">${esc(ph.roman)}</div>` : ''}
+                ${ph.eng ? `<div class="phrase-eng">“${esc(ph.eng)}”</div>` : ''}
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      function renderArticle(slug) {
+        const post = POSTS.find((p) => p.slug === slug);
+        if (!post) {
+          location.hash = '#/';
+          return;
+        }
+        const acc = ACCOUNTS[post.authorId] || ACCOUNTS.admin;
+        const user = currentUser();
+        const isOwnerOrAdmin = user.id === post.authorId || user.role === 'admin';
+        const photos = post.photos || [];
+
+        let bodyHtml = post.body ? post.body : (post.bodyText ? formatPlainBodyToHtml(post.bodyText) : buildFallbackBody(post));
+        if (post.pullQuote) {
+          bodyHtml += `<blockquote class="pull-quote">“${esc(post.pullQuote)}”</blockquote>`;
+        }
+        if (post.phrases && post.phrases.length) {
+          bodyHtml += renderPhrasesHtml(post.phrases);
+        }
+
+        const sameCat = POSTS.filter((p) => p.slug !== post.slug && p.category === post.category);
+        const others = POSTS.filter((p) => p.slug !== post.slug && p.category !== post.category);
+        const related = sameCat.concat(others).slice(0, 3);
+
+        articleView.innerHTML = `
+          <div class="article-topbar">
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+              <a class="back-pill" href="#/">← Back to Journal</a>
+              <div class="breadcrumb"><a href="#/">Journal</a> / <span>${esc(post.category)}</span></div>
+            </div>
+            ${isOwnerOrAdmin ? `
+              <div class="article-owner-actions">
+                <button type="button" class="btn-ghost" id="edit-post-btn">✏️ Edit post</button>
+                <button type="button" class="btn-danger-soft" id="delete-post-btn">🗑️ Delete</button>
+              </div>
+            ` : ''}
+          </div>
+
+          <header class="article-header">
+            <div class="tag-row">
+              ${renderCatPill(post.category)}
+              ${post.format === 'update' ? '<span class="format-badge">💬 Quick Update</span>' : ''}
+            </div>
+            <h1>${esc(post.title)}</h1>
+            ${renderAuthorChip(post)}
+          </header>
+
+          ${photos.length ? `<div class="article-gallery-wrap">${renderPhotoBento(photos, true)}</div>` : renderBannerCover(post)}
+
+          <div class="article-layout">
+            <aside class="share-rail" aria-label="Share article">
+              <span class="share-label">Share</span>
+              <button type="button" class="share-btn" id="share-copy" title="Copy link" aria-label="Copy link">🔗</button>
+              <button type="button" class="share-btn" data-share-net="Facebook" aria-label="Share on Facebook">f</button>
+              <button type="button" class="share-btn" data-share-net="LINE" aria-label="Share on LINE">L</button>
+              <button type="button" class="share-btn" data-share-net="X" aria-label="Share on X">𝕏</button>
+            </aside>
+            <div class="article-prose">${bodyHtml}</div>
+          </div>
+
+          <div class="article-end-stack">
+            <div class="author-card">
+              <div class="author-card-left">
+                ${renderAvatar(acc)}
+                <div>
+                  <h3 style="font-size:16.5px;color:var(--navy);margin-bottom:3px;">Written by ${esc(acc.fullName)}</h3>
+                  <p style="font-size:14px;color:var(--muted);">${esc(acc.bio)}</p>
+                </div>
+              </div>
+              <a href="#/author/${esc(acc.id)}" class="btn-ghost">View channel →</a>
+            </div>
+
+            <div class="article-cta-card">
+              <div>
+                <h3 style="font-size:18px;color:var(--navy);margin-bottom:4px;">Want to talk about this in Thai?</h3>
+                <p style="font-size:14px;color:var(--muted);">Practice real-life conversation 1-on-1 with ${esc(acc.name)} or our team.</p>
+              </div>
+              <button type="button" class="btn-primary" id="article-trial-btn">Book a free trial lesson →</button>
+            </div>
+          </div>
+
+          <section class="related-section" aria-label="Keep reading">
+            <h2>Keep reading</h2>
+            <div class="stories-grid">${related.map((r) => renderStoryCardHtml(r, true)).join('')}</div>
+          </section>
+        `;
+
+        // Photo Lightbox clicks
+        articleView.querySelectorAll('[data-lightbox-idx]').forEach((tile) => {
+          tile.addEventListener('click', () => openLightbox(photos, Number(tile.getAttribute('data-lightbox-idx'))));
+        });
+
+        // Edit & Delete
+        const editBtn = document.getElementById('edit-post-btn');
+        if (editBtn) {
+          editBtn.addEventListener('click', () => {
+            location.hash = `#/compose?edit=${encodeURIComponent(post.slug)}`;
+          });
+        }
+        const delBtn = document.getElementById('delete-post-btn');
+        if (delBtn) {
+          delBtn.addEventListener('click', async () => {
+            POSTS = POSTS.filter((p) => p.slug !== post.slug);
+            savePostsState();
+            const useRealAuth = !sessionStorage.getItem('speako_journal_demo_switch');
+            try { await apiRequest('/api/posts/delete', { slug: post.slug }, useRealAuth); } catch (_) {}
+            renderListing();
+            location.hash = '#/';
+            showToast('Post removed from feed');
+          });
+        }
+
+        const copyBtn = document.getElementById('share-copy');
+        if (copyBtn) copyBtn.addEventListener('click', () => {
+          if (navigator.clipboard?.writeText) navigator.clipboard.writeText(location.href).catch(() => {});
+          showToast('Link copied!');
+        });
+        articleView.querySelectorAll('[data-share-net]').forEach((b) => b.addEventListener('click', () => showToast(`Share link ready for ${b.getAttribute('data-share-net')}`)));
+        document.getElementById('article-trial-btn').addEventListener('click', () => { window.location.href = '../index.html?mode=signup&course=thai'; });
+      }
+
+      // =========================================================
+      // 10. MODALS (REAL PORTAL SIGN IN + ACCOUNT SWITCHER + LIGHTBOX)
+      // =========================================================
+      function openSignInModal() {
+        modalRoot.hidden = false;
+        modalRoot.innerHTML = `
+          <div class="modal-card" role="dialog" aria-modal="true" aria-label="Sign in to Speako">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+              <h2 style="font-size:20px;color:var(--navy);">Sign in to Speako</h2>
+              <button type="button" class="btn-ghost" id="close-modal-btn" style="padding:5px 11px;">×</button>
+            </div>
+            <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">Sign in with your Speako portal account — sessions stay linked across Journal, Teacher, Admin, and Student pages.</p>
+            <form id="real-signin-form" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
+              <input type="email" id="modal-email-in" class="mini-input" placeholder="Email (e.g. kendrick@speakolanguages.com)" required />
+              <input type="password" id="modal-pw-in" class="mini-input" placeholder="Password" required />
+              <div id="signin-err" style="font-size:12.5px;color:#B91C1C;font-weight:600;" hidden></div>
+              <button type="submit" class="btn-primary" style="width:100%;">Sign in to Portal &amp; Journal</button>
+            </form>
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:8px;">Or Quick Switch</div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              ${['kendrick', 'admin', 'kruploy', 'alex'].map((id) => {
+                const a = ACCOUNTS[id];
+                return `
+                  <button type="button" class="switch-row" style="border:1px solid var(--line-strong);" data-modal-acc="${esc(id)}">
+                    <span class="switch-left">
+                      ${renderAvatar(a)}
+                      <span class="switch-meta">
+                        <div class="switch-name">${esc(a.fullName)}</div>
+                        <div class="switch-role">${esc(a.roleBadge)} · ${esc(a.email)}</div>
+                      </span>
+                    </span>
+                    <span style="font-size:12px;font-weight:700;color:var(--teal-dark);">Switch →</span>
+                  </button>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+        document.getElementById('close-modal-btn').addEventListener('click', () => { modalRoot.hidden = true; });
+        modalRoot.querySelectorAll('[data-modal-acc]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            modalRoot.hidden = true;
+            switchAccount(btn.getAttribute('data-modal-acc'));
+          });
+        });
+        document.getElementById('real-signin-form').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const email = (document.getElementById('modal-email-in').value || '').trim();
+          const password = document.getElementById('modal-pw-in').value || '';
+          const errBox = document.getElementById('signin-err');
+          errBox.hidden = true;
+          try {
+            const res = await apiRequest('/api/login', { email, password }, false);
+            if (res.token) localStorage.setItem('speako_token', res.token);
+            if (res.user) {
+              localStorage.setItem('speako_user_cache', JSON.stringify(res.user));
+              sessionStorage.removeItem('speako_journal_demo_switch');
+              const mapped = mapServerUserToAccountId(res.user);
+              if (mapped) {
+                activeAccountId = mapped;
+                localStorage.setItem(STORAGE_ACCOUNT_KEY, mapped);
+              }
+            }
+            modalRoot.hidden = true;
+            renderNavbarActions();
+            renderTeacherChannelBar();
+            showToast(`Signed in as ${res.user?.name || email}`);
+          } catch (err) {
+            errBox.textContent = err.message || 'Incorrect email or password.';
+            errBox.hidden = false;
+          }
+        });
+      }
+
+      function openLightbox(photos, idx) {
+        let current = idx;
+        function draw() {
+          const ph = photos[current];
+          modalRoot.hidden = false;
+          modalRoot.innerHTML = `
+            <div class="modal-card lightbox-card" role="dialog" aria-modal="true" aria-label="Photo lightbox">
+              <img class="lightbox-img" src="${esc(ph.url)}" alt="${esc(ph.caption || 'Photo')}" />
+              <div class="lightbox-bar">
+                <span style="font-size:13.5px;color:rgba(255,255,255,0.9);">${esc(ph.caption || `Photo ${current + 1} of ${photos.length}`)}</span>
+                <div style="display:flex;gap:8px;">
+                  ${photos.length > 1 ? `<button type="button" class="btn-ghost" id="lb-prev" style="padding:6px 12px;">←</button><button type="button" class="btn-ghost" id="lb-next" style="padding:6px 12px;">→</button>` : ''}
+                  <button type="button" class="btn-coral" id="lb-close" style="padding:6px 14px;">Close</button>
+                </div>
+              </div>
+            </div>
+          `;
+          document.getElementById('lb-close').addEventListener('click', () => { modalRoot.hidden = true; });
+          const prev = document.getElementById('lb-prev');
+          const next = document.getElementById('lb-next');
+          if (prev) prev.addEventListener('click', () => { current = (current - 1 + photos.length) % photos.length; draw(); });
+          if (next) next.addEventListener('click', () => { current = (current + 1) % photos.length; draw(); });
+        }
+        draw();
+      }
+
+      modalRoot.addEventListener('click', (e) => {
+        if (e.target === modalRoot) modalRoot.hidden = true;
+      });
+
+      // =========================================================
+      // 11. ROUTER & GLOBAL EVENT WIRING
+      // =========================================================
+      function updateReadingProgress() {
+        if (articleView.hidden) {
+          progressWrap.classList.remove('is-active');
+          progressFill.style.width = '0%';
+          return;
+        }
+        progressWrap.classList.add('is-active');
+        const doc = document.documentElement;
+        const sh = doc.scrollHeight - doc.clientHeight;
+        const pct = sh > 0 ? Math.min(100, Math.max(0, ((window.scrollY || doc.scrollTop) / sh) * 100)) : 0;
+        progressFill.style.width = `${pct.toFixed(1)}%`;
+      }
+
+      function syncRoute() {
+        const hash = window.location.hash || '';
+        hubOpen = false;
+        mobileMenu.classList.remove('is-open');
+
+        listingView.hidden = true;
+        composeView.hidden = true;
+        authorView.hidden = true;
+        articleView.hidden = true;
+
+        if (hash.startsWith('#/compose')) {
+          composeView.hidden = false;
+          const editMatch = hash.match(/[?&]edit=([^&]+)/);
+          if (editMatch) {
+            const target = POSTS.find((p) => p.slug === decodeURIComponent(editMatch[1]));
+            if (target) {
+              composer = Object.assign(blankComposerState(), {
+                editingSlug: target.slug,
+                format: target.format || 'article',
+                category: target.category,
+                featured: !!target.featured,
+                title: target.title,
+                excerpt: target.excerpt,
+                bodyText: target.bodyText || (target.body ? target.body.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : target.excerpt),
+                pullQuote: target.pullQuote || '',
+                photos: JSON.parse(JSON.stringify(target.photos || [])),
+                coverPhotoIdx: target.coverPhotoIdx || 0,
+                coverMode: target.coverMode || ((target.photos || []).length ? 'photo' : 'gradient'),
+                coverThai: target.cover?.thai || 'Speako',
+                coverMascot: target.cover?.mascot || MASCOT_OPTIONS[0].src,
+                showPhrasePanel: !!(target.phrases && target.phrases.length),
+                showQuotePanel: !!target.pullQuote,
+                phrases: target.phrases && target.phrases.length ? JSON.parse(JSON.stringify(target.phrases)) : [{ thai: '', roman: '', eng: '' }]
+              });
+            }
+          }
+          renderComposer(hash.includes('action=photo'));
+        } else if (hash.startsWith('#/author/')) {
+          authorView.hidden = false;
+          authorProfileTab = 'posts';
+          renderAuthorProfile(decodeURIComponent(hash.slice('#/author/'.length).split('?')[0]));
+        } else if (hash.startsWith('#/post/')) {
+          articleView.hidden = false;
+          renderArticle(decodeURIComponent(hash.slice('#/post/'.length).split('?')[0]));
+        } else {
+          const pathMatch = window.location.pathname.match(/\/post\/([^/]+)$/);
+          const pathSlug = pathMatch ? decodeURIComponent(pathMatch[1]) : '';
+          if (!hash && pathSlug && pathSlug !== 'index.html' && POSTS.some((p) => p.slug === pathSlug)) {
+            articleView.hidden = false;
+            renderArticle(pathSlug);
+          } else {
+            if (hash === '#/' && pathSlug && pathSlug !== 'index.html' && window.history?.replaceState) {
+              history.replaceState(null, '', window.location.pathname.replace(/\/post\/[^/]+$/, '/post/') + '#/');
+            }
+            listingView.hidden = false;
+            renderListing();
+          }
+        }
+
+        renderNavbarActions();
+        window.scrollTo({ top: 0, behavior: 'auto' });
+        updateReadingProgress();
+      }
+
+      document.addEventListener('click', (e) => {
+        if (e.target.closest('[data-new-compose]')) {
+          composer = blankComposerState();
+        }
+        if (hubOpen && !e.target.closest('#account-hub') && !e.target.closest('#account-pill-btn')) {
+          hubOpen = false;
+          renderNavbarActions();
+        }
+        const demoLink = e.target.closest('[data-demo-nav]');
+        if (demoLink) {
+          e.preventDefault();
+          showToast(`${demoLink.getAttribute('data-demo-nav')} — mockup preview`);
+        }
+        const fCat = e.target.closest('[data-footer-cat]');
+        if (fCat) {
+          e.preventDefault();
+          activeCategory = fCat.getAttribute('data-footer-cat');
+          location.hash = '#/';
+          renderChips();
+          renderListing();
+        }
+      });
+
+      chipsContainer.addEventListener('click', (e) => {
+        const btn = e.target.closest('.chip-btn');
+        if (!btn) return;
+        activeCategory = btn.getAttribute('data-category');
+        renderChips();
+        renderListing();
+      });
+
+      searchInput.addEventListener('input', () => {
+        searchQuery = searchInput.value;
+        searchClear.classList.toggle('is-visible', searchQuery.length > 0);
+        renderListing();
+      });
+      searchClear.addEventListener('click', () => {
+        searchInput.value = '';
+        searchQuery = '';
+        searchClear.classList.remove('is-visible');
+        renderListing();
+      });
+      document.getElementById('reset-filters-btn').addEventListener('click', () => {
+        activeCategory = 'All';
+        searchInput.value = '';
+        searchQuery = '';
+        searchClear.classList.remove('is-visible');
+        renderChips();
+        renderListing();
+      });
+      document.getElementById('load-more-btn').addEventListener('click', () => showToast('All published stories are shown'));
+      document.getElementById('newsletter-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        document.getElementById('newsletter-email').value = '';
+        showToast('Subscribed to The Speako Journal!');
+      });
+
+      window.addEventListener('hashchange', syncRoute);
+      window.addEventListener('scroll', updateReadingProgress, { passive: true });
+
+      // Init
+      renderNavbarActions();
+      renderTeacherChannelBar();
+      renderChips();
+      renderListing();
+      syncRoute();
+      fetchServerPostsAndSession();
+    })();
+  </script>
+</body>
+</html>

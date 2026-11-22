@@ -158,6 +158,48 @@ def pub_teacher(t):
     return d
 
 
+def pub_post(p):
+    d = dict(p)
+    try:
+        cover = json.loads(d.get("cover_json") or "{}")
+    except Exception:
+        cover = {}
+    try:
+        photos = json.loads(d.get("photos_json") or "[]")
+    except Exception:
+        photos = []
+    try:
+        phrases = json.loads(d.get("phrases_json") or "[]")
+    except Exception:
+        phrases = []
+    return {
+        "slug": d["slug"],
+        "title": d["title"],
+        "category": d["category"],
+        "format": d.get("format") or "update",
+        "excerpt": d.get("excerpt") or "",
+        "authorId": d.get("author_id") or "kendrick",
+        "authorName": d.get("author_name") or "Kendrick",
+        "authorHandle": d.get("author_handle") or "@kendrick",
+        "authorRole": d.get("author_role") or "teacher",
+        "authorBadge": d.get("author_badge") or "Lead Teacher",
+        "authorAvatar": d.get("author_avatar") or "../portrait.png",
+        "date": d.get("date_str") or "",
+        "readTime": d.get("read_time") or "2 min read",
+        "featured": bool(d.get("featured")),
+        "coverMode": d.get("cover_mode") or "gradient",
+        "coverPhotoIdx": int(cover.get("coverPhotoIdx") or 0) if isinstance(cover, dict) else 0,
+        "cover": cover,
+        "photos": photos,
+        "phrases": phrases,
+        "bodyText": d.get("body_text") or "",
+        "body": d.get("body_html") or "",
+        "pullQuote": d.get("pull_quote") or "",
+        "is_deleted": int(d.get("is_deleted") or 0),
+        "updated_at": d.get("updated_at") or "",
+    }
+
+
 def export_vault_dict(cur) -> dict:
     return {
         "v": 3,
@@ -167,6 +209,7 @@ def export_vault_dict(cur) -> dict:
         "bookings": rows(cur, "SELECT * FROM bookings"),
         "transactions": rows(cur, "SELECT * FROM transactions"),
         "notifications": rows(cur, "SELECT * FROM notifications ORDER BY created_at DESC LIMIT 120"),
+        "posts": rows(cur, "SELECT * FROM posts"),
     }
 
 
@@ -183,7 +226,15 @@ def save_disk_backup(vault_dict: dict):
 def export_vault(cur) -> str:
     d = export_vault_dict(cur)
     save_disk_backup(d)
-    return sign_token({"t": "vault", "d": d})
+    # Keep header vault token compact by skipping huge raster image payloads
+    compact_posts = []
+    for p in d.get("posts") or []:
+        cp = dict(p)
+        if len(cp.get("photos_json") or "") > 6000:
+            cp["photos_json"] = "[]"
+        compact_posts.append(cp)
+    compact_d = dict(d, posts=compact_posts)
+    return sign_token({"t": "vault", "d": compact_d})
 
 
 def merge_vault_dict(cur, d: dict):
@@ -354,6 +405,60 @@ def merge_vault_dict(cur, d: dict):
                 vn.get("booking_id") or "", vn.get("emailed_to") or "", int(vn.get("is_read") or 0),
                 vn.get("created_at") or now_str()
             ))
+
+    # 6. Merge posts
+    for vp in d.get("posts") or []:
+        if not isinstance(vp, dict) or not vp.get("slug"):
+            continue
+        dbp = cur.execute("SELECT * FROM posts WHERE slug = ?", (vp["slug"],)).fetchone()
+        vp_ts = vp.get("updated_at") or vp.get("created_at") or ""
+        if not dbp:
+            cur.execute("""
+                INSERT INTO posts (slug, title, category, format, excerpt, author_id, author_name,
+                                   author_handle, author_role, author_badge, author_avatar, date_str,
+                                   read_time, featured, cover_mode, cover_json, photos_json, phrases_json,
+                                   body_text, body_html, pull_quote, is_deleted, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                vp["slug"], vp.get("title") or "Untitled", vp.get("category") or "Culture",
+                vp.get("format") or "update", vp.get("excerpt") or "",
+                vp.get("author_id") or "kendrick", vp.get("author_name") or "Kendrick",
+                vp.get("author_handle") or "@kendrick", vp.get("author_role") or "teacher",
+                vp.get("author_badge") or "Lead Teacher", vp.get("author_avatar") or "../portrait.png",
+                vp.get("date_str") or now_str(), vp.get("read_time") or "2 min read",
+                int(vp.get("featured") or 0), vp.get("cover_mode") or "gradient",
+                vp.get("cover_json") or "{}", vp.get("photos_json") or "[]", vp.get("phrases_json") or "[]",
+                vp.get("body_text") or "", vp.get("body_html") or "", vp.get("pull_quote") or "",
+                int(vp.get("is_deleted") or 0), vp.get("created_at") or now_str(), vp_ts
+            ))
+        else:
+            db_ts = dbp["updated_at"] if "updated_at" in dbp.keys() and dbp["updated_at"] else (dbp["created_at"] or "")
+            if vp_ts and vp_ts > db_ts:
+                photos_val = vp.get("photos_json")
+                if photos_val == "[]" and (dbp["photos_json"] or "[]") != "[]":
+                    photos_val = dbp["photos_json"]
+                cur.execute("""
+                    UPDATE posts SET title = ?, category = ?, format = ?, excerpt = ?, author_id = ?,
+                                     author_name = ?, author_handle = ?, author_role = ?, author_badge = ?,
+                                     author_avatar = ?, date_str = ?, read_time = ?, featured = ?, cover_mode = ?,
+                                     cover_json = ?, photos_json = ?, phrases_json = ?, body_text = ?,
+                                     body_html = ?, pull_quote = ?, is_deleted = ?, updated_at = ?
+                    WHERE slug = ?
+                """, (
+                    vp.get("title") or dbp["title"], vp.get("category") or dbp["category"],
+                    vp.get("format") or dbp["format"], vp.get("excerpt") if vp.get("excerpt") is not None else dbp["excerpt"],
+                    vp.get("author_id") or dbp["author_id"], vp.get("author_name") or dbp["author_name"],
+                    vp.get("author_handle") or dbp["author_handle"], vp.get("author_role") or dbp["author_role"],
+                    vp.get("author_badge") or dbp["author_badge"], vp.get("author_avatar") or dbp["author_avatar"],
+                    vp.get("date_str") or dbp["date_str"], vp.get("read_time") or dbp["read_time"],
+                    int(vp.get("featured") or 0), vp.get("cover_mode") or dbp["cover_mode"],
+                    vp.get("cover_json") or dbp["cover_json"], photos_val or "[]",
+                    vp.get("phrases_json") or dbp["phrases_json"],
+                    vp.get("body_text") if vp.get("body_text") is not None else dbp["body_text"],
+                    vp.get("body_html") if vp.get("body_html") is not None else dbp["body_html"],
+                    vp.get("pull_quote") if vp.get("pull_quote") is not None else dbp["pull_quote"],
+                    int(vp.get("is_deleted") or 0), vp_ts, vp["slug"]
+                ))
 
 
 def import_vault(cur, vault_str: str):
@@ -547,6 +652,34 @@ def init_db():
     cur.execute("""
     CREATE TABLE IF NOT EXISTS sessions (
         token TEXT PRIMARY KEY, user_id TEXT NOT NULL, created_at TEXT NOT NULL
+    )""")
+
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS posts (
+        slug TEXT PRIMARY KEY,
+        title TEXT NOT NULL,
+        category TEXT NOT NULL DEFAULT 'Culture',
+        format TEXT NOT NULL DEFAULT 'update',
+        excerpt TEXT DEFAULT '',
+        author_id TEXT NOT NULL DEFAULT 'kendrick',
+        author_name TEXT DEFAULT 'Kendrick',
+        author_handle TEXT DEFAULT '@kendrick',
+        author_role TEXT DEFAULT 'teacher',
+        author_badge TEXT DEFAULT 'Lead Teacher',
+        author_avatar TEXT DEFAULT '../portrait.png',
+        date_str TEXT NOT NULL,
+        read_time TEXT DEFAULT '2 min read',
+        featured INTEGER DEFAULT 0,
+        cover_mode TEXT DEFAULT 'gradient',
+        cover_json TEXT DEFAULT '{}',
+        photos_json TEXT DEFAULT '[]',
+        phrases_json TEXT DEFAULT '[]',
+        body_text TEXT DEFAULT '',
+        body_html TEXT DEFAULT '',
+        pull_quote TEXT DEFAULT '',
+        is_deleted INTEGER DEFAULT 0,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
     )""")
 
     # --- Lead teacher profile (Kendrick) ---
@@ -744,9 +877,10 @@ class SpeakoHandler(SimpleHTTPRequestHandler):
         if roles and me["role"] not in roles:
             raise ApiError(403, "You don't have access to this action.")
 
-    # ---------------- SCHEDULE SUBPATH SUPPORT ----------------
+    # ---------------- SCHEDULE & POST SUBPATH SUPPORT ----------------
     def _normalize_schedule_path(self, redirect_missing_slash=True):
         parsed = urllib.parse.urlsplit(self.path)
+        has_schedule = parsed.path == "/schedule" or parsed.path.startswith("/schedule/")
         if parsed.path == "/schedule":
             if redirect_missing_slash:
                 target = "/schedule/" + (f"?{parsed.query}" if parsed.query else "")
@@ -759,7 +893,23 @@ class SpeakoHandler(SimpleHTTPRequestHandler):
         elif parsed.path.startswith("/schedule/"):
             new_path = parsed.path[len("/schedule"):] or "/"
         else:
-            return parsed.path
+            new_path = parsed.path
+
+        if new_path == "/post":
+            if redirect_missing_slash:
+                prefix = "/schedule/post/" if has_schedule else "/post/"
+                target = prefix + (f"?{parsed.query}" if parsed.query else "")
+                self.send_response(302)
+                self.send_header("Location", target)
+                self.send_header("Content-Length", "0")
+                self.end_headers()
+                return None
+            new_path = "/post/"
+        elif new_path.startswith("/post/") and new_path not in ("/post/", "/post/index.html"):
+            candidate = os.path.join(BASE_DIR, new_path.lstrip("/"))
+            if not os.path.isfile(candidate):
+                new_path = "/post/index.html"
+
         self.path = urllib.parse.urlunsplit(("", "", new_path, parsed.query, ""))
         return new_path
 
@@ -809,6 +959,9 @@ class SpeakoHandler(SimpleHTTPRequestHandler):
             ("POST", "/api/admin/user/update"): self.api_admin_user_update,
             ("POST", "/api/admin/teacher/add"): self.api_admin_teacher_add,
             ("POST", "/api/admin/teacher/delete"): self.api_admin_teacher_delete,
+            ("GET", "/api/posts"): self.api_posts_list,
+            ("POST", "/api/posts/save"): self.api_posts_save,
+            ("POST", "/api/posts/delete"): self.api_posts_delete,
         }
         handler = routes.get((method, path))
         if not handler:
@@ -1369,6 +1522,107 @@ class SpeakoHandler(SimpleHTTPRequestHandler):
         for u in cur.execute("SELECT id FROM users WHERE teacher_id = ?", (tid,)).fetchall():
             cur.execute("UPDATE users SET is_deleted = 1, deleted_at = ?, updated_at = ? WHERE id = ?", (now_str(), ts, u["id"]))
             cur.execute("DELETE FROM sessions WHERE user_id = ?", (u["id"],))
+        return {"ok": True}
+
+    # ---------------- SPEAKO JOURNAL / POSTS ----------------
+    def api_posts_list(self, cur, me, data):
+        post_rows = cur.execute("SELECT * FROM posts ORDER BY created_at DESC, rowid DESC").fetchall()
+        teachers = [pub_teacher(t) for t in cur.execute("SELECT * FROM teachers ORDER BY id = ? DESC, name", (LEAD_TEACHER_ID,)).fetchall()]
+        return {
+            "posts": [pub_post(p) for p in post_rows],
+            "user": pub_user(me) if me else None,
+            "teachers": teachers,
+        }
+
+    def api_posts_save(self, cur, me, data):
+        if me is not None and me["role"] not in ("teacher", "admin"):
+            raise ApiError(403, "Only teachers and admins can publish posts.")
+        slug = (data.get("slug") or "").strip()[:120]
+        title = (data.get("title") or "").strip()[:240]
+        if not slug or not title:
+            raise ApiError(400, "Post slug and title are required.")
+        featured = 1 if data.get("featured") else 0
+        if featured:
+            cur.execute("UPDATE posts SET featured = 0")
+        cover_obj = data.get("cover") if isinstance(data.get("cover"), dict) else {}
+        if data.get("coverPhotoIdx") is not None:
+            cover_obj = dict(cover_obj, coverPhotoIdx=int(data.get("coverPhotoIdx") or 0))
+        photos = data.get("photos") if isinstance(data.get("photos"), list) else []
+        phrases = data.get("phrases") if isinstance(data.get("phrases"), list) else []
+        ts = now_iso()
+        existing = cur.execute("SELECT created_at FROM posts WHERE slug = ?", (slug,)).fetchone()
+        created_at = existing["created_at"] if existing else ts
+        cur.execute("""
+            INSERT INTO posts (slug, title, category, format, excerpt, author_id, author_name,
+                               author_handle, author_role, author_badge, author_avatar, date_str,
+                               read_time, featured, cover_mode, cover_json, photos_json, phrases_json,
+                               body_text, body_html, pull_quote, is_deleted, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?)
+            ON CONFLICT(slug) DO UPDATE SET
+                title = excluded.title,
+                category = excluded.category,
+                format = excluded.format,
+                excerpt = excluded.excerpt,
+                author_id = excluded.author_id,
+                author_name = excluded.author_name,
+                author_handle = excluded.author_handle,
+                author_role = excluded.author_role,
+                author_badge = excluded.author_badge,
+                author_avatar = excluded.author_avatar,
+                date_str = excluded.date_str,
+                read_time = excluded.read_time,
+                featured = excluded.featured,
+                cover_mode = excluded.cover_mode,
+                cover_json = excluded.cover_json,
+                photos_json = excluded.photos_json,
+                phrases_json = excluded.phrases_json,
+                body_text = excluded.body_text,
+                body_html = excluded.body_html,
+                pull_quote = excluded.pull_quote,
+                is_deleted = 0,
+                updated_at = excluded.updated_at
+        """, (
+            slug,
+            title,
+            (data.get("category") or "Culture").strip()[:60],
+            (data.get("format") or "update").strip()[:30],
+            (data.get("excerpt") or "").strip()[:500],
+            (data.get("authorId") or (me["id"] if me else "kendrick")).strip()[:80],
+            (data.get("authorName") or (me["name"] if me else "Kendrick")).strip()[:120],
+            (data.get("authorHandle") or "@kendrick").strip()[:60],
+            (data.get("authorRole") or (me["role"] if me else "teacher")).strip()[:30],
+            (data.get("authorBadge") or "Lead Teacher").strip()[:60],
+            (data.get("authorAvatar") or "../portrait.png").strip()[:200],
+            (data.get("date") or now_str()).strip()[:40],
+            (data.get("readTime") or "2 min read").strip()[:40],
+            featured,
+            (data.get("coverMode") or "gradient").strip()[:30],
+            json.dumps(cover_obj, ensure_ascii=False),
+            json.dumps(photos, ensure_ascii=False),
+            json.dumps(phrases, ensure_ascii=False),
+            data.get("bodyText") or "",
+            data.get("body") or "",
+            data.get("pullQuote") or "",
+            created_at,
+            ts,
+        ))
+        return {"ok": True, "slug": slug}
+
+    def api_posts_delete(self, cur, me, data):
+        if me is not None and me["role"] not in ("teacher", "admin"):
+            raise ApiError(403, "Only teachers and admins can delete posts.")
+        slug = (data.get("slug") or "").strip()
+        if not slug:
+            raise ApiError(400, "Post slug is required.")
+        ts = now_iso()
+        existing = cur.execute("SELECT 1 FROM posts WHERE slug = ?", (slug,)).fetchone()
+        if existing:
+            cur.execute("UPDATE posts SET is_deleted = 1, featured = 0, updated_at = ? WHERE slug = ?", (ts, slug))
+        else:
+            cur.execute("""
+                INSERT INTO posts (slug, title, date_str, is_deleted, created_at, updated_at)
+                VALUES (?, '', ?, 1, ?, ?)
+            """, (slug, now_str(), ts, ts))
         return {"ok": True}
 
 
