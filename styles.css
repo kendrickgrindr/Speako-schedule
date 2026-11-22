@@ -899,6 +899,8 @@ a {
    ========================================================= */
 .price-card {
   position: relative;
+  overflow: visible;
+  margin-top: 8px;
   background: var(--surface);
   border-radius: var(--radius-lg);
   padding: 34px 30px;
@@ -906,30 +908,39 @@ a {
   box-shadow: var(--glass-highlight), var(--shadow-sm);
   display: flex;
   flex-direction: column;
-  transition: transform 0.22s var(--spring);
+  transition: transform 0.22s var(--spring), box-shadow 0.22s var(--spring);
 }
 .price-card:hover {
   transform: translateY(-5px);
   box-shadow: var(--glass-highlight), var(--shadow-md);
 }
 .price-card.dark-trial {
-  background: linear-gradient(145deg, rgba(7, 33, 70, 0.92) 0%, rgba(5, 19, 42, 0.95) 100%);
+  background: linear-gradient(145deg, rgba(7, 33, 70, 0.94) 0%, rgba(5, 19, 42, 0.97) 100%);
   color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 22px 48px rgba(7, 33, 70, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 22px 48px rgba(7, 33, 70, 0.24);
 }
 .start-here-badge {
   position: absolute;
-  top: -12px;
+  top: -13px;
   right: 24px;
-  background: var(--coral);
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #FF8A75 0%, var(--coral) 55%, #E05846 100%);
   color: #fff;
   font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  padding: 5px 13px;
-  border-radius: 99px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  padding: 6px 14px;
+  border-radius: 999px;
   text-transform: uppercase;
+  border: 1.5px solid rgba(255, 255, 255, 0.92);
+  box-shadow: 0 10px 22px -6px rgba(244, 124, 107, 0.65), 0 2px 6px rgba(7, 25, 54, 0.25);
+  white-space: nowrap;
+  pointer-events: none;
 }
 .price-amount {
   font-family: var(--font-display);
@@ -1810,4 +1821,5 @@ body.mascot-dragging * {
 }
 
 /* ---------- Card Containment ---------- */
-.card, .price-card { position: relative; overflow: hidden; isolation: isolate; }
+.card { position: relative; overflow: hidden; isolation: isolate; }
+.price-card { position: relative; overflow: visible; isolation: isolate; }
