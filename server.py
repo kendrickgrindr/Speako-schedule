@@ -23,6 +23,10 @@ import zlib
 from datetime import datetime, timezone
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
+import campaigns
+import features_gamification
+import migrations
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "speako.db")
 BACKUP_JSON_PATHS = [
@@ -508,9 +512,10 @@ def add_transaction(cur, student, package_id, method):
     return tx_id
 
 
-def add_package_request(cur, student, package_id, method="Pending Admin Payment"):
+def add_package_request(cur, student, package_id, method="Pending Admin Payment", override_price=None):
     """Records a student's package booking request WITHOUT auto-adding credits until Admin approves."""
     pkg = PACKAGES[package_id]
+    price = int(override_price) if override_price is not None else pkg["price"]
     count = cur.execute("SELECT COUNT(*) FROM transactions").fetchone()[0] + 1
     tx_id = "tx-" + uuid.uuid4().hex[:8]
     ts = now_iso()
@@ -520,7 +525,7 @@ def add_package_request(cur, student, package_id, method="Pending Admin Payment"
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending_payment', ?, ?)
     """, (
         tx_id, f"INV-2026-{count:03d}", student["id"], student["name"], student["email"], package_id,
-        pkg["title"], pkg["course"], pkg["lessons"], pkg["price"],
+        pkg["title"], pkg["course"], pkg["lessons"], price,
         method, now_str(), ts
     ))
     return tx_id
@@ -748,6 +753,7 @@ def init_db():
                 pass
 
     conn.commit()
+    migrations.run_migrations(conn)
     conn.close()
 
 
@@ -962,6 +968,41 @@ class SpeakoHandler(SimpleHTTPRequestHandler):
             ("GET", "/api/posts"): self.api_posts_list,
             ("POST", "/api/posts/save"): self.api_posts_save,
             ("POST", "/api/posts/delete"): self.api_posts_delete,
+            # Pricing & Unsubscribe
+            ("GET", "/api/pricing"): self.api_pricing,
+            ("POST", "/api/pricing/quote"): self.api_pricing_quote,
+            ("POST", "/api/unsubscribe"): self.api_unsubscribe,
+            # Phase 5a (MINDMAP_5A)
+            ("GET", "/api/vault"): self.api_vault_list,
+            ("POST", "/api/vault/add"): self.api_vault_add,
+            ("POST", "/api/vault/remove"): self.api_vault_remove,
+            ("POST", "/api/activity"): self.api_activity_record,
+            # Phase 5b (MINDMAP_5B)
+            ("GET", "/api/recordings"): self.api_recordings_list,
+            ("POST", "/api/recordings/save"): self.api_recordings_save,
+            ("POST", "/api/recordings/delete"): self.api_recordings_delete,
+            ("POST", "/api/scores/save"): self.api_scores_save,
+            ("GET", "/api/decks"): self.api_decks_list,
+            ("POST", "/api/decks/save"): self.api_decks_save,
+            ("POST", "/api/decks/delete"): self.api_decks_delete,
+            # Phase 5c (MINDMAP_5C)
+            ("GET", "/api/preferences"): self.api_preferences_get,
+            ("POST", "/api/preferences/save"): self.api_preferences_save,
+            # Phase 5d (MINDMAP_5D_SOCIAL)
+            ("GET", "/api/social/leaderboard"): self.api_social_leaderboard,
+            ("POST", "/api/social/profile"): self.api_social_profile,
+            ("GET", "/api/social/notes"): self.api_social_notes,
+            ("POST", "/api/social/notes/create"): self.api_social_notes_create,
+            ("POST", "/api/social/notes/cheer"): self.api_social_notes_cheer,
+            ("POST", "/api/social/notes/moderate"): self.api_social_notes_moderate,
+            ("GET", "/api/social/practice"): self.api_social_practice,
+            ("POST", "/api/social/practice/create"): self.api_social_practice_create,
+            ("POST", "/api/social/practice/message"): self.api_social_practice_message,
+            # Part 2: Admin Campaigns
+            ("GET", "/api/admin/campaigns"): self.api_admin_campaigns,
+            ("POST", "/api/admin/campaigns/status"): self.api_admin_campaigns_status,
+            ("POST", "/api/admin/campaigns/run"): self.api_admin_campaigns_run,
+            ("POST", "/api/admin/campaigns/kill-switch"): self.api_admin_campaigns_kill_switch,
         }
         handler = routes.get((method, path))
         if not handler:
@@ -1055,14 +1096,37 @@ class SpeakoHandler(SimpleHTTPRequestHandler):
     # ---------------- ROLE-SCOPED STATE ----------------
     def api_state(self, cur, me, data):
         self.require(me)
+        flags = migrations.get_flags(cur)
+        pricing_info = campaigns.get_effective_pricing(cur, PACKAGES, flags)
         teachers = [pub_teacher(t) for t in cur.execute("SELECT * FROM teachers ORDER BY id = ? DESC, name", (LEAD_TEACHER_ID,)).fetchall()]
         busy = rows(cur, "SELECT teacher_id, date_str, time_slot FROM bookings WHERE status != 'cancelled'")
-        out = {"user": pub_user(me), "teachers": teachers, "busy": busy}
+        out = {
+            "user": pub_user(me),
+            "teachers": teachers,
+            "busy": busy,
+            "flags": flags,
+            "pricing": pricing_info,
+        }
         role = me["role"]
 
         if role == "student":
             out["bookings"] = rows(cur, "SELECT * FROM bookings WHERE student_id = ? ORDER BY date_str, time_slot", (me["id"],))
             out["transactions"] = rows(cur, "SELECT * FROM transactions WHERE student_id = ? ORDER BY created_at DESC", (me["id"],))
+            if flags.get("MINDMAP_5A"):
+                out["gamification"] = features_gamification.get_gamification_summary(cur, me["id"], me["timezone"])
+            if flags.get("MINDMAP_5B"):
+                out["voice_recordings"] = features_gamification.list_voice_recordings(cur, me["id"])
+                out["phrase_scores"] = features_gamification.list_phrase_scores(cur, me["id"])
+                out["custom_decks"] = features_gamification.list_custom_decks(cur, me["id"])
+            if flags.get("MINDMAP_5C"):
+                out["preferences"] = features_gamification.get_user_preferences(cur, me["id"])
+            if flags.get("MINDMAP_5D_SOCIAL"):
+                sp = features_gamification.get_social_profile(cur, me["id"])
+                out["social_profile"] = sp
+                out["leaderboard_weekly"] = features_gamification.get_leaderboard(cur, sp["group_id"], "weekly")
+                out["leaderboard_all"] = features_gamification.get_leaderboard(cur, sp["group_id"], "all")
+                out["study_notes"] = features_gamification.list_study_notes(cur, sp["group_id"])
+                out["peer_practice"] = features_gamification.list_peer_practice(cur, sp["group_id"])
 
         elif role == "teacher":
             tid = me["teacher_id"] or LEAD_TEACHER_ID
@@ -1091,6 +1155,9 @@ class SpeakoHandler(SimpleHTTPRequestHandler):
             out["notifications"] = rows(cur, "SELECT * FROM notifications ORDER BY created_at DESC LIMIT 200")
             out["notify_emails"] = NOTIFY_EMAILS
             out["main_admin_id"] = MAIN_ADMIN_ID
+            camp_data = campaigns.list_campaigns_and_logs(cur)
+            out["campaigns"] = camp_data["campaigns"]
+            out["campaign_logs"] = camp_data["logs"]
         return out
 
     # ---------------- STUDENT: PACKAGE BOOKING REQUEST ----------------
@@ -1103,13 +1170,27 @@ class SpeakoHandler(SimpleHTTPRequestHandler):
         if pkg["is_trial"] and trial_already_used(cur, me["id"], package_id):
             raise ApiError(400, "You've already used this free trial.")
 
+        flags = migrations.get_flags(cur)
+        quote_id = (data.get("quote_id") or "").strip()
+        effective_price = pkg["price"]
+        if quote_id:
+            q = cur.execute(
+                "SELECT * FROM checkout_quotes WHERE id = ? AND user_id = ? AND package_id = ?",
+                (quote_id, me["id"], package_id),
+            ).fetchone()
+            if q and q["expires_at"] >= now_iso()[:19] + "Z":
+                effective_price = int(q["quoted_price"])
+        else:
+            pricing_info = campaigns.get_effective_pricing(cur, PACKAGES, flags)
+            effective_price = int(pricing_info["packages"][package_id]["effective_price"])
+
         # Record package booking request as pending payment; Admin grants credits after payment
-        tx_id = add_package_request(cur, me, package_id, "Pending Admin Payment")
+        tx_id = add_package_request(cur, me, package_id, "Pending Admin Payment", override_price=effective_price)
         add_notification(
             cur,
             "purchase",
             f"Package booking request: {me['name']} · {pkg['title']}",
-            f"{me['name']} ({me['email']}) requested {pkg['title']} (฿{pkg['price']:,} THB · +{pkg['lessons']} lessons). "
+            f"{me['name']} ({me['email']}) requested {pkg['title']} (฿{effective_price:,} THB · +{pkg['lessons']} lessons). "
             f"Please contact student for fees & payment, then grant credits in Admin.",
             me,
         )
@@ -1625,8 +1706,271 @@ class SpeakoHandler(SimpleHTTPRequestHandler):
             """, (slug, now_str(), ts, ts))
         return {"ok": True}
 
+    # ---------------- PRICING, FLAGS & UNSUBSCRIBE ----------------
+    def _require_flag(self, cur, flag_name):
+        flags = migrations.get_flags(cur)
+        if not flags.get(flag_name, False):
+            raise ApiError(403, f"Feature {flag_name} is currently disabled.")
+        return flags
+
+    def api_pricing(self, cur, me, data):
+        flags = migrations.get_flags(cur)
+        return campaigns.get_effective_pricing(cur, PACKAGES, flags)
+
+    def api_pricing_quote(self, cur, me, data):
+        self.require(me)
+        package_id = (data.get("package_id") or "").strip()
+        flags = migrations.get_flags(cur)
+        try:
+            return campaigns.create_checkout_quote(cur, me["id"], package_id, PACKAGES, flags)
+        except ValueError as e:
+            raise ApiError(400, str(e))
+
+    def api_unsubscribe(self, cur, me, data):
+        token = (data.get("token") or "").strip()
+        if not token:
+            raise ApiError(400, "Unsubscribe token required.")
+        cur.execute("UPDATE users SET marketing_opt_in = 0, updated_at = ? WHERE unsubscribe_token = ?", (now_iso(), token))
+        return {"ok": True, "unsubscribed": True}
+
+    # ---------------- PHASE 5A: VAULT, STREAKS, XP & BADGES ----------------
+    def api_vault_list(self, cur, me, data):
+        self.require(me)
+        self._require_flag(cur, "MINDMAP_5A")
+        return {"word_vault": features_gamification.get_word_vault(cur, me["id"], data.get("q", ""))}
+
+    def api_vault_add(self, cur, me, data):
+        self.require(me)
+        self._require_flag(cur, "MINDMAP_5A")
+        try:
+            vault = features_gamification.add_word_vault(
+                cur, me["id"], data.get("course_id", "thai"), data.get("lesson_number", 1),
+                data.get("phrase", ""), data.get("notes", ""),
+            )
+            return {"word_vault": vault, "gamification": features_gamification.get_gamification_summary(cur, me["id"], me["timezone"])}
+        except ValueError as e:
+            raise ApiError(400, str(e))
+
+    def api_vault_remove(self, cur, me, data):
+        self.require(me)
+        self._require_flag(cur, "MINDMAP_5A")
+        vault = features_gamification.remove_word_vault(cur, me["id"], data.get("id", ""))
+        return {"word_vault": vault}
+
+    def api_activity_record(self, cur, me, data):
+        self.require(me)
+        self._require_flag(cur, "MINDMAP_5A")
+        try:
+            summary = features_gamification.record_daily_activity(
+                cur, me["id"], data.get("activity_type", "practice"),
+                data.get("ref_id", ""), me["timezone"],
+            )
+            return {"gamification": summary}
+        except ValueError as e:
+            raise ApiError(400, str(e))
+
+    # ---------------- PHASE 5B: VOICE RECORDINGS, SCORES & DECKS ----------------
+    def api_recordings_list(self, cur, me, data):
+        self.require(me)
+        self._require_flag(cur, "MINDMAP_5B")
+        return {"voice_recordings": features_gamification.list_voice_recordings(cur, me["id"])}
+
+    def api_recordings_save(self, cur, me, data):
+        self.require(me)
+        self._require_flag(cur, "MINDMAP_5B")
+        try:
+            recs = features_gamification.save_voice_recording(
+                cur, me["id"], data.get("course_id", "thai"), data.get("lesson_number", 1),
+                data.get("phrase", ""), data.get("mime_type", "audio/webm"),
+                data.get("audio_b64", ""), data.get("duration_ms", 0),
+            )
+            return {"voice_recordings": recs}
+        except ValueError as e:
+            raise ApiError(400, str(e))
+
+    def api_recordings_delete(self, cur, me, data):
+        self.require(me)
+        self._require_flag(cur, "MINDMAP_5B")
+        return {"voice_recordings": features_gamification.delete_voice_recording(cur, me["id"], data.get("id", ""))}
+
+    def api_scores_save(self, cur, me, data):
+        self.require(me)
+        self._require_flag(cur, "MINDMAP_5B")
+        try:
+            res = features_gamification.save_phrase_score(
+                cur, me["id"], data.get("course_id", "thai"), data.get("phrase", ""), data.get("score", 0),
+            )
+            return {"score_result": res, "phrase_scores": features_gamification.list_phrase_scores(cur, me["id"])}
+        except ValueError as e:
+            raise ApiError(400, str(e))
+
+    def api_decks_list(self, cur, me, data):
+        self.require(me)
+        self._require_flag(cur, "MINDMAP_5B")
+        return {"custom_decks": features_gamification.list_custom_decks(cur, me["id"])}
+
+    def api_decks_save(self, cur, me, data):
+        self.require(me)
+        self._require_flag(cur, "MINDMAP_5B")
+        try:
+            decks = features_gamification.save_custom_deck(
+                cur, me["id"], data.get("title", ""), data.get("course_id", "thai"),
+                data.get("items", []), data.get("id", ""),
+            )
+            return {"custom_decks": decks}
+        except ValueError as e:
+            raise ApiError(400, str(e))
+
+    def api_decks_delete(self, cur, me, data):
+        self.require(me)
+        self._require_flag(cur, "MINDMAP_5B")
+        return {"custom_decks": features_gamification.delete_custom_deck(cur, me["id"], data.get("id", ""))}
+
+    # ---------------- PHASE 5C: MASCOT & TOPIC PREFERENCES ----------------
+    def api_preferences_get(self, cur, me, data):
+        self.require(me)
+        self._require_flag(cur, "MINDMAP_5C")
+        return {"preferences": features_gamification.get_user_preferences(cur, me["id"])}
+
+    def api_preferences_save(self, cur, me, data):
+        self.require(me)
+        self._require_flag(cur, "MINDMAP_5C")
+        prefs = features_gamification.save_user_preferences(
+            cur, me["id"],
+            mascot_outfit=data.get("mascot_outfit"),
+            mascot_accessory=data.get("mascot_accessory"),
+            mascot_mood=data.get("mascot_mood"),
+            favorite_topics=data.get("favorite_topics"),
+            learning_goal=data.get("learning_goal"),
+        )
+        return {"preferences": prefs}
+
+    # ---------------- PHASE 5D: SOCIAL (LEADERBOARDS, NOTES, PEER PRACTICE) ----------------
+    def api_social_leaderboard(self, cur, me, data):
+        self.require(me)
+        self._require_flag(cur, "MINDMAP_5D_SOCIAL")
+        sp = features_gamification.get_social_profile(cur, me["id"])
+        return {
+            "weekly": features_gamification.get_leaderboard(cur, sp["group_id"], "weekly"),
+            "all_time": features_gamification.get_leaderboard(cur, sp["group_id"], "all"),
+        }
+
+    def api_social_profile(self, cur, me, data):
+        self.require(me)
+        self._require_flag(cur, "MINDMAP_5D_SOCIAL")
+        sp = features_gamification.update_social_profile(
+            cur, me["id"], bool(data.get("leaderboard_opt_out", False)), data.get("group_id", "global"),
+        )
+        return {"social_profile": sp}
+
+    def api_social_notes(self, cur, me, data):
+        self.require(me)
+        self._require_flag(cur, "MINDMAP_5D_SOCIAL")
+        sp = features_gamification.get_social_profile(cur, me["id"])
+        return {"study_notes": features_gamification.list_study_notes(cur, sp["group_id"])}
+
+    def api_social_notes_create(self, cur, me, data):
+        self.require(me)
+        self._require_flag(cur, "MINDMAP_5D_SOCIAL")
+        sp = features_gamification.get_social_profile(cur, me["id"])
+        try:
+            notes = features_gamification.create_study_note(cur, me["id"], me["name"], data.get("content", ""), sp["group_id"])
+            return {"study_notes": notes}
+        except ValueError as e:
+            raise ApiError(400, str(e))
+
+    def api_social_notes_cheer(self, cur, me, data):
+        self.require(me)
+        self._require_flag(cur, "MINDMAP_5D_SOCIAL")
+        return features_gamification.cheer_study_note(cur, me["id"], data.get("note_id", ""), data.get("reaction", "👏"))
+
+    def api_social_notes_moderate(self, cur, me, data):
+        self.require(me)
+        self._require_flag(cur, "MINDMAP_5D_SOCIAL")
+        is_staff = me["role"] in ("teacher", "admin")
+        return features_gamification.report_or_hide_note(
+            cur, me["id"], data.get("note_id", ""), data.get("action", "report"), data.get("reason", ""), is_staff=is_staff,
+        )
+
+    def api_social_practice(self, cur, me, data):
+        self.require(me)
+        self._require_flag(cur, "MINDMAP_5D_SOCIAL")
+        sp = features_gamification.get_social_profile(cur, me["id"])
+        return {"peer_practice": features_gamification.list_peer_practice(cur, sp["group_id"])}
+
+    def api_social_practice_create(self, cur, me, data):
+        self.require(me)
+        self._require_flag(cur, "MINDMAP_5D_SOCIAL")
+        sp = features_gamification.get_social_profile(cur, me["id"])
+        sessions = features_gamification.create_peer_practice(
+            cur, me["id"], me["name"], data.get("topic", "Daily Conversation"), data.get("mode", "text"), sp["group_id"],
+        )
+        return {"peer_practice": sessions}
+
+    def api_social_practice_message(self, cur, me, data):
+        self.require(me)
+        self._require_flag(cur, "MINDMAP_5D_SOCIAL")
+        try:
+            sessions = features_gamification.join_or_message_peer_practice(
+                cur, me["id"], me["name"], data.get("session_id", ""), data.get("message", ""),
+            )
+            return {"peer_practice": sessions}
+        except ValueError as e:
+            raise ApiError(400, str(e))
+
+    # ---------------- PART 2: ADMIN CAMPAIGNS ----------------
+    def api_admin_campaigns(self, cur, me, data):
+        self.require(me, "admin")
+        return {
+            **campaigns.list_campaigns_and_logs(cur),
+            "flags": migrations.get_flags(cur),
+            "packages": PACKAGES,
+        }
+
+    def api_admin_campaigns_status(self, cur, me, data):
+        self.require(me, "admin")
+        try:
+            camp = campaigns.set_campaign_status(cur, data.get("campaign_id", ""), data.get("status", ""))
+            return {"campaign": camp}
+        except ValueError as e:
+            raise ApiError(400, str(e))
+
+    def api_admin_campaigns_run(self, cur, me, data):
+        self.require(me, "admin")
+        flags = migrations.get_flags(cur)
+        # Enforce dry-run unless explicitly disabled in flags (which defaults to ON)
+        log_entry = campaigns.run_campaign_scheduler(cur, PACKAGES, flags)
+        return {"run_log": log_entry, **campaigns.list_campaigns_and_logs(cur)}
+
+    def api_admin_campaigns_kill_switch(self, cur, me, data):
+        self.require(me, "admin")
+        enabled = bool(data.get("enabled", True))
+        migrations.set_flag(cur, "CAMPAIGNS_KILL_SWITCH", enabled)
+        return {"flags": migrations.get_flags(cur)}
+
+
+def _start_campaign_scheduler_thread():
+    def _loop():
+        import time
+        while True:
+            time.sleep(300)  # 5 minutes
+            try:
+                conn = get_db()
+                cur = conn.cursor()
+                flags = migrations.get_flags(cur)
+                if flags.get("CAMPAIGNS_SCHEDULER", False):
+                    campaigns.run_campaign_scheduler(cur, PACKAGES, flags)
+                    conn.commit()
+                conn.close()
+            except Exception as exc:
+                print(f"[campaign-scheduler] error: {exc}")
+
+    t = threading.Thread(target=_loop, daemon=True)
+    t.start()
+
 
 if __name__ == "__main__":
     init_db()
+    _start_campaign_scheduler_thread()
     print(f"Speako portal running at http://localhost:{PORT}")
     ThreadingHTTPServer(("0.0.0.0", PORT), SpeakoHandler).serve_forever()
