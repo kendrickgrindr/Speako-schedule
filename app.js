@@ -403,7 +403,7 @@ async function initPortal() {
   const allowedTabs = {
     student: ["schedule", "book", "lessons", "credits"],
     teacher: ["schedule", "availability", "students", "slides"],
-    admin: ["accounts", "schedules", "teachers", "invoices", "alerts"],
+    admin: ["accounts", "schedules", "teachers", "invoices", "campaigns", "alerts"],
   };
   STATE.tab =
     qTab && (allowedTabs[STATE.portal] || []).includes(qTab)
@@ -427,6 +427,20 @@ async function refreshState() {
   STATE.users = data.users || [];
   STATE.students = data.students || [];
   STATE.my_teacher = data.my_teacher || STATE.teachers[0] || null;
+  STATE.flags = data.flags || {};
+  STATE.pricing = data.pricing || null;
+  STATE.gamification = data.gamification || null;
+  STATE.voice_recordings = data.voice_recordings || [];
+  STATE.phrase_scores = data.phrase_scores || [];
+  STATE.custom_decks = data.custom_decks || [];
+  STATE.preferences = data.preferences || null;
+  STATE.social_profile = data.social_profile || null;
+  STATE.leaderboard_weekly = data.leaderboard_weekly || [];
+  STATE.leaderboard_all = data.leaderboard_all || [];
+  STATE.study_notes = data.study_notes || [];
+  STATE.peer_practice = data.peer_practice || [];
+  STATE.campaigns = data.campaigns || [];
+  STATE.campaign_logs = data.campaign_logs || [];
   if (data.notify_emails) STATE.notify_emails = data.notify_emails;
   if (data.main_admin_id) STATE.main_admin_id = data.main_admin_id;
   if (STATE.teachers.length && !STATE.teachers.some((t) => t.id === STATE.bookTeacherId)) {
@@ -1007,6 +1021,9 @@ function renderStudentSchedule(main) {
     `
         : ""
     }
+    ${window.SPEAKO_FEATURES ? window.SPEAKO_FEATURES.renderDashboardGamification() : ""}
+    ${window.SPEAKO_FEATURES ? window.SPEAKO_FEATURES.renderMascotAndTopicsCard() : ""}
+    ${window.SPEAKO_FEATURES ? window.SPEAKO_FEATURES.renderSocialCard() : ""}
   `;
 }
 
@@ -1421,6 +1438,7 @@ function renderStudentLessons(main) {
       <div class="segmented-nav">
         <button class="seg-btn ${STATE.curriculumCourse === "thai" ? "active" : ""}" onclick="STATE.curriculumCourse='thai';renderCurrentPortal(false)">🇹🇭 Basic Thai (8)</button>
         <button class="seg-btn ${STATE.curriculumCourse === "english" ? "active" : ""}" onclick="STATE.curriculumCourse='english';renderCurrentPortal(false)">🇬🇧 Basic English (8)</button>
+        ${window.SPEAKO_FEATURES?.isOn("MINDMAP_5B") ? `<button class="seg-btn" onclick="SPEAKO_FEATURES.openCustomDecksModal()">🃏 Custom Decks</button>` : ""}
       </div>
     </div>
 
@@ -1510,7 +1528,26 @@ function openStudentLessonDetail(courseId, lessonNum) {
           <div style="padding:16px;border-radius:16px;background:var(--bg);min-width:0;">
             <div style="font-size:12px;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Key Vocabulary</div>
             <div style="display:flex;flex-wrap:wrap;gap:6px;">
-              ${vocabulary.map((v) => `<span class="pill-tag vocab-pill">${esc(v)}</span>`).join("")}
+              ${vocabulary
+                .map((v) => {
+                  const isStarred =
+                    window.SPEAKO_FEATURES?.isOn("MINDMAP_5A") &&
+                    (STATE.gamification?.word_vault || []).some((w) => w.phrase === v && w.course_id === courseId);
+                  return `<span class="pill-tag vocab-pill" style="display:inline-flex;align-items:center;gap:6px;">
+                    ${esc(v)}
+                    ${
+                      window.SPEAKO_FEATURES?.isOn("MINDMAP_5A")
+                        ? `<button type="button" style="border:none;background:none;cursor:pointer;padding:0;font-size:13px;" title="Bookmark tricky word" onclick="event.stopPropagation();SPEAKO_FEATURES.toggleVaultWord('${esc(courseId)}', ${l.number}, '${esc(v)}')">${isStarred ? "★" : "☆"}</button>`
+                        : ""
+                    }
+                    ${
+                      window.SPEAKO_FEATURES?.isOn("MINDMAP_5B")
+                        ? `<button type="button" style="border:none;background:none;cursor:pointer;padding:0;font-size:13px;" title="Record your voice" onclick="event.stopPropagation();SPEAKO_FEATURES.startOrStopRecording('${esc(courseId)}', ${l.number}, '${esc(v)}', this)">🎙️</button>`
+                        : ""
+                    }
+                  </span>`;
+                })
+                .join("")}
             </div>
           </div>
           <div style="padding:16px;border-radius:16px;background:var(--bg);min-width:0;">
@@ -1601,15 +1638,19 @@ function renderStudentCredits(main) {
     <!-- Official Pricing Cards -->
     <div class="grid-3 anim-up" style="margin-bottom:40px;">
       ${pkgs
-        .map(
-          (p) => `
+        .map((p) => {
+          const livePkg = STATE.pricing?.packages?.[p.id];
+          const displayPrice = livePkg ? livePkg.effective_price : p.price;
+          const strikePrice = livePkg ? livePkg.strikethrough_price : null;
+          return `
         <div class="price-card ${p.darkCard ? "dark-trial" : ""}">
           ${p.featuredBadge ? `<div class="start-here-badge">${esc(p.featuredBadge)}</div>` : ""}
           <div>
             <span class="pill-tag ${p.darkCard ? "dark" : ""}">${esc(p.badge)}</span>
             <h3 style="font-size:22px;margin-top:12px;${p.darkCard ? "color:#fff;" : ""}">${esc(p.title)}</h3>
             <div style="margin-top:14px;display:flex;align-items:baseline;gap:6px;">
-              <span class="price-amount">${esc(p.currency)}${p.price.toLocaleString()}</span>
+              ${strikePrice ? `<span style="text-decoration:line-through;opacity:0.6;font-size:16px;">${esc(p.currency)}${strikePrice.toLocaleString()}</span>` : ""}
+              <span class="price-amount">${esc(p.currency)}${displayPrice.toLocaleString()}</span>
               <span style="font-size:13px;opacity:0.75;">${esc(p.unit || p.currencySuffix || "THB")}</span>
             </div>
           </div>
@@ -1620,8 +1661,8 @@ function renderStudentCredits(main) {
             ${esc(p.cta)} (+${p.lessons})
           </button>
         </div>
-      `
-        )
+      `;
+        })
         .join("")}
     </div>
 
@@ -1668,7 +1709,12 @@ function renderStudentCredits(main) {
 
 async function studentPurchasePackage(packageId) {
   try {
-    const res = await api("/api/purchase", { package_id: packageId, payment_method: "Pending Admin Payment" });
+    let quoteId = "";
+    try {
+      const q = await api("/api/pricing/quote", { package_id: packageId });
+      quoteId = q.quote_id || "";
+    } catch (_) {}
+    const res = await api("/api/purchase", { package_id: packageId, payment_method: "Pending Admin Payment", quote_id: quoteId });
     dispatchEmailFallback(res);
     await refreshState();
     renderCurrentPortal(false);
@@ -1755,6 +1801,9 @@ function renderTeacherSchedule(main) {
     `
         : ""
     }
+    ${window.SPEAKO_FEATURES ? window.SPEAKO_FEATURES.renderDashboardGamification() : ""}
+    ${window.SPEAKO_FEATURES ? window.SPEAKO_FEATURES.renderMascotAndTopicsCard() : ""}
+    ${window.SPEAKO_FEATURES ? window.SPEAKO_FEATURES.renderSocialCard() : ""}
   `;
 }
 
@@ -2146,6 +2195,9 @@ function renderTeacherStudents(main) {
       </div>
     `
     }
+    ${window.SPEAKO_FEATURES ? window.SPEAKO_FEATURES.renderDashboardGamification() : ""}
+    ${window.SPEAKO_FEATURES ? window.SPEAKO_FEATURES.renderMascotAndTopicsCard() : ""}
+    ${window.SPEAKO_FEATURES ? window.SPEAKO_FEATURES.renderSocialCard() : ""}
   `;
 }
 
@@ -2164,6 +2216,7 @@ function renderAdminPortal(main) {
   else if (STATE.tab === "schedules") renderAdminSchedules(main);
   else if (STATE.tab === "teachers") renderAdminTeachers(main);
   else if (STATE.tab === "invoices") renderAdminInvoices(main);
+  else if (STATE.tab === "campaigns") window.SPEAKO_FEATURES?.renderAdminCampaigns?.(main);
   else if (STATE.tab === "alerts") renderAdminAlerts(main);
 }
 
