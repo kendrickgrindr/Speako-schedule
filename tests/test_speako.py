@@ -30,10 +30,10 @@ class SpeakoSuiteTests(unittest.TestCase):
 
     def test_01_default_flags(self):
         flags = migrations.get_flags(self.cur)
-        self.assertFalse(flags["MINDMAP_5A"])
-        self.assertFalse(flags["MINDMAP_5B"])
-        self.assertFalse(flags["MINDMAP_5C"])
-        self.assertFalse(flags["MINDMAP_5D_SOCIAL"])
+        self.assertTrue(flags["MINDMAP_5A"])
+        self.assertTrue(flags["MINDMAP_5B"])
+        self.assertTrue(flags["MINDMAP_5C"])
+        self.assertTrue(flags["MINDMAP_5D_SOCIAL"])
         self.assertFalse(flags["CAMPAIGNS_SCHEDULER"])
         self.assertTrue(flags["CAMPAIGNS_DRY_RUN"])
         self.assertTrue(flags["CAMPAIGNS_KILL_SWITCH"])

@@ -13,10 +13,10 @@ def _utc_now():
 
 
 DEFAULT_FLAGS = {
-    "MINDMAP_5A": False,
-    "MINDMAP_5B": False,
-    "MINDMAP_5C": False,
-    "MINDMAP_5D_SOCIAL": False,
+    "MINDMAP_5A": True,
+    "MINDMAP_5B": True,
+    "MINDMAP_5C": True,
+    "MINDMAP_5D_SOCIAL": True,
     "CAMPAIGNS_SCHEDULER": False,
     "CAMPAIGNS_DRY_RUN": True,
     "CAMPAIGNS_KILL_SWITCH": True,
